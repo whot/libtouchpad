@@ -1,0 +1,6 @@
+sdkdir=@sdkdir@
+
+Name: touchpad
+Description: X.Org touchpad input driver.
+Version: @PACKAGE_VERSION@
+Cflags: -I${sdkdir}
