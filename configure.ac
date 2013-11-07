@@ -41,7 +41,7 @@ LT_PATH_LD
 PKG_CHECK_MODULES(LIBEVDEV, [libevdev >= 0.4])
 
 AC_ARG_ENABLE(xorg,
-	      AS_HELP_STRING([--with-xorg], [Build xorg driver (default=yes)]),
+	      AS_HELP_STRING([--enable-xorg], [Build xorg driver (default=yes)]),
 	      [build_xorg="$enableval"],
 	      [build_xorg="yes"])
 
