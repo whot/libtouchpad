@@ -25,9 +25,9 @@
 #include "config.h"
 #endif
 
+#include <xorg-server.h>
 #include <exevents.h>
 #include <xf86Xinput.h>
-#include <xorg-server.h>
 #include <xserver-properties.h>
 #include <linux/input.h>
 #include "touchpad.h"
