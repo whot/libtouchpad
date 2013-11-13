@@ -61,9 +61,9 @@ tap(struct touchpad *tp, void *userdata, unsigned int fingers, bool is_press)
 }
 
 static void
-scroll(struct touchpad *tp, void *userdata, enum touchpad_scroll_direction dir, int units)
+scroll(struct touchpad *tp, void *userdata, enum touchpad_scroll_direction dir, double units)
 {
-	printf("scroll: %s %d\n", dir == TOUCHPAD_SCROLL_HORIZONTAL ? "horizontal" : "vertical", units);
+	printf("scroll: %s %.2f\n", dir == TOUCHPAD_SCROLL_HORIZONTAL ? "horizontal" : "vertical", units);
 }
 
 static int

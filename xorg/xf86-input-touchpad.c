@@ -199,7 +199,7 @@ xf86touchpad_tap(struct touchpad *tp, void *userdata, unsigned int fingers, bool
 
 void
 xf86touchpad_scroll(struct touchpad *tp, void *userdata,
-		    enum touchpad_scroll_direction direction, int units)
+		    enum touchpad_scroll_direction direction, double units)
 {
 	InputInfoPtr pInfo = userdata;
 	DeviceIntPtr dev = pInfo->dev;

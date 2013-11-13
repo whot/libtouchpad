@@ -8,6 +8,7 @@ libtouchpad_la_SOURCES = \
 	touchpad-events.c \
 	touchpad-filter.c \
 	touchpad-tap.c \
+	touchpad-scroll.c \
 	touchpad-int.h \
 	touchpad-util.h
 

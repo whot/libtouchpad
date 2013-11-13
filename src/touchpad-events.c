@@ -163,8 +163,10 @@ touchpad_post_events(struct touchpad *tp, void *userdata)
 	struct touch *t;
 
 	touchpad_tap_handle_state(tp, userdata);
-	touchpad_post_motion_events(tp, userdata);
-	touchpad_post_button_events(tp, userdata);
+	if (touchpad_scroll_handle_state(tp, userdata) == 0) {
+		touchpad_post_motion_events(tp, userdata);
+		touchpad_post_button_events(tp, userdata);
+	}
 
 	for (i = 0, t = touchpad_touch(tp, i);
 	     i < tp->ntouches; i++, t = touchpad_touch(tp, i)) {

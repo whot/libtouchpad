@@ -34,4 +34,12 @@ int touchpad_config_tap_get(struct touchpad *tp, bool *enabled,
 			    int *timeout, int *doubletap_timeout,
 			    int *move_threshold);
 int touchpad_config_tap_set_defaults(struct touchpad *tp);
+
+int touchpad_config_scroll_set(struct touchpad *tp,
+			       enum touchpad_scroll_methods methods,
+			       int vdelta, int hdelta);
+int touchpad_config_scroll_get(struct touchpad *tp,
+			       enum touchpad_scroll_methods *methods,
+			       int *vdelta, int *hdelta);
+int touchpad_config_scroll_set_defaults(struct touchpad *tp);
 #endif

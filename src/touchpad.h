@@ -37,6 +37,14 @@ enum touchpad_scroll_direction {
 	TOUCHPAD_SCROLL_VERTICAL,
 };
 
+enum touchpad_scroll_methods {
+	TOUCHPAD_SCROLL_NONE = 0x0,
+	TOUCHPAD_SCROLL_EDGE_VERTICAL = 0x1,
+	TOUCHPAD_SCROLL_EDGE_HORIZONTAL = 0x2,
+	TOUCHPAD_SCROLL_TWOFINGER_VERTICAL = 0x4,
+	TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL = 0x8,
+};
+
 /**
  * Callback interface used by the backends to get notified about
  * events on the touchpad.
@@ -83,16 +91,19 @@ struct touchpad_interface {
 		    unsigned int fingers,
 		    bool is_press);
 	/**
-	 * Called for a scroll event.
+	 * Called for a scroll event. The first scroll event will always be
+	 * 1 unit or more, other scroll events may be less than one unit. A
+	 * unit count of 0 signals that scrolling has terminated.
 	 *
 	 * @param tp The touchpad device
 	 * @param userdata Backend-specific data, see
 	 *	  touchpad_handle_events()
 	 * @param direction The scrolling direction
-	 * @param units The number of units scrolled in that direction
+	 * @param units The number of units scrolled in that direction, or 0
+	 *		if the scroll gesture terminated.
 	 */
 	void (*scroll)(struct touchpad *tp, void *userdata,
-		       enum touchpad_scroll_direction direction, int units);
+		       enum touchpad_scroll_direction direction, double units);
 
 	/**
 	 * Called for a rotate event, i.e. two fingers down rotating around

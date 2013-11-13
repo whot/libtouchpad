@@ -73,6 +73,9 @@ touchpad_reset(struct touchpad *tp)
 	tp->slot = libevdev_get_current_slot(tp->dev);
 	tp->tap.state = TAP_STATE_IDLE;
 	touchpad_config_tap_set_defaults(tp);
+
+	tp->scroll.state = SCROLL_STATE_NONE;
+	touchpad_config_scroll_set_defaults(tp);
 }
 
 struct touchpad*

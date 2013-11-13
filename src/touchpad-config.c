@@ -39,8 +39,8 @@ struct tap_config tap_defaults = {
 
 struct scroll_config scroll_defaults = {
 	.methods = TOUCHPAD_SCROLL_TWOFINGER_VERTICAL,
-	.vdelta = 300,
-	.hdelta = 300,
+	.vdelta = 100,
+	.hdelta = 100,
 };
 
 int
@@ -84,3 +84,35 @@ touchpad_config_tap_get(struct touchpad *tp, bool *enabled,
 	return 0;
 }
 
+int
+touchpad_config_scroll_set(struct touchpad *tp,
+			   enum touchpad_scroll_methods methods,
+			   int vdelta, int hdelta)
+{
+	tp->scroll.config.methods = methods;
+	tp->scroll.config.vdelta = vdelta;
+	tp->scroll.config.hdelta = hdelta;
+	return 0;
+}
+
+int
+touchpad_config_scroll_get(struct touchpad *tp,
+			   enum touchpad_scroll_methods *methods,
+			   int *vdelta, int *hdelta)
+{
+	if (methods)
+		*methods = tp->scroll.config.methods;
+	if (vdelta)
+		*vdelta = tp->scroll.config.vdelta;
+	if (hdelta)
+		*hdelta = tp->scroll.config.hdelta;
+	return 0;
+}
+
+int
+touchpad_config_scroll_set_defaults(struct touchpad *tp)
+{
+	tp->scroll.config = scroll_defaults;
+
+	return 0;
+}

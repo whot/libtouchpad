@@ -105,6 +105,23 @@ struct tap {
 	enum tap_event events[MAX_TAP_EVENTS];
 };
 
+enum scroll_state {
+	SCROLL_STATE_NONE = 9,
+	SCROLL_STATE_SCROLLING,
+};
+
+struct scroll_config {
+	enum touchpad_scroll_methods methods;
+	int hdelta;
+	int vdelta;
+};
+
+struct scroll {
+	struct scroll_config config;
+	enum scroll_state state;
+	enum touchpad_scroll_direction direction;
+};
+
 struct buttons {
 	uint32_t state;
 	uint32_t old_state;
@@ -121,6 +138,7 @@ struct touchpad {
 
     struct buttons buttons;
     struct tap tap;
+    struct scroll scroll;
     const struct touchpad_interface *interface;
 
     unsigned int ms;		/* ms of last SYN_REPORT */
@@ -164,6 +182,7 @@ struct touch_history_point * touchpad_history_get(struct touch *t, int when);
 struct touch_history_point * touchpad_history_get_last(struct touch *t);
 int touchpad_tap_handle_state(struct touchpad *tp, void *userdata);
 int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
+int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
 void touchpad_log(const char *fmt, ...);
 
 #endif
