@@ -30,6 +30,7 @@
 #include <touchpad-config.h>
 
 #include <assert.h>
+#include <stdarg.h>
 
 struct tap_config tap_defaults = {
 	.enabled = true,
@@ -43,76 +44,162 @@ struct scroll_config scroll_defaults = {
 	.hdelta = 100,
 };
 
+#define apply_value(what, value, deflt) \
+	if (value == TOUCHPAD_CONFIG_USE_DEFAULT) what = deflt; \
+	else what = value;
+
+
+/**
+ * @return 0 on success, 1 for a bad key, -1 for a bad value
+ */
+static int
+touchpad_config_set_key_value(struct touchpad *tp,
+			      enum touchpad_config_parameter key,
+			      int value)
+{
+	switch(key) {
+		case TOUCHPAD_CONFIG_NONE: /* filtered before */
+		case TOUCHPAD_CONFIG_USE_DEFAULT:
+			return 1;
+
+		case TOUCHPAD_CONFIG_TAP_ENABLE:
+			apply_value(tp->tap.config.enabled, value, tap_defaults.enabled);
+			break;
+		case TOUCHPAD_CONFIG_TAP_TIMEOUT:
+			apply_value(tp->tap.config.timeout_period, value, tap_defaults.timeout_period);
+			break;
+		case TOUCHPAD_CONFIG_TAP_DOUBLETAP_TIMEOUT:
+			apply_value(tp->tap.config.timeout_period, value, tap_defaults.timeout_period);
+			break;
+		case TOUCHPAD_CONFIG_TAP_MOVE_THRESHOLD:
+			apply_value(tp->tap.config.timeout_period, value, tap_defaults.timeout_period);
+			break;
+		case TOUCHPAD_CONFIG_SCROLL_METHOD:
+			apply_value(tp->scroll.config.methods, value, scroll_defaults.methods);
+			break;
+		case TOUCHPAD_CONFIG_SCROLL_DELTA_VERT:
+			apply_value(tp->scroll.config.vdelta, value, scroll_defaults.vdelta);
+			break;
+		case TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ:
+			apply_value(tp->scroll.config.hdelta, value, scroll_defaults.hdelta);
+			break;
+		default:
+			return 1;
+	}
+
+	return 0;
+}
+
 int
-touchpad_config_tap_set_defaults(struct touchpad *tp)
+touchpad_config_set(struct touchpad *tp, ...)
+{
+	va_list args;
+	int processed = 1;
+	unsigned int key;
+	int value;
+
+	va_start(args, tp);
+
+	key = va_arg(args, unsigned int);
+	while (key != TOUCHPAD_CONFIG_NONE) {
+		int success;
+		value = va_arg(args, int);
+		success = touchpad_config_set_key_value(tp, key, value);
+		if (success != 0) {
+			if (success < 0)
+				processed = -processed;
+			break;
+		}
+		processed++;
+		key = va_arg(args, unsigned int);
+	}
+
+	va_end(args);
+
+	if (key == TOUCHPAD_CONFIG_NONE)
+		processed = 0;
+	return processed;
+}
+
+/**
+ * @return 0 on success, 1 for a bad key, -1 for a bad value
+ */
+static int
+touchpad_config_get_key_value(struct touchpad *tp,
+			      enum touchpad_config_parameter key,
+			      int *value)
+{
+	if (value == NULL)
+		return -1;
+
+	switch(key) {
+		case TOUCHPAD_CONFIG_NONE: /* filtered before */
+		case TOUCHPAD_CONFIG_USE_DEFAULT:
+			return 1;
+
+		case TOUCHPAD_CONFIG_TAP_ENABLE:
+			*value = tp->tap.config.enabled;
+			break;
+		case TOUCHPAD_CONFIG_TAP_TIMEOUT:
+			*value = tp->tap.config.timeout_period;
+			break;
+		case TOUCHPAD_CONFIG_TAP_DOUBLETAP_TIMEOUT:
+			*value = tp->tap.config.timeout_period;
+			break;
+		case TOUCHPAD_CONFIG_TAP_MOVE_THRESHOLD:
+			*value = tp->tap.config.timeout_period;
+			break;
+		case TOUCHPAD_CONFIG_SCROLL_METHOD:
+			*value = tp->scroll.config.methods;
+			break;
+		case TOUCHPAD_CONFIG_SCROLL_DELTA_VERT:
+			*value = tp->scroll.config.vdelta;
+			break;
+		case TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ:
+			*value = tp->scroll.config.hdelta;
+			break;
+		default:
+			return 1;
+	}
+
+	return 0;
+}
+
+int
+touchpad_config_get(struct touchpad *tp, ...)
+{
+	va_list args;
+	int processed = 1;
+	unsigned int key;
+	int* value;
+
+	va_start(args, tp);
+
+	key = va_arg(args, unsigned int);
+	while (key != TOUCHPAD_CONFIG_NONE) {
+		int success;
+		value = va_arg(args, int*);
+		success = touchpad_config_get_key_value(tp, key, value);
+		if (success != 0) {
+			if (success < 0)
+				processed = -processed;
+			break;
+		}
+		processed++;
+		key = va_arg(args, unsigned int);
+	}
+
+	va_end(args);
+
+	if (key == TOUCHPAD_CONFIG_NONE)
+		processed = 0;
+	return processed;
+}
+
+void
+touchpad_config_set_defaults(struct touchpad *tp)
 {
 	tp->tap.config = tap_defaults;
-
-	return 0;
-}
-
-
-int
-touchpad_config_tap_set(struct touchpad *tp, bool enable,
-			int timeout, int doubletap_timeout,
-			int move_threshold)
-{
-	assert(tp);
-
-	tp->tap.config.enabled = enable;
-	tp->tap.config.timeout_period = timeout;
-	/* FIXME: doubletap timeout */
-	tp->tap.config.move_threshold = move_threshold;
-
-	return 0;
-}
-
-int
-touchpad_config_tap_get(struct touchpad *tp, bool *enabled,
-			int *timeout, int *doubletap_timeout,
-			int *move_threshold)
-{
-	if (enabled)
-		*enabled = tp->tap.config.enabled;
-	if (timeout)
-		*timeout = tp->tap.config.timeout_period;
-	if (doubletap_timeout)	/* FIXME: */
-		*doubletap_timeout = tp->tap.config.timeout_period;
-	if (move_threshold)
-		*move_threshold = tp->tap.config.move_threshold;
-
-	return 0;
-}
-
-int
-touchpad_config_scroll_set(struct touchpad *tp,
-			   enum touchpad_scroll_methods methods,
-			   int vdelta, int hdelta)
-{
-	tp->scroll.config.methods = methods;
-	tp->scroll.config.vdelta = vdelta;
-	tp->scroll.config.hdelta = hdelta;
-	return 0;
-}
-
-int
-touchpad_config_scroll_get(struct touchpad *tp,
-			   enum touchpad_scroll_methods *methods,
-			   int *vdelta, int *hdelta)
-{
-	if (methods)
-		*methods = tp->scroll.config.methods;
-	if (vdelta)
-		*vdelta = tp->scroll.config.vdelta;
-	if (hdelta)
-		*hdelta = tp->scroll.config.hdelta;
-	return 0;
-}
-
-int
-touchpad_config_scroll_set_defaults(struct touchpad *tp)
-{
 	tp->scroll.config = scroll_defaults;
-
-	return 0;
 }
+

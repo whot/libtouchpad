@@ -25,6 +25,7 @@
 #ifndef TOUCHPAD_CONFIG_H
 #define TOUCHPAD_CONFIG_H
 
+#include <limits.h>
 #include <touchpad.h>
 
 /**
@@ -34,89 +35,88 @@
  * functionality.
  */
 
-/**
- * @ingroup configuration
- *
- * Modify tapping-related parameters. See @ref tapping for a detailed
- * description.
- *
- * @param tp A previously opened touchpad device
- * @param enable True to enable tapping, false to disable tapping
- * @param timeout Maximum time in ms to elapse after a touch-and-hold for a
- * a release to trigger a tap event.
- * @param doubletap_timeout Maximum time in ms to elapse between two taps to
- * count as doubletap.
- * @param move_threshold Maximum movement in device coordinates before a
- * release won't trigger a tap.
- *
- * @return 0 on success, -1 on failure
- */
-int touchpad_config_tap_set(struct touchpad *tp, bool enable,
-			    int timeout, int doubletap_timeout,
-			    int move_threshold);
-/**
- * @ingroup configuration
- *
- * Get tapping-related parameters. See @ref tapping for a detailed
- * description.
- *
- * @param tp A previously opened touchpad device
- * @param enabled If not NULL, set to true if tapping is enabled or false if
- * tapping is disabled.
- * @param timeout If not NULL, set to the tapping timeout
- * @param doubletap_timeout If not NULL, set to the doubletap timeout
- * @param move_threshold If not NULL, set to the move threshold
- *
- * @return 0 on success, -1 on failure
- */
-int touchpad_config_tap_get(struct touchpad *tp, bool *enabled,
-			    int *timeout, int *doubletap_timeout,
-			    int *move_threshold);
-/**
- * @ingroup configuration
- * Set the touchpad's tapping configuration to the built-in defaults.
- * @param tp A previously opened touchpad device
- *
- * @return 0 on success, -1 on failure
- */
-int touchpad_config_tap_set_defaults(struct touchpad *tp);
+enum touchpad_config_parameter {
+	TOUCHPAD_CONFIG_NONE = 0,
+	TOUCHPAD_CONFIG_TAP_ENABLE,
+	TOUCHPAD_CONFIG_TAP_TIMEOUT,
+	TOUCHPAD_CONFIG_TAP_DOUBLETAP_TIMEOUT,
+	TOUCHPAD_CONFIG_TAP_MOVE_THRESHOLD,
+	TOUCHPAD_CONFIG_SCROLL_METHOD,
+	TOUCHPAD_CONFIG_SCROLL_DELTA_VERT,
+	TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ,
+
+	/**
+	 * Use the built-in defaults for the preceding parameter.
+	 */
+	TOUCHPAD_CONFIG_USE_DEFAULT = INT_MAX,
+};
 
 /**
- * @ingroup configuration
+ * Change the touchpad configuration parameters. The vararg is a key/value
+ * pair of touchpad_config_parameter as key and the value to be set as
+ * value, terminated by a single TOUCHPAD_CONFIG_NONE key.
  *
- * Modify scrolling-related parameters. See @ref scrolling for a detailed
- * description.
+ * For example, to enable tapping with a timeout of 100ms, use
+ *
+ * @code
+ * rc = touchpad_config_set(tp,
+ *	                    TOUCHPAD_CONFIG_TAP_ENABLE, 1,
+ *			    TOUCHPAD_CONFIG_TAP_TIMEOUT, 100,
+ *			    TOUCHPAD_CONFIG_NONE);
+ * assert(rc == 0); // expect both to be successful
+ * @endcode
+ *
+ * The special value TOUCHPAD_CONFIG_USE_DEFAULT may be used to revert to
+ * the built-in defaults for the given key.
+ *
+ * If a key is invalid, the return value is the number of that
+ * key/value pair, starting at 1.
+ * If a value is invalid, the return value is the negative number of the
+ * key/value pair, starting at 1.
+ * On error, values up to excluding the index returned are applied to the
+ * touchpad. Processing stops at the first invalid index.
  *
  * @param tp A previously opened touchpad device
- * @param methods A bitmask of scrolling methods to enable
- * @param vdelta Delta movement in device coordinates that represents one
- * unit scrolling vertically
- * @param hdelta Delta movement in device coordinates that represents one
- * unit of scrolling horizontally
- *
- * @return 0 on success, -1 on failure
+ * @param ... A key/value pair of parameters and values
+ * @return 0 on success, or the 1-indexed key or value that failed.
  */
-int touchpad_config_scroll_set(struct touchpad *tp,
-			       enum touchpad_scroll_methods methods,
-			       int vdelta, int hdelta);
+int touchpad_config_set(struct touchpad *tp, ...);
+
 /**
- * @ingroup configuration
+ * Retrieve the touchpad configuration parameters. The vararg is a key/value
+ * pair of touchpad_config_parameter as key and the value to be retrieved as
+ * value, terminated by a single TOUCHPAD_CONFIG_NONE key.
  *
- * Get scrolling-related parameters. See @ref scrolling for a detailed
- * description.
+ * For example, to get the tapping parameters, use
+ *
+ * @code
+ * int enabled, timeout;
+ * rc = touchpad_config_set(tp,
+ *	                    TOUCHPAD_CONFIG_TAP_ENABLE, &enabled,
+ *			    TOUCHPAD_CONFIG_TAP_TIMEOUT, &timeout,
+ *			    TOUCHPAD_CONFIG_NONE);
+ * assert(rc == 0); // expect both to be successful
+ * @endcode
+ *
+ * A NULL value as value is invalid and will lead to dead kittens.
+ *
+ * If a key is invalid, the return value is the number of that
+ * key/value pair, starting at 1.
+ * If a value is invalid, the return value is the negative number of the
+ * key/value pair, starting at 1.
+ * On error, values up to excluding the index returned are filled in, and
+ * the value for all others is undefined.
  *
  * @param tp A previously opened touchpad device
- * @param methods If not NULL, set to the bitmask of scrolling methods
- * currently enabled
- * @param vdelta If not NULL, set to the delta movement in device
- * coordinates that represents one unit scrolling vertically
- * @param hdelta if not NULL, set to the delta movement in device
- * coordinates that represents one unit of scrolling horizontally
- 
- * @return 0 on success, -1 on failure
+ * @param ... A key/value pair of parameters and pointers to values
+ * @return 0 on success, or the 1-indexed key or value that failed.
  */
-int touchpad_config_scroll_get(struct touchpad *tp,
-			       enum touchpad_scroll_methods *methods,
-			       int *vdelta, int *hdelta);
-int touchpad_config_scroll_set_defaults(struct touchpad *tp);
+int touchpad_config_get(struct touchpad *tp, ...);
+
+/**
+ * Restore built-in defaults. Note that some of these defaults are
+ * hardcoded, others may be calculated based on hardware capabilities.
+ * @param tp A previously opened touchpad
+ */
+void touchpad_config_set_defaults(struct touchpad *tp);
 #endif
