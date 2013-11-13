@@ -39,6 +39,15 @@ LT_PATH_LD
 
 PKG_CHECK_MODULES(LIBEVDEV, [libevdev >= 0.4])
 
+AC_PATH_PROG(DOXYGEN, [doxygen])
+if test "x$DOXYGEN" = "x"; then
+	AC_MSG_WARN([doxygen not found - required for documentation])
+	have_doxygen="no"
+else
+	have_doxygen="yes"
+fi
+AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$have_doxygen" = "xyes"])
+
 AC_ARG_ENABLE(xorg,
 	      AS_HELP_STRING([--enable-xorg], [Build xorg driver (default=yes)]),
 	      [build_xorg="$enableval"],
@@ -87,9 +96,11 @@ if test "$build_xorg" = "yes"; then
 fi # with_xorg
 
 AC_CONFIG_FILES([Makefile
+		 doc/Makefile
 		 src/Makefile
 		 test/Makefile
 		 tools/Makefile
+		 doc/libtouchpad.doxygen
 		 libtouchpad.pc
 		 xorg/Makefile
 		 xorg/xorg-touchpad.pc])
