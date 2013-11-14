@@ -93,6 +93,58 @@ touchpad_update_button_state(struct touchpad *tp,
 }
 
 static void
+touchpad_unpin_finger(struct touchpad *tp)
+{
+	struct touch *t = touchpad_pinned_touch(tp);
+	if (t) {
+		t->pinned = false;
+		if (tp->fingers_down == 1)
+			t->pointer = true;
+	}
+}
+
+static void
+touchpad_pin_finger(struct touchpad *tp)
+{
+	struct touch *t;
+
+	arg_require_flag_set(tp->queued, EVENT_BUTTON_PRESS);
+
+	t = touchpad_pinned_touch(tp);
+	if (t)
+		return;
+
+	if (tp->fingers_down == 1) /* Whoopee, the easy case */
+		t = touchpad_pointer_touch(tp);
+	else {
+		int maxy = INT_MIN;
+		struct touch *tmp, *new_pointer_touch = touchpad_touch(tp, 0);
+
+		/* Pick the finger lowest to the bottom of the touchpad */
+		touchpad_for_each_touch(tp, tmp) {
+			printf("%d\n", tmp->y);
+			if (tmp->y > maxy) {
+				t = tmp;
+				maxy = tmp->y;
+			} else if (tmp->state == TOUCH_UPDATE ||
+				   tmp->state == TOUCH_BEGIN)
+				new_pointer_touch = tmp;
+		}
+
+		arg_require_not_null(new_pointer_touch);
+		if (new_pointer_touch->state != TOUCH_NONE)
+			new_pointer_touch->pointer = true;
+	}
+
+	arg_require_not_null(t);
+
+	t->pinned = true;
+	t->pointer = false;
+
+	return ;
+}
+
+static void
 touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 {
 	struct touch *t;
@@ -102,7 +154,7 @@ touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 		return;
 
 	t = touchpad_pointer_touch(tp);
-	if (t == NULL || !t->dirty)
+	if (t == NULL)
 		return;
 
 	touchpad_motion_dejitter(t);
@@ -143,6 +195,9 @@ touchpad_pre_process_touches(struct touchpad *tp)
 	touchpad_for_each_touch(tp, t)
 		if (t->state == TOUCH_BEGIN)
 			touchpad_history_push(t, t->x, t->y, t->millis);
+
+	if (tp->queued & EVENT_BUTTON_PRESS)
+		touchpad_pin_finger(tp);
 }
 
 static void
@@ -155,6 +210,7 @@ touchpad_post_process_touches(struct touchpad *tp)
 		if (t->state == TOUCH_END) {
 			t->state = TOUCH_NONE;
 			t->pointer = false;
+			t->pinned = false;
 			dec++;
 		} else if (t->state == TOUCH_BEGIN)
 			t->state = TOUCH_UPDATE;
@@ -166,6 +222,9 @@ touchpad_post_process_touches(struct touchpad *tp)
 		touchpad_for_each_touch(tp, t)
 			t->number -= dec;
 	}
+
+	if (tp->queued & EVENT_BUTTON_RELEASE)
+		touchpad_unpin_finger(tp);
 
 	tp->queued = EVENT_NONE;
 }
