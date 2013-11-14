@@ -35,10 +35,12 @@
 	typeof(a) _a = a; \
 	typeof(b) _b = b; \
 	_a > _b ? _a : _b;})
+#define _unlikely_(x) (__builtin_expect(!!(x), 0))
+#define _likely_(x) (__builtin_expect(!!(x), 1))
 
 #define log_bug(cond, ...) \
 	do { \
-		if (cond) { \
+		if (_unlikely_(cond)) { \
 			touchpad_log("BUG: %s:%d %s() 'if (" # cond ")'\n", __FILE__, __LINE__, __func__); \
 			touchpad_log( __VA_ARGS__); \
 		} } while(0)
