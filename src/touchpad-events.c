@@ -44,13 +44,16 @@ touchpad_update_abs_state(struct touchpad *tp,
 		case ABS_MT_POSITION_X:
 			t->x = ev->value;
 			t->dirty = true;
+			tp->queued |= EVENT_MOTION;
 			break;
 		case ABS_MT_POSITION_Y:
 			t->y = ev->value;
 			t->dirty = true;
+			tp->queued |= EVENT_MOTION;
 			break;
 		case ABS_MT_SLOT:
 			tp->slot = ev->value;
+			tp->queued |= EVENT_MOTION;
 			break;
 		case ABS_MT_TRACKING_ID:
 			if (ev->value == -1) {
@@ -65,6 +68,7 @@ touchpad_update_abs_state(struct touchpad *tp,
 				t->number = tp->fingers_down++;
 			}
 			t->dirty = true;
+			tp->queued |= EVENT_MOTION;
 			break;
 	}
 
@@ -79,19 +83,26 @@ touchpad_update_button_state(struct touchpad *tp,
 	if (ev->code >= BTN_LEFT && ev->code <= BTN_TASK) {
 		uint32_t mask;
 		mask = 0x1 << (ev->code - BTN_LEFT);
-		if (ev->value)
+		if (ev->value) {
 			tp->buttons.state |= mask;
-		else
+			tp->queued |= EVENT_BUTTON_PRESS;
+		} else {
 			tp->buttons.state &= ~mask;
+			tp->queued |= EVENT_BUTTON_RELEASE;
+		}
 	}
 }
 
 static void
 touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 {
-	struct touch *t = touchpad_pointer_touch(tp);
+	struct touch *t;
 	int dx, dy;
 
+	if ((tp->queued & EVENT_MOTION) == 0)
+		return;
+
+	t = touchpad_pointer_touch(tp);
 	if (t == NULL || !t->dirty)
 		return;
 
@@ -167,6 +178,8 @@ touchpad_post_events(struct touchpad *tp, void *userdata)
 		touchpad_post_motion_events(tp, userdata);
 		touchpad_post_button_events(tp, userdata);
 	}
+
+	tp->queued = EVENT_NONE;
 
 	for (i = 0, t = touchpad_touch(tp, i);
 	     i < tp->ntouches; i++, t = touchpad_touch(tp, i)) {

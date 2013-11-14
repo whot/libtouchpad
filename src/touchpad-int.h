@@ -129,6 +129,14 @@ struct buttons {
 	uint32_t old_state;
 };
 
+enum event_types {
+	EVENT_NONE = 0,
+	EVENT_BUTTON_PRESS = 0x1,
+	EVENT_BUTTON_RELEASE = 0x2,
+	EVENT_MOTION = 0x4,
+};
+
+
 struct touchpad {
     struct libevdev *dev;
     char *path;
@@ -144,6 +152,8 @@ struct touchpad {
     const struct touchpad_interface *interface;
 
     unsigned int ms;		/* ms of last SYN_REPORT */
+
+    enum event_types queued;
 };
 
 static inline struct touch*
