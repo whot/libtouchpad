@@ -124,6 +124,10 @@ touchpad_scroll_handle_state(struct touchpad *tp, void *userdata)
 {
 	int rc = 0;
 
+	/* Can't two-finger scroll with a clickpad button down */
+	if (tp->buttons.state != 0)
+		return 0;
+
 	if (tp->scroll.state != SCROLL_STATE_NONE)
 		return touchpad_scroll_continue(tp, userdata);
 

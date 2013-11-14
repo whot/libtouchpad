@@ -63,6 +63,7 @@ struct touch_history {
 struct touch {
 	bool dirty;
 	bool pointer; /* is this the pointer-moving touchpoint? */
+	bool pinned; /* touch is pinned from phys. button press, movement is ignored */
 
 	enum touch_state state;
 	int millis;
@@ -178,6 +179,17 @@ touchpad_pointer_touch(struct touchpad *tp)
 			return t;
 		}
 	}
+
+	return NULL;
+}
+
+static inline struct touch*
+touchpad_pinned_touch(struct touchpad *tp)
+{
+	struct touch *t;
+	touchpad_for_each_touch(tp, t)
+		if (t->pinned)
+			return t;
 
 	return NULL;
 }
