@@ -46,6 +46,12 @@
 #define log_debug(msg, ...) \
 	do { touchpad_log("%s:%d %s() " msg, __FILE__, __LINE__, __func__, __VA_ARGS__); } while(0)
 
+#define arg_require_int_min(arg, min) \
+	log_bug(arg < min, "invalid range: %s must be >= %d, is %d\n", #arg, min, arg)
+#define arg_require_int_max(arg, max) \
+	log_bug(arg > max, "invalid range: %s must be <= %d, is %d\n", #arg, max, arg)
+#define arg_require_int_range(arg, min, max) \
+	log_bug(arg < min || arg > max, "invalid range: required %d <= %s <= %d, is %d\n", min, #arg, max, arg)
 
 static inline unsigned int
 timeval_to_millis(const struct timeval *tv)

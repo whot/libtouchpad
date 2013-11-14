@@ -57,6 +57,8 @@ touchpad_config_set_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int value)
 {
+	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ);
+
 	switch(key) {
 		case TOUCHPAD_CONFIG_NONE: /* filtered before */
 		case TOUCHPAD_CONFIG_USE_DEFAULT:
@@ -129,6 +131,8 @@ touchpad_config_get_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int *value)
 {
+	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ);
+
 	if (value == NULL)
 		return -1;
 

@@ -43,6 +43,8 @@
 
 static inline const char*
 tap_state_to_str(enum tap_state state) {
+	arg_require_int_range(state, TAP_STATE_IDLE, TAP_STATE_DEAD);
+
 	switch(state) {
 		CASE_RETURN_STRING(TAP_STATE_IDLE);
 		CASE_RETURN_STRING(TAP_STATE_HOLD);
@@ -62,6 +64,8 @@ tap_state_to_str(enum tap_state state) {
 
 static inline const char*
 tap_event_to_str(enum tap_event event) {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch(event) {
 		CASE_RETURN_STRING(TAP_EVENT_TOUCH);
 		CASE_RETURN_STRING(TAP_EVENT_MOTION);
@@ -89,6 +93,8 @@ touchpad_tap_clear_timer(struct touchpad *tp, void *userdata)
 static void
 touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_TOUCH;
@@ -107,6 +113,8 @@ touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *
 static void
 touchpad_tap_touch_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_TOUCH_2;
@@ -128,6 +136,8 @@ touchpad_tap_touch_handle_event(struct touchpad *tp, enum tap_event event, void 
 static void
 touchpad_tap_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_TOUCH_2;
@@ -145,6 +155,8 @@ touchpad_tap_hold_handle_event(struct touchpad *tp, enum tap_event event, void *
 static void
 touchpad_tap_tapped_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_RELEASE:
@@ -164,6 +176,8 @@ touchpad_tap_tapped_handle_event(struct touchpad *tp, enum tap_event event, void
 static void
 touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_TOUCH_3;
@@ -185,6 +199,8 @@ touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void
 static void
 touchpad_tap_touch2_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_TOUCH_3;
@@ -203,6 +219,8 @@ touchpad_tap_touch2_hold_handle_event(struct touchpad *tp, enum tap_event event,
 static void
 touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 		case TAP_EVENT_MOTION:
@@ -221,6 +239,8 @@ touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void
 static void
 touchpad_tap_touch3_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_DEAD;
@@ -259,6 +279,8 @@ touchpad_tap_dragging_or_doubletap_handle_event(struct touchpad *tp, enum tap_ev
 static void
 touchpad_tap_dragging_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_DRAGGING_2;
@@ -277,6 +299,8 @@ touchpad_tap_dragging_handle_event(struct touchpad *tp, enum tap_event event, vo
 static void
 touchpad_tap_dragging2_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_RELEASE:
 			tp->tap.state = TAP_STATE_DRAGGING;
@@ -295,6 +319,8 @@ touchpad_tap_dragging2_handle_event(struct touchpad *tp, enum tap_event event, v
 static void
 touchpad_tap_dead_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
 	switch (event) {
 		case TAP_EVENT_RELEASE:
 			if (tp->fingers_down == 0)
@@ -310,7 +336,7 @@ touchpad_tap_dead_handle_event(struct touchpad *tp, enum tap_event event, void *
 static void
 touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	assert(event >= TAP_EVENT_NONE);
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	if (!tp->tap.config.enabled)
 		return;
