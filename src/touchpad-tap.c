@@ -38,10 +38,13 @@ tap_state_to_str(enum tap_state state) {
 		CASE_RETURN_STRING(TAP_STATE_TOUCH);
 		CASE_RETURN_STRING(TAP_STATE_TAPPED);
 		CASE_RETURN_STRING(TAP_STATE_TOUCH_2);
+		CASE_RETURN_STRING(TAP_STATE_TOUCH_2_HOLD);
 		CASE_RETURN_STRING(TAP_STATE_TOUCH_3);
+		CASE_RETURN_STRING(TAP_STATE_TOUCH_3_HOLD);
 		CASE_RETURN_STRING(TAP_STATE_DRAGGING);
 		CASE_RETURN_STRING(TAP_STATE_DRAGGING_OR_DOUBLETAP);
 		CASE_RETURN_STRING(TAP_STATE_DRAGGING_2);
+		CASE_RETURN_STRING(TAP_STATE_DEAD);
 	}
 	return NULL;
 }
@@ -166,10 +169,29 @@ touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void
 			touchpad_tap_clear_timer(tp, userdata);
 			break;
 		case TAP_EVENT_MOTION:
-			tp->tap.state = TAP_STATE_IDLE;
-			break;
 		case TAP_EVENT_TIMEOUT:
+			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
+			break;
+		default:
+			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
+			break;
+	}
+}
+
+static void
+touchpad_tap_touch2_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
+{
+	switch (event) {
+		case TAP_EVENT_TOUCH:
+			tp->tap.state = TAP_STATE_TOUCH_3;
+			touchpad_tap_set_timer(tp, userdata);
+			break;
+		case TAP_EVENT_RELEASE:
 			tp->tap.state = TAP_STATE_HOLD;
+			break;
+		case TAP_EVENT_MOTION:
+		case TAP_EVENT_TIMEOUT:
+			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
 			break;
 		default:
 			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
@@ -188,9 +210,29 @@ touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void
 			touchpad_tap_clear_timer(tp, userdata);
 			break;
 		case TAP_EVENT_RELEASE:
-			tp->tap.state = TAP_STATE_IDLE;
+			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
 			tp->interface->tap(tp, userdata, 3, true);
 			tp->interface->tap(tp, userdata, 3, false);
+			break;
+		default:
+			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
+			break;
+	}
+}
+
+static void
+touchpad_tap_touch3_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
+{
+	switch (event) {
+		case TAP_EVENT_TOUCH:
+			tp->tap.state = TAP_STATE_DEAD;
+			touchpad_tap_set_timer(tp, userdata);
+			break;
+		case TAP_EVENT_RELEASE:
+			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
+			break;
+		case TAP_EVENT_MOTION:
+		case TAP_EVENT_TIMEOUT:
 			break;
 		default:
 			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
@@ -250,10 +292,29 @@ touchpad_tap_dragging2_handle_event(struct touchpad *tp, enum tap_event event, v
 			tp->tap.state = TAP_STATE_DRAGGING;
 			break;
 		case TAP_EVENT_TOUCH:
-			tp->tap.state = TAP_STATE_IDLE;
+			tp->tap.state = TAP_STATE_DEAD;
+			tp->interface->tap(tp, userdata, 1, false);
 			break;
 		case TAP_EVENT_MOTION:
 			/* noop */
+			break;
+		default:
+			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
+			break;
+	}
+}
+
+static void
+touchpad_tap_dead_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
+{
+	switch (event) {
+		case TAP_EVENT_RELEASE:
+			if (tp->fingers_down == 0)
+				tp->tap.state = TAP_STATE_IDLE;
+			break;
+		case TAP_EVENT_TOUCH:
+		case TAP_EVENT_MOTION:
+		case TAP_EVENT_TIMEOUT:
 			break;
 		default:
 			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
@@ -285,8 +346,14 @@ touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userd
 		case TAP_STATE_TOUCH_2:
 			touchpad_tap_touch2_handle_event(tp, event, userdata);
 			break;
+		case TAP_STATE_TOUCH_2_HOLD:
+			touchpad_tap_touch2_hold_handle_event(tp, event, userdata);
+			break;
 		case TAP_STATE_TOUCH_3:
 			touchpad_tap_touch3_handle_event(tp, event, userdata);
+			break;
+		case TAP_STATE_TOUCH_3_HOLD:
+			touchpad_tap_touch3_hold_handle_event(tp, event, userdata);
 			break;
 		case TAP_STATE_DRAGGING_OR_DOUBLETAP:
 			touchpad_tap_dragging_or_doubletap_handle_event(tp, event, userdata);
@@ -296,6 +363,9 @@ touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userd
 			break;
 		case TAP_STATE_DRAGGING_2:
 			touchpad_tap_dragging2_handle_event(tp, event, userdata);
+			break;
+		case TAP_STATE_DEAD:
+			touchpad_tap_dead_handle_event(tp, event, userdata);
 			break;
 		default:
 			log_bug(event, "invalid tap state %s\n", tap_event_to_str(event));
