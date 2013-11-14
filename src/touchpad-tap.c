@@ -97,6 +97,9 @@ touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *
 			tp->tap.timeout = tp->ms + tp->tap.config.timeout_period;
 			break;
 		case TAP_EVENT_RELEASE:
+		case TAP_EVENT_MOTION:
+			log_bug(event, "invalid event, no fingers are down\n");
+			break;
 		case TAP_EVENT_TIMEOUT:
 			break;
 		default:
@@ -153,6 +156,10 @@ static void
 touchpad_tap_tapped_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
 	switch (event) {
+		case TAP_EVENT_MOTION:
+		case TAP_EVENT_RELEASE:
+			log_bug(event, "invalid event when fingers are up\n");
+			break;
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_DRAGGING_OR_DOUBLETAP;
 			touchpad_tap_clear_timer(tp, userdata);
