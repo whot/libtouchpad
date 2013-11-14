@@ -88,8 +88,7 @@ enum tap_state {
 };
 
 enum tap_event {
-	TAP_EVENT_NONE = 12,
-	TAP_EVENT_TOUCH,
+	TAP_EVENT_TOUCH = 12,
 	TAP_EVENT_MOTION,
 	TAP_EVENT_RELEASE,
 	TAP_EVENT_TIMEOUT,

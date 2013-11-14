@@ -63,7 +63,6 @@ tap_state_to_str(enum tap_state state) {
 static inline const char*
 tap_event_to_str(enum tap_event event) {
 	switch(event) {
-		CASE_RETURN_STRING(TAP_EVENT_NONE);
 		CASE_RETURN_STRING(TAP_EVENT_TOUCH);
 		CASE_RETURN_STRING(TAP_EVENT_MOTION);
 		CASE_RETURN_STRING(TAP_EVENT_RELEASE);
