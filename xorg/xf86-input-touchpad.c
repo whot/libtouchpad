@@ -37,10 +37,16 @@
 #define TOUCHPAD_MAX_BUTTONS 7 /* three buttons, 4 scroll buttons */
 #define TOUCHPAD_NUM_AXES 4 /* x, y, hscroll, vscroll */
 
+struct xf86touchpad {
+	struct touchpad *tp;
+	OsTimerPtr timer;
+	int time_offset;
+};
+
 static inline struct touchpad*
 xf86touchpad(InputInfoPtr pInfo)
 {
-	return (struct touchpad*)pInfo->private;
+	return ((struct xf86touchpad*)pInfo->private)->tp;
 }
 
 static int
@@ -210,11 +216,33 @@ xf86touchpad_scroll(struct touchpad *tp, void *userdata,
 	xf86PostMotionEvent(dev, Absolute, first, 1, units);
 }
 
+static CARD32
+timer_func(OsTimerPtr timer, CARD32 now, pointer userdata)
+{
+	InputInfoPtr pInfo = userdata;
+	struct xf86touchpad *touchpad = pInfo->private;
+	struct touchpad *tp = xf86touchpad(pInfo);
+	touchpad_handle_timer_expired(tp, now - touchpad->time_offset, userdata);
+	return 0;
+}
+
+static int
+xf86touchpad_register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
+{
+	InputInfoPtr pInfo = userdata;
+	struct xf86touchpad *touchpad = pInfo->private;
+
+	touchpad->timer = TimerSet(touchpad->timer, 0, ms, timer_func, pInfo);
+	touchpad->time_offset = GetTimeInMillis() - now;
+	return 0;
+}
+
 static const struct touchpad_interface xf86touchpad_interface = {
 	.motion = xf86touchpad_motion,
 	.button = xf86touchpad_button,
 	.scroll = xf86touchpad_scroll,
 	.tap = xf86touchpad_tap,
+	.register_timer = xf86touchpad_register_timer
 };
 
 static void
@@ -261,6 +289,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 				 InputInfoPtr pInfo,
 				 int flags)
 {
+	struct xf86touchpad *driver_data;
 	struct touchpad *tp;
 	char *device;
 
@@ -270,6 +299,8 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	pInfo->read_input = xf86touchpad_read_input;
 	pInfo->control_proc = NULL;
 	pInfo->switch_mode = NULL;
+
+	driver_data = zalloc(sizeof(*driver_data));
 
 	device = xf86SetStrOption(pInfo->options, "Device", NULL);
 	if (!device)
@@ -284,7 +315,11 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	if (!xf86touchpad_apply_config(pInfo, tp))
 		return BadValue;
 
-	pInfo->private = tp;
+	/* empty timer, processing is in the signal handler so we can't
+	 * create it there */
+	driver_data->timer = TimerSet(NULL, 0, 0, NULL, NULL);
+	pInfo->private = driver_data;
+	driver_data->tp = tp;
 
 	return Success;
 
@@ -298,7 +333,14 @@ xf86touchpad_uninit(InputDriverPtr drv,
 		    InputInfoPtr pInfo,
 		    int flags)
 {
-	touchpad_free(pInfo->private);
+	struct xf86touchpad *touchpad = pInfo->private;
+	if (touchpad) {
+		struct touchpad *tp = xf86touchpad(pInfo);
+		touchpad_free(tp);
+		TimerFree(touchpad->timer);
+		free(touchpad);
+		pInfo->private = NULL;
+	}
 }
 
 
