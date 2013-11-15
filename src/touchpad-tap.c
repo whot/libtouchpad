@@ -71,6 +71,7 @@ tap_event_to_str(enum tap_event event) {
 		CASE_RETURN_STRING(TAP_EVENT_MOTION);
 		CASE_RETURN_STRING(TAP_EVENT_RELEASE);
 		CASE_RETURN_STRING(TAP_EVENT_TIMEOUT);
+		CASE_RETURN_STRING(TAP_EVENT_BUTTON);
 	}
 	return NULL;
 }
@@ -107,6 +108,9 @@ touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *
 			break;
 		case TAP_EVENT_TIMEOUT:
 			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			break;
 	}
 }
 
@@ -130,6 +134,9 @@ touchpad_tap_touch_handle_event(struct touchpad *tp, enum tap_event event, void 
 			tp->tap.state = TAP_STATE_HOLD;
 			touchpad_tap_clear_timer(tp, userdata);
 			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			break;
 	}
 }
 
@@ -148,6 +155,9 @@ touchpad_tap_hold_handle_event(struct touchpad *tp, enum tap_event event, void *
 			break;
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
+			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
 			break;
 	}
 }
@@ -168,6 +178,10 @@ touchpad_tap_tapped_handle_event(struct touchpad *tp, enum tap_event event, void
 			break;
 		case TAP_EVENT_TIMEOUT:
 			tp->tap.state = TAP_STATE_IDLE;
+			tp->interface->tap(tp, userdata, 1, false);
+			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
 			tp->interface->tap(tp, userdata, 1, false);
 			break;
 	}
@@ -193,6 +207,9 @@ touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void
 		case TAP_EVENT_TIMEOUT:
 			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
 			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			break;
 	}
 }
 
@@ -212,6 +229,9 @@ touchpad_tap_touch2_hold_handle_event(struct touchpad *tp, enum tap_event event,
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
 			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
+			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
 			break;
 	}
 }
@@ -233,6 +253,9 @@ touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void
 			tp->interface->tap(tp, userdata, 3, true);
 			tp->interface->tap(tp, userdata, 3, false);
 			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			break;
 	}
 }
 
@@ -251,6 +274,9 @@ touchpad_tap_touch3_hold_handle_event(struct touchpad *tp, enum tap_event event,
 			break;
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
+			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
 			break;
 	}
 }
@@ -273,6 +299,10 @@ touchpad_tap_dragging_or_doubletap_handle_event(struct touchpad *tp, enum tap_ev
 		case TAP_EVENT_TIMEOUT:
 			tp->tap.state = TAP_STATE_DRAGGING;
 			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			tp->interface->tap(tp, userdata, 1, false);
+			break;
 	}
 }
 
@@ -292,6 +322,10 @@ touchpad_tap_dragging_handle_event(struct touchpad *tp, enum tap_event event, vo
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
 			/* noop */
+			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			tp->interface->tap(tp, userdata, 1, false);
 			break;
 	}
 }
@@ -313,6 +347,10 @@ touchpad_tap_dragging2_handle_event(struct touchpad *tp, enum tap_event event, v
 		case TAP_EVENT_TIMEOUT:
 			/* noop */
 			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			tp->interface->tap(tp, userdata, 1, false);
+			break;
 	}
 }
 
@@ -329,6 +367,7 @@ touchpad_tap_dead_handle_event(struct touchpad *tp, enum tap_event event, void *
 		case TAP_EVENT_TOUCH:
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
+		case TAP_EVENT_BUTTON:
 			break;
 	}
 }
@@ -379,7 +418,7 @@ touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userd
 			touchpad_tap_dead_handle_event(tp, event, userdata);
 			break;
 	}
-	if (tp->tap.state == TAP_STATE_IDLE)
+	if (tp->tap.state == TAP_STATE_IDLE || tp->tap.state == TAP_STATE_DEAD)
 		touchpad_tap_clear_timer(tp, userdata);
 
 	log_debug("%s\n", tap_state_to_str(tp->tap.state));
@@ -400,6 +439,10 @@ int
 touchpad_tap_handle_state(struct touchpad *tp, void *userdata)
 {
 	int i;
+
+	if (tp->queued & EVENT_BUTTON_PRESS)
+		touchpad_tap_handle_event(tp, TAP_EVENT_BUTTON, userdata);
+
 	for (i = 0; i < tp->ntouches; i++) {
 		struct touch *t = touchpad_touch(tp, i);
 
