@@ -438,14 +438,12 @@ touchpad_tap_exceeds_motion_threshold(struct touchpad *tp, struct touch *t)
 int
 touchpad_tap_handle_state(struct touchpad *tp, void *userdata)
 {
-	int i;
+	struct touch *t;
 
 	if (tp->queued & EVENT_BUTTON_PRESS)
 		touchpad_tap_handle_event(tp, TAP_EVENT_BUTTON, userdata);
 
-	for (i = 0; i < tp->ntouches; i++) {
-		struct touch *t = touchpad_touch(tp, i);
-
+	touchpad_for_each_touch(tp, t) {
 		if (!t->dirty || t->state == TOUCH_NONE)
 			continue;
 

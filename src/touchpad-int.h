@@ -157,23 +157,24 @@ struct touchpad {
     enum event_types queued;
 };
 
-static inline struct touch*
-touchpad_pointer_touch(struct touchpad *tp)
-{
-	int i;
-	for (i = 0; i < tp->ntouches; i++) {
-		struct touch *t = &tp->touches[i];
-		if (t->pointer)
-			return t;
-	}
-
-	return NULL;
-}
+#define touchpad_for_each_touch(_tp, _t) \
+	for (int _i = 0; (_t = touchpad_touch(_tp, _i)) && _i < tp->ntouches; _i++)
 
 static inline struct touch*
 touchpad_touch(struct touchpad *tp, int index)
 {
 	return &tp->touches[index];
+}
+
+static inline struct touch*
+touchpad_pointer_touch(struct touchpad *tp)
+{
+	struct touch *t;
+	touchpad_for_each_touch(tp, t)
+		if (t->pointer)
+			return t;
+
+	return NULL;
 }
 
 static inline struct touch*

@@ -139,24 +139,19 @@ touchpad_post_button_events(struct touchpad *tp, void *userdata)
 static void
 touchpad_pre_process_touches(struct touchpad *tp)
 {
-	int i;
 	struct touch *t;
 
-	for (i = 0, t = touchpad_touch(tp, i);
-	     i < tp->ntouches; i++, t = touchpad_touch(tp, i)) {
+	touchpad_for_each_touch(tp, t)
 		if (t->state == TOUCH_BEGIN)
 			touchpad_history_push(t, t->x, t->y, t->millis);
-	}
 }
 
 static void
 touchpad_post_process_touches(struct touchpad *tp)
 {
-	int i;
 	struct touch *t;
 
-	for (i = 0, t = touchpad_touch(tp, i);
-	     i < tp->ntouches; i++, t = touchpad_touch(tp, i)) {
+	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_END)
 			t->state = TOUCH_NONE;
 		else if (t->state == TOUCH_BEGIN)
@@ -169,7 +164,6 @@ touchpad_post_process_touches(struct touchpad *tp)
 static void
 touchpad_post_events(struct touchpad *tp, void *userdata)
 {
-	int i;
 	int dec = 0;
 	struct touch *t;
 
@@ -181,8 +175,7 @@ touchpad_post_events(struct touchpad *tp, void *userdata)
 
 	tp->queued = EVENT_NONE;
 
-	for (i = 0, t = touchpad_touch(tp, i);
-	     i < tp->ntouches; i++, t = touchpad_touch(tp, i)) {
+	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_END) {
 			t->state = TOUCH_NONE;
 			dec++;
@@ -190,8 +183,7 @@ touchpad_post_events(struct touchpad *tp, void *userdata)
 	}
 
 	if (dec > 0) {
-		for (i = 0, t = touchpad_touch(tp, i);
-		     i < tp->ntouches; i++, t = touchpad_touch(tp, i))
+		touchpad_for_each_touch(tp, t)
 			t->number -= dec;
 	}
 }
