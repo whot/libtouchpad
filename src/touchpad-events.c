@@ -158,7 +158,6 @@ touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 	if (t == NULL)
 		return;
 
-	touchpad_motion_dejitter(t);
 	touchpad_motion_to_delta(t, &dx, &dy);
 
 	if (dx || dy)
@@ -189,9 +188,12 @@ touchpad_pre_process_touches(struct touchpad *tp)
 {
 	struct touch *t;
 
-	touchpad_for_each_touch(tp, t)
+	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_BEGIN)
 			touchpad_history_push(t, t->x, t->y, t->millis);
+		if (t->state != TOUCH_NONE && t->dirty)
+			touchpad_motion_dejitter(t);
+	}
 
 	if (tp->queued & EVENT_BUTTON_PRESS)
 		touchpad_pin_finger(tp);
