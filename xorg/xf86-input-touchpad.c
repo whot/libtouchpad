@@ -41,6 +41,11 @@ struct xf86touchpad {
 	struct touchpad *tp;
 	OsTimerPtr timer;
 	int time_offset;
+
+	int scroll_vdist;
+	int scroll_hdist;
+	int scroll_vdist_remainder;
+	int scroll_hdist_remainder;
 };
 
 static inline struct touchpad*
@@ -122,6 +127,9 @@ init_axis_labels(Atom *labels, size_t size)
 static int
 xf86touchpad_init(DeviceIntPtr dev)
 {
+	InputInfoPtr pInfo = dev->public.devicePrivate;
+	struct xf86touchpad *touchpad = pInfo->private;
+
 	unsigned char btnmap[TOUCHPAD_MAX_BUTTONS + 1];
 	Atom btnlabels[TOUCHPAD_MAX_BUTTONS];
 	Atom axislabels[TOUCHPAD_NUM_AXES];
@@ -139,6 +147,14 @@ xf86touchpad_init(DeviceIntPtr dev)
 				GetMotionHistorySize(),
 				TOUCHPAD_NUM_AXES,
 				axislabels);
+
+	touchpad_config_get(xf86touchpad(pInfo),
+			    TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ, &touchpad->scroll_hdist,
+			    TOUCHPAD_CONFIG_SCROLL_DELTA_VERT, &touchpad->scroll_vdist,
+			    TOUCHPAD_CONFIG_NONE);
+
+	SetScrollValuator(dev, 2, SCROLL_TYPE_HORIZONTAL, touchpad->scroll_hdist, 0);
+	SetScrollValuator(dev, 3, SCROLL_TYPE_VERTICAL, touchpad->scroll_vdist, 0);
 
 	return Success;
 }
@@ -170,7 +186,7 @@ xf86touchpad_motion(struct touchpad *tp, void *userdata, int x, int y)
 	InputInfoPtr pInfo = userdata;
 	DeviceIntPtr dev = pInfo->dev;
 
-	xf86PostMotionEvent(dev, Relative, 0, 2, x, y);
+	xf86PostMotionEvent(dev, Relative, 0, 2, x/10, y/10);
 }
 
 static void
@@ -211,9 +227,23 @@ xf86touchpad_scroll(struct touchpad *tp, void *userdata,
 {
 	InputInfoPtr pInfo = userdata;
 	DeviceIntPtr dev = pInfo->dev;
-	int first = (direction == TOUCHPAD_SCROLL_HORIZONTAL) ? 2 : 3;
+	struct xf86touchpad *touchpad = pInfo->private;
+	int first;
 
-	xf86PostMotionEvent(dev, Absolute, first, 1, units);
+	switch(direction) {
+		case TOUCHPAD_SCROLL_HORIZONTAL:
+			first = 2;
+			units = units * touchpad->scroll_hdist + touchpad->scroll_hdist_remainder;
+			touchpad->scroll_hdist_remainder = (int)units % touchpad->scroll_hdist;
+			break;
+		case TOUCHPAD_SCROLL_VERTICAL:
+			first = 3;
+			units = units * touchpad->scroll_vdist + touchpad->scroll_vdist_remainder;
+			touchpad->scroll_vdist_remainder = (int)units % touchpad->scroll_vdist;
+			break;
+	}
+
+	xf86PostMotionEvent(dev, Relative, first, 1, (int)units);
 }
 
 static CARD32
