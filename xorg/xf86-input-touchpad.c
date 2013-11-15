@@ -31,6 +31,8 @@
 #include <xserver-properties.h>
 #include <linux/input.h>
 #include "touchpad.h"
+#include "touchpad-config.h"
+#include "touchpad-util.h"
 
 #define TOUCHPAD_MAX_BUTTONS 7 /* three buttons, 4 scroll buttons */
 #define TOUCHPAD_NUM_AXES 4 /* x, y, hscroll, vscroll */
@@ -223,6 +225,37 @@ xf86touchpad_read_input(InputInfoPtr pInfo)
 	touchpad_handle_events(tp, pInfo);
 }
 
+static void xf86touchpad_apply_config(InputInfoPtr pInfo,
+				      struct touchpad *tp)
+{
+
+	const struct lookup {
+		const char *name; /* xorg.conf option name */
+		enum touchpad_config_parameter key;
+	} options[] = {
+		{ "MaxTapTime", TOUCHPAD_CONFIG_TAP_TIMEOUT },
+		{ "MaxTapMove", TOUCHPAD_CONFIG_TAP_MOVE_THRESHOLD },
+		{ "VertScrollDelta", TOUCHPAD_CONFIG_SCROLL_DELTA_VERT },
+		{ "VertScrollHoriz", TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ },
+	};
+	const struct lookup *opt;
+	enum touchpad_config_parameter scroll_methods = TOUCHPAD_SCROLL_NONE;
+	bool b;
+
+	ARRAY_FOR_EACH(options, opt) {
+		int value = xf86SetIntOption(pInfo->options, opt->name, INT_MAX);
+		if (value != INT_MAX)
+			touchpad_config_set(tp, opt->key, value);
+	}
+
+	b = xf86SetBoolOption(pInfo->options, "VertTwoFingerScroll", true);
+	if (b)
+		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL;
+	if (b)
+		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_VERTICAL;
+	touchpad_config_set(tp, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods);
+}
+
 static int xf86touchpad_pre_init(InputDriverPtr drv,
 				 InputInfoPtr pInfo,
 				 int flags)
@@ -246,6 +279,8 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 
 	touchpad_set_interface(tp, &xf86touchpad_interface);
 	touchpad_close(tp);
+
+	xf86touchpad_apply_config(pInfo, tp);
 
 	pInfo->private = tp;
 
