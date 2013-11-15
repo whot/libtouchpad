@@ -26,6 +26,8 @@
 #endif
 
 #define ARRAY_LENGTH(_arr) (sizeof(_arr)/sizeof(_arr[0]))
+#define ARRAY_FOR_EACH(_arr, _elem) \
+	for (int i = 0; (_elem = &_arr[i]) && i < ARRAY_LENGTH(_arr); i++)
 
 #define min(a, b) ({ \
 	typeof(a) _a = a; \
