@@ -156,7 +156,7 @@ xf86touchpad_device_control(DeviceIntPtr dev, int mode)
 	return rc;
 }
 
-void
+static void
 xf86touchpad_motion(struct touchpad *tp, void *userdata, int x, int y)
 {
 	InputInfoPtr pInfo = userdata;
@@ -165,7 +165,7 @@ xf86touchpad_motion(struct touchpad *tp, void *userdata, int x, int y)
 	xf86PostMotionEvent(dev, Relative, 0, 2, x, y);
 }
 
-void
+static void
 xf86touchpad_button(struct touchpad *tp, void *userdata, unsigned int button /* linux/input.h */, bool is_press)
 {
 	InputInfoPtr pInfo = userdata;
@@ -182,7 +182,7 @@ xf86touchpad_button(struct touchpad *tp, void *userdata, unsigned int button /* 
 	xf86PostButtonEvent(dev, Relative, button, is_press, 0, 0);
 }
 
-void
+static void
 xf86touchpad_tap(struct touchpad *tp, void *userdata, unsigned int fingers, bool is_press)
 {
 	unsigned int button;
@@ -197,7 +197,7 @@ xf86touchpad_tap(struct touchpad *tp, void *userdata, unsigned int fingers, bool
 }
 
 
-void
+static void
 xf86touchpad_scroll(struct touchpad *tp, void *userdata,
 		    enum touchpad_scroll_direction direction, double units)
 {
