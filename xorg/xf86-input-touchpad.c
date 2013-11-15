@@ -225,7 +225,7 @@ xf86touchpad_read_input(InputInfoPtr pInfo)
 	touchpad_handle_events(tp, pInfo);
 }
 
-static void xf86touchpad_apply_config(InputInfoPtr pInfo,
+static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
 				      struct touchpad *tp)
 {
 
@@ -245,7 +245,8 @@ static void xf86touchpad_apply_config(InputInfoPtr pInfo,
 	ARRAY_FOR_EACH(options, opt) {
 		int value = xf86SetIntOption(pInfo->options, opt->name, INT_MAX);
 		if (value != INT_MAX)
-			touchpad_config_set(tp, opt->key, value);
+			if (touchpad_config_set(tp, opt->key, value) != 0)
+				return false;
 	}
 
 	b = xf86SetBoolOption(pInfo->options, "VertTwoFingerScroll", true);
@@ -253,7 +254,7 @@ static void xf86touchpad_apply_config(InputInfoPtr pInfo,
 		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL;
 	if (b)
 		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_VERTICAL;
-	touchpad_config_set(tp, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods);
+	return touchpad_config_set(tp, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods) == 0;
 }
 
 static int xf86touchpad_pre_init(InputDriverPtr drv,
@@ -280,7 +281,8 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	touchpad_set_interface(tp, &xf86touchpad_interface);
 	touchpad_close(tp);
 
-	xf86touchpad_apply_config(pInfo, tp);
+	if (!xf86touchpad_apply_config(pInfo, tp))
+		return BadValue;
 
 	pInfo->private = tp;
 
