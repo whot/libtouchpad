@@ -35,7 +35,6 @@ touchpad_scroll_units(struct touchpad *tp, struct touch *t,
 	double delta, threshold;
 	int dx, dy;
 
-	touchpad_motion_dejitter(t);
 	touchpad_motion_to_delta(t, &dx, &dy);
 
 	switch(direction) {
