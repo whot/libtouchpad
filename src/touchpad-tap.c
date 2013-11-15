@@ -99,8 +99,7 @@ touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *
 	switch (event) {
 		case TAP_EVENT_TOUCH:
 			tp->tap.state = TAP_STATE_TOUCH;
-			tp->interface->register_timer(tp, userdata, tp->tap.config.timeout_period);
-			tp->tap.timeout = tp->ms + tp->tap.config.timeout_period;
+			touchpad_tap_set_timer(tp, userdata);
 			break;
 		case TAP_EVENT_RELEASE:
 		case TAP_EVENT_MOTION:
