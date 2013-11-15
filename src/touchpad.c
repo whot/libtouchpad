@@ -40,13 +40,6 @@
 #include "touchpad-int.h"
 #include "touchpad-config.h"
 
-static inline void*
-zalloc(size_t sz) {
-	void *p = calloc(1, sz);
-	assert(p);
-	return p;
-}
-
 void
 touchpad_log(const char *fmt, ...)
 {
