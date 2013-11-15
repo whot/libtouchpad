@@ -29,10 +29,16 @@
 #define ARRAY_FOR_EACH(_arr, _elem) \
 	for (int i = 0; (_elem = &_arr[i]) && i < ARRAY_LENGTH(_arr); i++)
 
+#ifdef min
+#undef min
+#endif
 #define min(a, b) ({ \
 	typeof(a) _a = a; \
 	typeof(b) _b = b; \
 	_a < _b ? _a : _b;})
+#ifdef max
+#undef max
+#endif
 #define max(a, b) ({ \
 	typeof(a) _a = a; \
 	typeof(b) _b = b; \
