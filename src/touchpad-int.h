@@ -157,6 +157,8 @@ struct touchpad {
     enum event_types queued;
 };
 
+void touchpad_log(const char *fmt, ...);
+
 #define touchpad_for_each_touch(_tp, _t) \
 	for (int _i = 0; (_t = touchpad_touch(_tp, _i)) && _i < tp->ntouches; _i++)
 
@@ -170,9 +172,12 @@ static inline struct touch*
 touchpad_pointer_touch(struct touchpad *tp)
 {
 	struct touch *t;
-	touchpad_for_each_touch(tp, t)
-		if (t->pointer)
+	touchpad_for_each_touch(tp, t) {
+		if (t->pointer) {
+			arg_require_int_ne(t->state, TOUCH_NONE);
 			return t;
+		}
+	}
 
 	return NULL;
 }
@@ -197,6 +202,5 @@ struct touch_history_point * touchpad_history_get_last(struct touch *t);
 int touchpad_tap_handle_state(struct touchpad *tp, void *userdata);
 int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
 int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
-void touchpad_log(const char *fmt, ...);
 
 #endif
