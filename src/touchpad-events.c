@@ -150,41 +150,34 @@ static void
 touchpad_post_process_touches(struct touchpad *tp)
 {
 	struct touch *t;
-
-	touchpad_for_each_touch(tp, t) {
-		if (t->state == TOUCH_END)
-			t->state = TOUCH_NONE;
-		else if (t->state == TOUCH_BEGIN)
-			t->state = TOUCH_UPDATE;
-
-		t->dirty = false;
-	}
-}
-
-static void
-touchpad_post_events(struct touchpad *tp, void *userdata)
-{
 	int dec = 0;
-	struct touch *t;
-
-	touchpad_tap_handle_state(tp, userdata);
-	if (touchpad_scroll_handle_state(tp, userdata) == 0) {
-		touchpad_post_motion_events(tp, userdata);
-		touchpad_post_button_events(tp, userdata);
-	}
-
-	tp->queued = EVENT_NONE;
 
 	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_END) {
 			t->state = TOUCH_NONE;
+			t->pointer = false;
 			dec++;
-		}
+		} else if (t->state == TOUCH_BEGIN)
+			t->state = TOUCH_UPDATE;
+
+		t->dirty = false;
 	}
 
 	if (dec > 0) {
 		touchpad_for_each_touch(tp, t)
 			t->number -= dec;
+	}
+
+	tp->queued = EVENT_NONE;
+}
+
+static void
+touchpad_post_events(struct touchpad *tp, void *userdata)
+{
+	touchpad_tap_handle_state(tp, userdata);
+	if (touchpad_scroll_handle_state(tp, userdata) == 0) {
+		touchpad_post_motion_events(tp, userdata);
+		touchpad_post_button_events(tp, userdata);
 	}
 }
 
