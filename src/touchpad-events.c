@@ -64,7 +64,8 @@ touchpad_update_abs_state(struct touchpad *tp,
 					t->pointer = true;
 
 				t->state = TOUCH_BEGIN;
-				t->number = tp->fingers_down++;
+				t->number = ev->value;
+				tp->fingers_down++;
 			}
 			t->dirty = true;
 			tp->queued |= EVENT_MOTION;
@@ -200,7 +201,6 @@ static void
 touchpad_post_process_touches(struct touchpad *tp)
 {
 	struct touch *t;
-	int dec = 0;
 
 	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_NONE)
@@ -212,17 +212,11 @@ touchpad_post_process_touches(struct touchpad *tp)
 			t->state = TOUCH_NONE;
 			t->pointer = false;
 			t->pinned = false;
-			dec++;
 			touchpad_history_reset(t);
 		} else if (t->state == TOUCH_BEGIN)
 			t->state = TOUCH_UPDATE;
 
 		t->dirty = false;
-	}
-
-	if (dec > 0) {
-		touchpad_for_each_touch(tp, t)
-			t->number -= dec;
 	}
 
 	if (tp->queued & EVENT_BUTTON_RELEASE)
