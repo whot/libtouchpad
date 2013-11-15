@@ -164,10 +164,6 @@ touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 	if (dx || dy)
 		tp->interface->motion(tp, userdata, dx, dy);
 
-	touchpad_history_push(t, t->x, t->y, t->millis);
-
-	if (t->state == TOUCH_END)
-		touchpad_history_reset(t);
 }
 
 static void
@@ -208,11 +204,17 @@ touchpad_post_process_touches(struct touchpad *tp)
 	int dec = 0;
 
 	touchpad_for_each_touch(tp, t) {
+		if (t->state == TOUCH_NONE)
+			continue;
+
+		touchpad_history_push(t, t->x, t->y, t->millis);
+
 		if (t->state == TOUCH_END) {
 			t->state = TOUCH_NONE;
 			t->pointer = false;
 			t->pinned = false;
 			dec++;
+			touchpad_history_reset(t);
 		} else if (t->state == TOUCH_BEGIN)
 			t->state = TOUCH_UPDATE;
 
