@@ -36,7 +36,6 @@ touchpad_scroll_units(struct touchpad *tp, struct touch *t,
 
 	touchpad_motion_to_delta(t, &dx, &dy);
 
-
 	switch(direction) {
 		case TOUCHPAD_SCROLL_VERTICAL:
 			delta = dy;
