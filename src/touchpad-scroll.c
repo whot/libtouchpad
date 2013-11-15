@@ -25,6 +25,7 @@
 #include "config.h"
 #endif
 
+#include <math.h>
 #include "touchpad-int.h"
 
 static double
@@ -59,6 +60,7 @@ touchpad_scroll_handle_2fg(struct touchpad *tp, void *userdata,
 {
 	int i;
 	double delta = 0;
+	double dist = 0;
 
 	if (tp->fingers_down != 2) {
 		if (tp->scroll.state != SCROLL_STATE_NONE) {
@@ -71,15 +73,20 @@ touchpad_scroll_handle_2fg(struct touchpad *tp, void *userdata,
 
 	for (i = 0; i < tp->ntouches; i++) {
 		struct touch *t = touchpad_touch(tp, i);
+		double d;
 
 		if (!t->dirty || t->state != TOUCH_UPDATE)
 			continue;
 
-		delta = max(delta, touchpad_scroll_units(tp, t, direction));
+		d = touchpad_scroll_units(tp, t, direction);
+		if (fabs(d) > dist) {
+			dist = abs(d);
+			delta = d;
+		}
 	}
 
 	/* require scroll dist for first scroll event */
-	if (delta < 1.0 && tp->scroll.state == SCROLL_STATE_NONE) {
+	if (abs(delta) < 1.0 && tp->scroll.state == SCROLL_STATE_NONE) {
 		delta = 0;
 	} else if (delta) {
 		tp->interface->scroll(tp, userdata, direction, delta);
