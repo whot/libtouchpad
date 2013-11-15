@@ -67,7 +67,7 @@ scroll(struct touchpad *tp, void *userdata, enum touchpad_scroll_direction dir, 
 }
 
 static int
-register_timer(struct touchpad *tp, void *userdata, unsigned int ms)
+register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
 {
 	int rc;
 	struct tpdata *tpdata = userdata;
@@ -85,7 +85,7 @@ register_timer(struct touchpad *tp, void *userdata, unsigned int ms)
 static void
 deregister_timer(struct touchpad *tp, void *userdata)
 {
-	register_timer(tp, userdata, 0);
+	register_timer(tp, userdata, 0, 0);
 }
 
 const struct touchpad_interface interface = {

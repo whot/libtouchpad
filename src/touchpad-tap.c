@@ -81,14 +81,14 @@ static void
 touchpad_tap_set_timer(struct touchpad *tp, void *userdata)
 {
 	tp->tap.timeout = tp->ms + tp->tap.config.timeout_period;
-	tp->interface->register_timer(tp, userdata, tp->tap.config.timeout_period);
+	tp->interface->register_timer(tp, userdata, tp->ms, tp->tap.config.timeout_period);
 }
 
 static void
 touchpad_tap_clear_timer(struct touchpad *tp, void *userdata)
 {
 	tp->tap.timeout = 0;
-	tp->interface->register_timer(tp, userdata, 0);
+	tp->interface->register_timer(tp, userdata, tp->ms, 0);
 }
 
 static void
