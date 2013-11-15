@@ -72,8 +72,15 @@ touchpad_motion_to_delta(struct touch *t, int *dx_out, int *dy_out)
 	int i;
 	int dx = t->x,
 	    dy = t->y;
+	int npoints;
 
-	int npoints = (1 + t->history.valid)/2 * 2;
+	if (t->history.valid < t->history.size) {
+		*dx_out = 0;
+		*dy_out = 0;
+		return;
+	}
+
+	npoints = (1 + t->history.valid)/2 * 2;
 
 	for (i = 1; i < npoints; i++) {
 		struct touch_history_point *p = touchpad_history_get(t, i);
