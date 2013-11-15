@@ -53,7 +53,6 @@ touchpad_update_abs_state(struct touchpad *tp,
 			break;
 		case ABS_MT_SLOT:
 			tp->slot = ev->value;
-			tp->queued |= EVENT_MOTION;
 			break;
 		case ABS_MT_TRACKING_ID:
 			if (ev->value == -1) {
