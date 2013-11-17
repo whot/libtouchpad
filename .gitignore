@@ -79,3 +79,4 @@ core
 .vimdir
 *.swp
 tags
+test-driver
