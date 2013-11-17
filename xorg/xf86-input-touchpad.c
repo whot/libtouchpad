@@ -319,8 +319,8 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 				 InputInfoPtr pInfo,
 				 int flags)
 {
-	struct xf86touchpad *driver_data;
-	struct touchpad *tp;
+	struct xf86touchpad *driver_data = NULL;
+	struct touchpad *tp = NULL;
 	char *device;
 
 	pInfo->fd = -1;
@@ -331,6 +331,8 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	pInfo->switch_mode = NULL;
 
 	driver_data = zalloc(sizeof(*driver_data));
+	if (!driver_data)
+		goto fail;
 
 	device = xf86SetStrOption(pInfo->options, "Device", NULL);
 	if (!device)
@@ -343,7 +345,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	touchpad_close(tp);
 
 	if (!xf86touchpad_apply_config(pInfo, tp))
-		return BadValue;
+		goto fail;
 
 	/* empty timer, processing is in the signal handler so we can't
 	 * create it there */
@@ -354,7 +356,10 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	return Success;
 
 fail:
+	if (driver_data && driver_data->timer)
+		TimerFree(driver_data->timer);
 	free(device);
+	free(driver_data);
 	return BadValue;
 }
 
