@@ -26,6 +26,7 @@
 #endif
 
 #include <assert.h>
+#include <stdlib.h>
 
 #define ARRAY_LENGTH(_arr) (sizeof(_arr)/sizeof(_arr[0]))
 #define ARRAY_FOR_EACH(_arr, _elem) \
