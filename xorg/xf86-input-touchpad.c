@@ -46,6 +46,13 @@ struct xf86touchpad {
 	int scroll_hdist;
 	int scroll_vdist_remainder;
 	int scroll_hdist_remainder;
+
+	struct {
+		double x;
+		double y;
+		double x_remainder;
+		double y_remainder;
+	} scale;
 };
 
 static inline struct touchpad*
@@ -185,8 +192,16 @@ xf86touchpad_motion(struct touchpad *tp, void *userdata, int x, int y)
 {
 	InputInfoPtr pInfo = userdata;
 	DeviceIntPtr dev = pInfo->dev;
+	struct xf86touchpad *touchpad = pInfo->private;
+	double dx, dy;
 
-	xf86PostMotionEvent(dev, Relative, 0, 2, x, y);
+	dx = x * touchpad->scale.x + touchpad->scale.x_remainder;
+	dy = y * touchpad->scale.y + touchpad->scale.y_remainder;
+
+	xf86PostMotionEvent(dev, Relative, 0, 2, (int)dx, (int)dy);
+
+	touchpad->scale.x_remainder = (dx > -1.0 && dx < 1.0) ? dx : remainder(dx, (int)dx);
+	touchpad->scale.y_remainder = (dy > -1.0 && dy < 1.0) ? dy : remainder(dy, (int)dy);
 }
 
 static void
@@ -315,6 +330,23 @@ static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
 	return touchpad_config_set(tp, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods) == 0;
 }
 
+static bool xf86touchpad_calc_scale(struct xf86touchpad *touchpad)
+{
+	int hres, vres;
+
+	if (touchpad_get_min_max(touchpad->tp, ABS_MT_POSITION_X, NULL,
+				 NULL, &hres) != 0 ||
+	    touchpad_get_min_max(touchpad->tp, ABS_MT_POSITION_Y, NULL,
+				 NULL, &vres) != 0)
+		return false;
+
+	touchpad->scale.x = hres/(double)vres;
+	touchpad->scale.y = 1;
+
+	return true;
+
+}
+
 static int xf86touchpad_pre_init(InputDriverPtr drv,
 				 InputInfoPtr pInfo,
 				 int flags)
@@ -352,6 +384,9 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	driver_data->timer = TimerSet(NULL, 0, 0, NULL, NULL);
 	pInfo->private = driver_data;
 	driver_data->tp = tp;
+
+	if (!xf86touchpad_calc_scale(driver_data))
+		goto fail;
 
 	return Success;
 
