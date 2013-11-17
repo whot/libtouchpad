@@ -38,6 +38,18 @@ LT_INIT
 LT_PATH_LD
 
 PKG_CHECK_MODULES(LIBEVDEV, [libevdev >= 0.4])
+AC_ARG_ENABLE(tests,
+	      AS_HELP_STRING([--enable-tests], [Build the tests (default=auto)]),
+	      [build_tests="$enableval"],
+	      [build_tests="auto"])
+PKG_CHECK_MODULES(CHECK, [check >= 0.9.9], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
+if test "x$build_tests" = "xauto"; then
+	build_tests="$HAVE_CHECK"
+fi
+if test "x$build_tests" = "xyes" -a "x$HAVE_CHECK" = "xno"; then
+	AC_MSG_ERROR([Cannot build tests, check is missing])
+fi
+AM_CONDITIONAL(BUILD_TESTS, [test "x$build_tests" = "xyes"])
 
 AC_PATH_PROG(DOXYGEN, [doxygen])
 if test "x$DOXYGEN" = "x"; then
@@ -107,6 +119,7 @@ AC_CONFIG_FILES([Makefile
 AC_OUTPUT
 
 AC_MSG_RESULT([
+	       Build unit-tests:	${build_tests}
 	       Build xorg backend:	${build_xorg}
 	      ])
 
