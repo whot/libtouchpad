@@ -224,6 +224,12 @@ touchpad_set_interface(struct touchpad *tp, const struct touchpad_interface *int
 }
 
 
+struct libevdev*
+touchpad_get_device(struct touchpad *tp)
+{
+	return tp->dev;
+}
+
 static int
 touchpad_sync_device(struct touchpad *tp, void *userdata)
 {

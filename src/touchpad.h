@@ -351,4 +351,6 @@ int touchpad_handle_timer_expired(struct touchpad *tp, unsigned int ms, void *us
  */
 int touchpad_get_fd(struct touchpad *tp);
 
+struct libevdev *touchpad_get_device(struct touchpad *tp);
+
 #endif
