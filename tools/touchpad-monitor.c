@@ -25,7 +25,6 @@
 #include "config.h"
 #endif
 
-#include <sys/signalfd.h>
 #include <sys/time.h>
 #include <sys/timerfd.h>
 #include <assert.h>
