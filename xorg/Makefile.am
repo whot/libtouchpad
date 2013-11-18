@@ -29,7 +29,7 @@ touchpad_drv_la_LTLIBRARIES = touchpad_drv.la
 touchpad_drv_la_LDFLAGS = -module -avoid-version
 touchpad_drv_ladir = @inputdir@
 
-AM_CFLAGS = -I$(top_srcdir)/src $(XORG_CFLAGS)
+AM_CFLAGS = -I$(top_srcdir)/src $(XORG_CFLAGS) $(LIBEVDEV_CFLAGS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = xorg-touchpad.pc

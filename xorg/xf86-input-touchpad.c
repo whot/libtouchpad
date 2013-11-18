@@ -25,10 +25,12 @@
 #include "config.h"
 #endif
 
+#include <time.h>
 #include <xorg-server.h>
 #include <exevents.h>
 #include <xf86Xinput.h>
 #include <xserver-properties.h>
+#include <libevdev/libevdev.h>
 #include <linux/input.h>
 #include "touchpad.h"
 #include "touchpad-config.h"
@@ -70,6 +72,8 @@ xf86touchpad_on(DeviceIntPtr dev)
 
 	fd = touchpad_reopen(tp);
 	if (fd > -1) {
+		struct libevdev *evdev = touchpad_get_device(tp);
+		libevdev_set_clock_id(evdev, CLOCK_MONOTONIC);
 		pInfo->fd = fd;
 		xf86AddEnabledDevice(pInfo);
 		dev->public.on = TRUE;
