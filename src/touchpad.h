@@ -241,6 +241,11 @@ struct touchpad_interface {
 	 * now. The backend must call touchpad_handle_timer_expired()
 	 * after this period expires.
 	 *
+	 * The time used by libtouchpad is the time provided by the input
+	 * events on the device fd. By default, this is CLOCK_REALTIME, but
+	 * it may be set to CLOCK_MONOTONIC if the kernel supports the
+	 * EVIOCSCLOCK ioctl.
+	 *
 	 * @param tp The touchpad device
 	 * @param userdata Backend-specific data, see touchpad_handle_events()
 	 * @param ms The timer expiry time in milliseconds, relative to now.
