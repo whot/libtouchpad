@@ -108,11 +108,11 @@ touchpad_motion_dejitter(struct touch *t)
 }
 
 void
-touchpad_history_reset(struct touch *t)
+touchpad_history_reset(struct touchpad *tp, struct touch *t)
 {
 	t->history.index = 0;
 	t->history.valid = 0;
-	t->history.size = MAX_MOTION_HISTORY_SIZE;
+	t->history.size = tp->config.motion_history_size;
 }
 
 void

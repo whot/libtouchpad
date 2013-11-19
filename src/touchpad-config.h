@@ -44,6 +44,7 @@ enum touchpad_config_parameter {
 	TOUCHPAD_CONFIG_SCROLL_METHOD,
 	TOUCHPAD_CONFIG_SCROLL_DELTA_VERT,
 	TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ,
+	TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE,
 
 	/**
 	 * Use the built-in defaults for the preceding parameter.

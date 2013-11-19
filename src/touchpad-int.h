@@ -138,6 +138,10 @@ enum event_types {
 	EVENT_MOTION = 0x4,
 };
 
+struct touchpad_config {
+	size_t motion_history_size;
+};
+
 
 struct touchpad {
     struct libevdev *dev;
@@ -148,6 +152,7 @@ struct touchpad {
     int ntouches;		/* from ABS_MT_SLOT(max) */
     struct touch touches[MAX_TOUCHPOINTS];
 
+    struct touchpad_config config;
     struct buttons buttons;
     struct tap tap;
     struct scroll scroll;
@@ -207,7 +212,7 @@ int touchpad_handle_event(struct touchpad *tp,
 void touchpad_motion_dejitter(struct touch *t);
 void touchpad_motion_to_delta(struct touch *t, int *dx, int *dy);
 void touchpad_apply_motion_history(const struct touchpad *tp, struct touch *t);
-void touchpad_history_reset(struct touch *t);
+void touchpad_history_reset(struct touchpad *tp, struct touch *t);
 void touchpad_history_push(struct touch *t, int x, int y, unsigned int millis);
 struct touch_history_point * touchpad_history_get(struct touch *t, int when);
 struct touch_history_point * touchpad_history_get_last(struct touch *t);

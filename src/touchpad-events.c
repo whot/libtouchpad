@@ -214,7 +214,7 @@ touchpad_post_process_touches(struct touchpad *tp)
 			t->state = TOUCH_NONE;
 			t->pointer = false;
 			t->pinned = false;
-			touchpad_history_reset(t);
+			touchpad_history_reset(tp, t);
 		} else if (t->state == TOUCH_BEGIN)
 			t->state = TOUCH_UPDATE;
 

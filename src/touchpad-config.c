@@ -44,6 +44,10 @@ struct scroll_config scroll_defaults = {
 	.hdelta = 100,
 };
 
+struct touchpad_config touchpad_defaults = {
+	.motion_history_size = 10,
+};
+
 #define apply_value(what, value, deflt) \
 	if (value == TOUCHPAD_CONFIG_USE_DEFAULT) what = deflt; \
 	else what = value;
@@ -57,7 +61,7 @@ touchpad_config_set_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int value)
 {
-	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ);
+	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE);
 
 	switch(key) {
 		case TOUCHPAD_CONFIG_NONE: /* filtered before */
@@ -84,6 +88,11 @@ touchpad_config_set_key_value(struct touchpad *tp,
 			break;
 		case TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ:
 			apply_value(tp->scroll.config.hdelta, value, scroll_defaults.hdelta);
+			break;
+		case TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE:
+			arg_require_int_min(value, 1);
+			value = min(abs(value), MAX_MOTION_HISTORY_SIZE);
+			apply_value(tp->config.motion_history_size, value, touchpad_defaults.motion_history_size);
 			break;
 		default:
 			return 1;
@@ -131,7 +140,7 @@ touchpad_config_get_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int *value)
 {
-	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ);
+	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE);
 
 	if (value == NULL)
 		return -1;
@@ -161,6 +170,9 @@ touchpad_config_get_key_value(struct touchpad *tp,
 			break;
 		case TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ:
 			*value = tp->scroll.config.hdelta;
+			break;
+		case TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE:
+			*value = tp->config.motion_history_size;
 			break;
 		default:
 			return 1;
@@ -205,5 +217,6 @@ touchpad_config_set_defaults(struct touchpad *tp)
 {
 	tp->tap.config = tap_defaults;
 	tp->scroll.config = scroll_defaults;
+	tp->config = touchpad_defaults;
 }
 

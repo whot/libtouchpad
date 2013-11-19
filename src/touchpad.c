@@ -49,11 +49,11 @@ touchpad_log(const char *fmt, ...)
 	va_end(args);
 }
 
-void touch_init(struct touch *t)
+void touch_init(struct touchpad *tp, struct touch *t)
 {
 	t->x = t->y = 0;
 	t->state = TOUCH_NONE;
-	touchpad_history_reset(t);
+	touchpad_history_reset(tp, t);
 }
 
 void
@@ -61,12 +61,12 @@ touchpad_reset(struct touchpad *tp)
 {
 	int i;
 
+	touchpad_config_set_defaults(tp);
 	for (i = 0; i < MAX_TOUCHPOINTS; i++)
-		touch_init(&tp->touches[i]);
+		touch_init(tp, &tp->touches[i]);
 	tp->slot = libevdev_get_current_slot(tp->dev);
 	tp->tap.state = TAP_STATE_IDLE;
 	tp->scroll.state = SCROLL_STATE_NONE;
-	touchpad_config_set_defaults(tp);
 }
 
 struct touchpad*
