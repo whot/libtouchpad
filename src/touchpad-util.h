@@ -25,6 +25,9 @@
 #include "config.h"
 #endif
 
+#ifndef TOUCHPAD_UTIL_H
+#define TOUCHPAD_UTIL_H
+
 #include <assert.h>
 #include <stdlib.h>
 
@@ -91,3 +94,5 @@ timeval_to_millis(const struct timeval *tv)
 	return tv->tv_sec * 1000 + (tv->tv_usec / 1000);
 }
 
+
+#endif
