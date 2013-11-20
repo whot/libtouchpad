@@ -42,7 +42,6 @@
 struct xf86touchpad {
 	struct touchpad *tp;
 	OsTimerPtr timer;
-	int time_offset;
 
 	int scroll_vdist;
 	int scroll_hdist;
@@ -271,7 +270,7 @@ timer_func(OsTimerPtr timer, CARD32 now, pointer userdata)
 	InputInfoPtr pInfo = userdata;
 	struct xf86touchpad *touchpad = pInfo->private;
 	struct touchpad *tp = xf86touchpad(pInfo);
-	touchpad_handle_timer_expired(tp, now - touchpad->time_offset, userdata);
+	touchpad_handle_timer_expired(tp, now, userdata);
 	return 0;
 }
 
@@ -282,7 +281,6 @@ xf86touchpad_register_timer(struct touchpad *tp, void *userdata, unsigned int no
 	struct xf86touchpad *touchpad = pInfo->private;
 
 	touchpad->timer = TimerSet(touchpad->timer, 0, ms, timer_func, pInfo);
-	touchpad->time_offset = GetTimeInMillis() - now;
 	return 0;
 }
 
