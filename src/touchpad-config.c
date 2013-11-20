@@ -53,11 +53,22 @@ struct touchpad_config touchpad_defaults = {
 	else what = value;
 
 
+static int
+config_error(enum touchpad_config_error error, enum touchpad_config_error *error_out)
+{
+	arg_require_int_range(error, TOUCHPAD_CONFIG_ERROR_NO_ERROR, TOUCHPAD_CONFIG_ERROR_NOT_SUPPORTED);
+	if (error_out)
+		*error_out = error;
+
+	return error != TOUCHPAD_CONFIG_ERROR_NO_ERROR;
+}
+
 /**
  * @return 0 on success, 1 for a bad key, -1 for a bad value
  */
 static int
 touchpad_config_set_key_value(struct touchpad *tp,
+			      enum touchpad_config_error *error,
 			      enum touchpad_config_parameter key,
 			      int value)
 {
@@ -90,37 +101,36 @@ touchpad_config_set_key_value(struct touchpad *tp,
 			apply_value(tp->scroll.config.hdelta, value, scroll_defaults.hdelta);
 			break;
 		case TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE:
-			arg_require_int_min(value, 1);
-			value = min(abs(value), MAX_MOTION_HISTORY_SIZE);
+			if (value <= 0)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW, error);
+			if (value >= MAX_MOTION_HISTORY_SIZE)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
 			apply_value(tp->config.motion_history_size, value, touchpad_defaults.motion_history_size);
 			break;
 		default:
-			return 1;
+			return config_error(TOUCHPAD_CONFIG_ERROR_KEY_INVALID, error);
 	}
 
-	return 0;
+	return config_error(TOUCHPAD_CONFIG_ERROR_NO_ERROR, error);
 }
 
 int
-touchpad_config_set(struct touchpad *tp, ...)
+touchpad_config_set(struct touchpad *tp, enum touchpad_config_error *error, ...)
 {
 	va_list args;
 	int processed = 1;
 	unsigned int key;
 	int value;
 
-	va_start(args, tp);
+	va_start(args, error);
 
 	key = va_arg(args, unsigned int);
 	while (key != TOUCHPAD_CONFIG_NONE) {
 		int success;
 		value = va_arg(args, int);
-		success = touchpad_config_set_key_value(tp, key, value);
-		if (success != 0) {
-			if (success < 0)
-				processed = -processed;
+		success = touchpad_config_set_key_value(tp, error, key, value);
+		if (success != 0)
 			break;
-		}
 		processed++;
 		key = va_arg(args, unsigned int);
 	}

@@ -322,7 +322,7 @@ static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
 	ARRAY_FOR_EACH(options, opt) {
 		int value = xf86SetIntOption(pInfo->options, opt->name, INT_MAX);
 		if (value != INT_MAX)
-			if (touchpad_config_set(tp, opt->key, value) != 0)
+			if (touchpad_config_set(tp, NULL, opt->key, value) != 0)
 				return false;
 	}
 
@@ -331,7 +331,7 @@ static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
 		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL;
 	if (b)
 		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_VERTICAL;
-	return touchpad_config_set(tp, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods) == 0;
+	return touchpad_config_set(tp, NULL, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods) == 0;
 }
 
 static bool xf86touchpad_calc_scale(struct xf86touchpad *touchpad)

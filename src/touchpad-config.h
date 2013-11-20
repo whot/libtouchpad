@@ -52,6 +52,15 @@ enum touchpad_config_parameter {
 	TOUCHPAD_CONFIG_USE_DEFAULT = INT_MAX,
 };
 
+enum touchpad_config_error {
+	TOUCHPAD_CONFIG_ERROR_NO_ERROR = 0,
+	TOUCHPAD_CONFIG_ERROR_KEY_INVALID,
+	TOUCHPAD_CONFIG_ERROR_VALUE_INVALID,
+	TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH,
+	TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW,
+	TOUCHPAD_CONFIG_ERROR_NOT_SUPPORTED, /**< The HW cannot enable this configuration */
+};
+
 /**
  * Change the touchpad configuration parameters. The vararg is a key/value
  * pair of touchpad_config_parameter as key and the value to be set as
@@ -70,18 +79,20 @@ enum touchpad_config_parameter {
  * The special value TOUCHPAD_CONFIG_USE_DEFAULT may be used to revert to
  * the built-in defaults for the given key.
  *
- * If a key is invalid, the return value is the number of that
- * key/value pair, starting at 1.
- * If a value is invalid, the return value is the negative number of the
- * key/value pair, starting at 1.
+ * If a key or value is invalid, the return value is the number of that
+ * key/value pair, starting at 1. If the key is invalid, error is set to
+ * TOUCHPAD_CONFIG_ERROR_KEY_INVALID. Otherwise, the value does not meet the
+ * ranges required and error indicates the reason.
  * On error, values up to excluding the index returned are applied to the
  * touchpad. Processing stops at the first invalid index.
  *
  * @param tp A previously opened touchpad device
+ * @param error If not NULL, set to the error code of the failed
+ * keyconfiguration
  * @param ... A key/value pair of parameters and values
  * @return 0 on success, or the 1-indexed key or value that failed.
  */
-int touchpad_config_set(struct touchpad *tp, ...);
+int touchpad_config_set(struct touchpad *tp, enum touchpad_config_error *error, ...);
 
 /**
  * Retrieve the touchpad configuration parameters. The vararg is a key/value
