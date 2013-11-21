@@ -81,12 +81,6 @@ register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned i
 	return rc < 0 ? -errno : 0;
 }
 
-static void
-deregister_timer(struct touchpad *tp, void *userdata)
-{
-	register_timer(tp, userdata, 0, 0);
-}
-
 const struct touchpad_interface interface = {
 	.motion = motion,
 	.button = button,
@@ -109,19 +103,13 @@ int mainloop(struct touchpad *tp, struct tpdata *data) {
 	fds[1].events = POLLIN;
 
 	while (poll(fds, 2, -1)) {
-		if (fds[0].revents) {
-			fds[0].revents = 0;
-			touchpad_handle_events(tp, data);
-		}
+		struct timespec t;
+		unsigned int millis;
 
-		if (fds[1].revents) {
-			struct timespec t;
-			fds[1].revents = 0;
+		clock_gettime(CLOCK_REALTIME, &t);
+		millis = t.tv_sec * 1000 + t.tv_nsec/1000000;
 
-			clock_gettime(CLOCK_REALTIME, &t);
-			if (touchpad_handle_timer_expired(tp, t.tv_sec * 1000 + t.tv_nsec/1000000, data) == 0)
-				deregister_timer(tp, data);
-		}
+		touchpad_handle_events(tp, data, millis);
 	}
 
 	return 0;

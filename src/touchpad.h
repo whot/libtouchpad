@@ -328,22 +328,11 @@ void touchpad_set_interface(struct touchpad *tp, const struct touchpad_interface
  * Read and handle events from this device
  * @param tp A previously opened touchpad device
  * @param userdata The data to be supplied in the callback interface.
+ * @param now The current time in milliseconds
  *
  * @return 0 on success or a negative errno on failure
  */
-int touchpad_handle_events(struct touchpad *tp, void *userdata);
-
-/**
- * @ingroup api
- *
- * Use this function when a timer set in the by register_timer() has expired
- * to notify the library that an internal state update is required.
- *
- * @param tp A previously opened touchpad device
- * @param ms The current time in ms
- * @param userdata The data to be supplied in the callback interface.
- */
-int touchpad_handle_timer_expired(struct touchpad *tp, unsigned int ms, void *userdata);
+int touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now);
 
 /**
  * @ingroup api

@@ -258,13 +258,15 @@ touchpad_sync_device(struct touchpad *tp, void *userdata)
 }
 
 int
-touchpad_handle_events(struct touchpad *tp, void *userdata)
+touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 {
 	int rc = 0;
 	enum libevdev_read_flag mode = LIBEVDEV_READ_FLAG_NORMAL;
 
 	assert(tp);
 	assert(tp->interface);
+
+	touchpad_tap_handle_timeout(tp, now, userdata);
 
 	do {
 		struct input_event ev;
@@ -279,11 +281,4 @@ touchpad_handle_events(struct touchpad *tp, void *userdata)
 	} while (rc == LIBEVDEV_READ_STATUS_SUCCESS);
 
 	return (rc != -EAGAIN) ? rc : 0;
-}
-
-int
-touchpad_handle_timer_expired(struct touchpad *tp, unsigned int millis, void *userdata)
-{
-	touchpad_tap_handle_timeout(tp, millis, userdata);
-	return 0;
 }

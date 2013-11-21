@@ -268,9 +268,8 @@ static CARD32
 timer_func(OsTimerPtr timer, CARD32 now, pointer userdata)
 {
 	InputInfoPtr pInfo = userdata;
-	struct xf86touchpad *touchpad = pInfo->private;
 	struct touchpad *tp = xf86touchpad(pInfo);
-	touchpad_handle_timer_expired(tp, now, userdata);
+	touchpad_handle_events(tp, userdata, now);
 	return 0;
 }
 
@@ -296,8 +295,9 @@ static void
 xf86touchpad_read_input(InputInfoPtr pInfo)
 {
 	struct touchpad *tp = xf86touchpad(pInfo);
+	unsigned int millis = GetTimeInMillis();
 
-	touchpad_handle_events(tp, pInfo);
+	touchpad_handle_events(tp, pInfo, millis);
 }
 
 static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
