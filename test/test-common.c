@@ -38,9 +38,13 @@
 #include <unistd.h>
 #include <ccan/list/list.h>
 #include <linux/input.h>
+#include <sys/ptrace.h>
 #include <sys/timerfd.h>
+#include <sys/wait.h>
 
 #define MAX_SUITES 100
+
+static int in_debugger = -1;
 
 struct test {
 	struct list_node node;
@@ -97,12 +101,45 @@ test_common_add(const char *suite, const char *name, void *func)
 	test_common_add_tcase(s, name, func);
 }
 
+int is_debugger_attached()
+{
+	int status;
+	int rc;
+	int pid = fork();
+
+	if (pid == -1)
+		return 0;
+
+	if (pid == 0) {
+		int ppid = getppid();
+		if (ptrace(PTRACE_ATTACH, ppid, NULL, NULL) == 0) {
+			waitpid(ppid, NULL, 0);
+			ptrace(PTRACE_CONT, NULL, NULL);
+			ptrace(PTRACE_DETACH, ppid, NULL, NULL);
+			rc = 0;
+		} else
+			rc = 1;
+		_exit(rc);
+	} else {
+		waitpid(pid, &status, 0);
+		rc = WEXITSTATUS(status);
+	}
+
+	return rc;
+}
+
 
 int
 test_common_run(void) {
 	struct suite *s, *next;
 	int failed;
 	SRunner *sr = NULL;
+
+	if (in_debugger == -1) {
+		in_debugger = is_debugger_attached();
+		if (in_debugger)
+			setenv("CK_FORK", "no", 0);
+	}
 
 	list_for_each(&all_tests, s, node) {
 		if (!sr)
