@@ -55,6 +55,7 @@ tap_state_to_str(enum tap_state state) {
 		CASE_RETURN_STRING(TAP_STATE_TOUCH_3);
 		CASE_RETURN_STRING(TAP_STATE_TOUCH_3_HOLD);
 		CASE_RETURN_STRING(TAP_STATE_DRAGGING);
+		CASE_RETURN_STRING(TAP_STATE_DRAGGING_WAIT);
 		CASE_RETURN_STRING(TAP_STATE_DRAGGING_OR_DOUBLETAP);
 		CASE_RETURN_STRING(TAP_STATE_DRAGGING_2);
 		CASE_RETURN_STRING(TAP_STATE_DEAD);
@@ -315,12 +316,36 @@ touchpad_tap_dragging_handle_event(struct touchpad *tp, enum tap_event event, vo
 			tp->tap.state = TAP_STATE_DRAGGING_2;
 			break;
 		case TAP_EVENT_RELEASE:
-			tp->tap.state = TAP_STATE_IDLE;
-			tp->interface->tap(tp, userdata, 1, false);
+			tp->tap.state = TAP_STATE_DRAGGING_WAIT;
+			touchpad_tap_set_timer(tp, userdata);
 			break;
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
 			/* noop */
+			break;
+		case TAP_EVENT_BUTTON:
+			tp->tap.state = TAP_STATE_DEAD;
+			tp->interface->tap(tp, userdata, 1, false);
+			break;
+	}
+}
+
+static void
+touchpad_tap_dragging_wait_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
+{
+	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+
+	switch (event) {
+		case TAP_EVENT_TOUCH:
+			tp->tap.state = TAP_STATE_DRAGGING;
+			touchpad_tap_clear_timer(tp, userdata);
+			break;
+		case TAP_EVENT_RELEASE:
+		case TAP_EVENT_MOTION:
+			break;
+		case TAP_EVENT_TIMEOUT:
+			tp->tap.state = TAP_STATE_IDLE;
+			tp->interface->tap(tp, userdata, 1, false);
 			break;
 		case TAP_EVENT_BUTTON:
 			tp->tap.state = TAP_STATE_DEAD;
@@ -409,6 +434,9 @@ touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userd
 			break;
 		case TAP_STATE_DRAGGING:
 			touchpad_tap_dragging_handle_event(tp, event, userdata);
+			break;
+		case TAP_STATE_DRAGGING_WAIT:
+			touchpad_tap_dragging_wait_handle_event(tp, event, userdata);
 			break;
 		case TAP_STATE_DRAGGING_2:
 			touchpad_tap_dragging2_handle_event(tp, event, userdata);
