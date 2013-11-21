@@ -162,6 +162,93 @@ START_TEST(tap_single_finger_tap_move)
 }
 END_TEST
 
+START_TEST(tap_single_finger_drag)
+{
+	struct device *dev;
+	struct event *e;
+	int tap_down = 0, tap_up = 0;
+	int button_state = 0;
+
+	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	test_common_touch_down(dev, 0, 3000, 3000);
+	test_common_touch_up(dev, 0);
+	test_common_touch_down(dev, 0, 3000, 3000);
+	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	test_common_touch_up(dev, 0);
+
+	while (test_common_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press) {
+				button_state |= (1 << (e->button - 1));
+				tap_down++;
+			} else {
+				button_state &= ~(1 << (e->button -1));
+				tap_up++;
+			}
+			ck_assert_int_eq(e->button, 1);
+		}
+		if (e->type == EVTYPE_MOTION)
+			ck_assert_int_eq(button_state, 1);
+	}
+
+	ck_assert(tap_down == 1);
+	ck_assert(tap_up == 1);
+
+	test_common_delete_device(dev);
+}
+END_TEST
+
+START_TEST(tap_single_finger_multi_drag)
+{
+	struct device *dev;
+	struct event *e;
+	int tap_down = 0, tap_up = 0;
+	int button_state = 0;
+
+	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	test_common_touch_down(dev, 0, 3000, 3000);
+	test_common_touch_up(dev, 0);
+	test_common_touch_down(dev, 0, 3000, 3000);
+	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	test_common_touch_up(dev, 0);
+	test_common_touch_down(dev, 0, 3000, 3000);
+	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	test_common_touch_up(dev, 0);
+	test_common_touch_down(dev, 0, 3000, 3000);
+	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	test_common_touch_up(dev, 0);
+
+	while (test_common_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press) {
+				button_state |= (1 << (e->button - 1));
+				tap_down++;
+			} else {
+				button_state &= ~(1 << (e->button -1));
+				tap_up++;
+			}
+			ck_assert_int_eq(e->button, 1);
+		}
+		if (e->type == EVTYPE_MOTION)
+			ck_assert_int_eq(button_state, 1);
+	}
+
+	ck_assert(tap_down == 1);
+	ck_assert(tap_up == 1);
+
+	test_common_delete_device(dev);
+}
+END_TEST
 START_TEST(tap_double_finger)
 {
 	struct device *dev;
@@ -201,6 +288,8 @@ int main(void) {
 	test_common_add("tap", "tap_single_finger", tap_single_finger_move);
 	test_common_add("tap", "tap_single_finger", tap_single_finger_doubletap);
 	test_common_add("tap", "tap_single_finger", tap_single_finger_tap_move);
+	test_common_add("tap", "tap_single_finger", tap_single_finger_drag);
+	test_common_add("tap", "tap_single_finger", tap_single_finger_multi_drag);
 	test_common_add("tap", "tap_double_finger", tap_double_finger);
 	return test_common_run();
 }
