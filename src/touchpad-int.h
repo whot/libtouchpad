@@ -162,6 +162,8 @@ struct touchpad {
     unsigned int ms;		/* ms of last SYN_REPORT */
 
     enum event_types queued;
+
+    unsigned int next_timeout;
 };
 
 void touchpad_log(const char *fmt, ...);
@@ -218,7 +220,8 @@ void touchpad_history_push(struct touch *t, int x, int y, unsigned int millis);
 struct touch_history_point * touchpad_history_get(struct touch *t, int when);
 struct touch_history_point * touchpad_history_get_last(struct touch *t);
 int touchpad_tap_handle_state(struct touchpad *tp, void *userdata);
-int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
+unsigned int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
 int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
+int touchpad_request_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int delta);
 
 #endif

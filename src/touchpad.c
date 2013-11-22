@@ -258,6 +258,36 @@ touchpad_sync_device(struct touchpad *tp, void *userdata)
 }
 
 int
+touchpad_request_timer(struct touchpad *tp, void *userdata,
+		       unsigned int now, unsigned int delta)
+{
+	int t = now + delta;
+
+	if (delta == 0)
+		return 0;
+
+	if (tp->next_timeout)
+		tp->next_timeout = min(t, tp->next_timeout);
+	else
+		tp->next_timeout = t;
+
+	tp->interface->register_timer(tp, userdata, now, delta);
+	return 0;
+}
+
+static int
+touchpad_handle_timeouts(struct touchpad *tp, void *userdata, unsigned int now)
+{
+	if (tp->next_timeout == 0 || tp->next_timeout > now)
+		return 0;
+
+	tp->next_timeout = touchpad_tap_handle_timeout(tp, now, userdata);
+	arg_require_int_min(tp->next_timeout - now, 0);
+
+	return 0;
+}
+
+int
 touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 {
 	int rc = 0;
@@ -266,7 +296,7 @@ touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 	assert(tp);
 	assert(tp->interface);
 
-	touchpad_tap_handle_timeout(tp, now, userdata);
+	touchpad_handle_timeouts(tp, userdata, now);
 
 	do {
 		struct input_event ev;

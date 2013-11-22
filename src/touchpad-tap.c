@@ -82,14 +82,13 @@ static void
 touchpad_tap_set_timer(struct touchpad *tp, void *userdata)
 {
 	tp->tap.timeout = tp->ms + tp->tap.config.timeout_period;
-	tp->interface->register_timer(tp, userdata, tp->ms, tp->tap.config.timeout_period);
+	touchpad_request_timer(tp, userdata, tp->ms, tp->tap.config.timeout_period);
 }
 
 static void
 touchpad_tap_clear_timer(struct touchpad *tp, void *userdata)
 {
 	tp->tap.timeout = 0;
-	tp->interface->register_timer(tp, userdata, tp->ms, 0);
 }
 
 static void
@@ -488,7 +487,7 @@ touchpad_tap_handle_state(struct touchpad *tp, void *userdata)
 	return 0;
 }
 
-int
+unsigned int
 touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata)
 {
 	if (!tp->tap.config.enabled)
@@ -497,5 +496,5 @@ touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata
 	if (tp->tap.timeout && tp->tap.timeout <= ms)
 		touchpad_tap_handle_event(tp, TAP_EVENT_TIMEOUT, userdata);
 
-	return 0;
+	return tp->tap.timeout;
 }
