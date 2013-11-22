@@ -296,8 +296,6 @@ touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 	assert(tp);
 	assert(tp->interface);
 
-	touchpad_handle_timeouts(tp, userdata, now);
-
 	do {
 		struct input_event ev;
 		rc = libevdev_next_event(tp->dev, mode, &ev);
@@ -306,8 +304,12 @@ touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 			if (rc == -EAGAIN)
 				rc = LIBEVDEV_READ_STATUS_SUCCESS;
 		} else if (rc == LIBEVDEV_READ_STATUS_SUCCESS) {
+			if (ev.type == EV_SYN)
+				touchpad_handle_timeouts(tp, userdata, timeval_to_millis(&ev.time));
 			touchpad_handle_event(tp, userdata, &ev);
-		}
+		} else if (rc == -EAGAIN)
+			touchpad_handle_timeouts(tp, userdata, now);
+
 	} while (rc == LIBEVDEV_READ_STATUS_SUCCESS);
 
 	return (rc != -EAGAIN) ? rc : 0;
