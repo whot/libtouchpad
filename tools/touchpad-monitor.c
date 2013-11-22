@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -110,6 +111,11 @@ int mainloop(struct touchpad *tp, struct tpdata *data) {
 		millis = t.tv_sec * 1000 + t.tv_nsec/1000000;
 
 		touchpad_handle_events(tp, data, millis);
+
+		if (fds[1].revents) {
+			uint64_t buf;
+			read(fds[1].fd, &buf, sizeof(buf));
+		}
 	}
 
 	return 0;
