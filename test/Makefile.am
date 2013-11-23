@@ -7,7 +7,7 @@ libtest_common_la_SOURCES = \
 	test-common.h \
 	test-common.c
 
-noinst_PROGRAMS = test-tap test-config
+noinst_PROGRAMS = test-tap test-config test-build-pedantic
 
 TESTS = $(noinst_PROGRAMS)
 
@@ -18,5 +18,9 @@ test_tap_LDFLAGS = -static
 test_config_SOURCES = test-config.c
 test_config_LDADD = $(TEST_LIBS)
 test_config_LDFLAGS = -static
+
+# build-test only
+test_build_pedantic_SOURCES = test-build-pedantic.c
+test_build_pedantic_CFLAGS = $(AM_CPPFLAGS) -Wpedantic -Werror
 
 endif
