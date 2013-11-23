@@ -24,8 +24,10 @@
 #include "config.h"
 #endif
 
+#include <unistd.h>
 #include "test-common.h"
 #include "touchpad-util.h"
+#include "touchpad-config.h"
 
 START_TEST(tap_single_finger)
 {
@@ -249,6 +251,53 @@ START_TEST(tap_single_finger_multi_drag)
 	test_common_delete_device(dev);
 }
 END_TEST
+
+START_TEST(tap_single_finger_read_delay)
+{
+	struct device *dev;
+	struct event *e;
+	bool tap_down = false, tap_up = false;
+	int tap_timeout;
+
+	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	test_common_touch_down(dev, 0, 3000, 3000);
+
+	while (!test_common_handle_events(dev))
+		;
+
+	/* submit the events now, but don't read until later.
+	   If the lib handles this correctly, the tap should
+	   happen, even though we read after the timeout.
+	 */
+	test_common_touch_up(dev, 0);
+
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+
+	usleep(tap_timeout * 2 * 1000);
+
+	while (test_common_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press)
+				tap_down = true;
+			else
+				tap_up = true;
+			ck_assert_int_eq(e->button, 1);
+		}
+	}
+
+	ck_assert(tap_down);
+	ck_assert(tap_up);
+
+	test_common_delete_device(dev);
+}
+END_TEST
+
 START_TEST(tap_double_finger)
 {
 	struct device *dev;
@@ -290,6 +339,7 @@ int main(void) {
 	test_common_add("tap", "tap_single_finger", tap_single_finger_tap_move);
 	test_common_add("tap", "tap_single_finger", tap_single_finger_drag);
 	test_common_add("tap", "tap_single_finger", tap_single_finger_multi_drag);
+	test_common_add("tap", "tap_single_finger", tap_single_finger_read_delay);
 	test_common_add("tap", "tap_double_finger", tap_double_finger);
 	return test_common_run();
 }
