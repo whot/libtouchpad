@@ -25,7 +25,7 @@
 #endif
 
 #include <unistd.h>
-#include "test-common.h"
+#include "tptest.h"
 #include "touchpad-util.h"
 #include "touchpad-config.h"
 
@@ -35,12 +35,12 @@ START_TEST(tap_single_finger)
 	struct event *e;
 	bool tap_down = false, tap_up = false;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_up(dev, 0);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_up(dev, 0);
 
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -58,7 +58,7 @@ START_TEST(tap_single_finger)
 	ck_assert(tap_down);
 	ck_assert(tap_up);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -68,12 +68,12 @@ START_TEST(tap_single_finger_move)
 	struct event *e;
 	bool tap_down = false, tap_up = false;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
-	test_common_touch_up(dev, 0);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -91,7 +91,7 @@ START_TEST(tap_single_finger_move)
 	ck_assert(!tap_down);
 	ck_assert(!tap_up);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -101,13 +101,13 @@ START_TEST(tap_single_finger_doubletap)
 	struct event *e;
 	int tap_down = 0, tap_up = 0;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_up(dev, 0);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_up(dev, 0);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_up(dev, 0);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_up(dev, 0);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -125,7 +125,7 @@ START_TEST(tap_single_finger_doubletap)
 	ck_assert(tap_down == 2);
 	ck_assert(tap_up == 2);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -135,14 +135,14 @@ START_TEST(tap_single_finger_tap_move)
 	struct event *e;
 	int tap_down = 0, tap_up = 0;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_up(dev, 0);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
-	test_common_touch_up(dev, 0);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_up(dev, 0);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -160,7 +160,7 @@ START_TEST(tap_single_finger_tap_move)
 	ck_assert(tap_down == 1);
 	ck_assert(tap_up == 1);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -171,14 +171,14 @@ START_TEST(tap_single_finger_drag)
 	int tap_down = 0, tap_up = 0;
 	int button_state = 0;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_up(dev, 0);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
-	test_common_touch_up(dev, 0);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_up(dev, 0);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -201,7 +201,7 @@ START_TEST(tap_single_finger_drag)
 	ck_assert(tap_down == 1);
 	ck_assert(tap_up == 1);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -212,20 +212,20 @@ START_TEST(tap_single_finger_multi_drag)
 	int tap_down = 0, tap_up = 0;
 	int button_state = 0;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_up(dev, 0);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
-	test_common_touch_up(dev, 0);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
-	test_common_touch_up(dev, 0);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
-	test_common_touch_up(dev, 0);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_up(dev, 0);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -248,7 +248,7 @@ START_TEST(tap_single_finger_multi_drag)
 	ck_assert(tap_down == 1);
 	ck_assert(tap_up == 1);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -259,24 +259,24 @@ START_TEST(tap_single_finger_read_delay)
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
 
-	while (!test_common_handle_events(dev))
+	while (!tptest_handle_events(dev))
 		;
 
 	/* submit the events now, but don't read until later.
 	   If the lib handles this correctly, the tap should
 	   happen, even though we read after the timeout.
 	 */
-	test_common_touch_up(dev, 0);
+	tptest_touch_up(dev, 0);
 
 	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
 			&tap_timeout, TOUCHPAD_CONFIG_NONE);
 
 	usleep(tap_timeout * 2 * 1000);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -294,7 +294,7 @@ START_TEST(tap_single_finger_read_delay)
 	ck_assert(tap_down);
 	ck_assert(tap_up);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -304,13 +304,13 @@ START_TEST(tap_double_finger)
 	bool tap_down = false, tap_up = false;
 	struct event *e;
 
-	dev = test_common_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	test_common_touch_down(dev, 0, 3000, 3000);
-	test_common_touch_down(dev, 1, 4000, 4000);
-	test_common_touch_up(dev, 0);
-	test_common_touch_up(dev, 1);
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_up(dev, 0);
+	tptest_touch_up(dev, 1);
 
-	while (test_common_handle_events(dev))
+	while (tptest_handle_events(dev))
 		;
 
 	ARRAY_FOR_EACH(dev->events, e) {
@@ -328,18 +328,18 @@ START_TEST(tap_double_finger)
 	ck_assert(tap_down);
 	ck_assert(tap_up);
 
-	test_common_delete_device(dev);
+	tptest_delete_device(dev);
 }
 END_TEST
 
 int main(void) {
-	test_common_add("tap", "tap_single_finger", tap_single_finger);
-	test_common_add("tap", "tap_single_finger", tap_single_finger_move);
-	test_common_add("tap", "tap_single_finger", tap_single_finger_doubletap);
-	test_common_add("tap", "tap_single_finger", tap_single_finger_tap_move);
-	test_common_add("tap", "tap_single_finger", tap_single_finger_drag);
-	test_common_add("tap", "tap_single_finger", tap_single_finger_multi_drag);
-	test_common_add("tap", "tap_single_finger", tap_single_finger_read_delay);
-	test_common_add("tap", "tap_double_finger", tap_double_finger);
-	return test_common_run();
+	tptest_add("tap", "tap_single_finger", tap_single_finger);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_move);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_doubletap);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_tap_move);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_drag);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_multi_drag);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_read_delay);
+	tptest_add("tap", "tap_double_finger", tap_double_finger);
+	return tptest_run();
 }

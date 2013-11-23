@@ -24,7 +24,7 @@
 #include "config.h"
 #endif
 
-#include "test-common.h"
+#include "tptest.h"
 #include "touchpad.h"
 #include "touchpad-config.h"
 #include "touchpad-util.h"
@@ -62,7 +62,7 @@ struct suite {
 static struct list_head all_tests = LIST_HEAD_INIT(all_tests);
 
 static void
-test_common_add_tcase(struct suite *suite, const char *name, void *func)
+tptest_add_tcase(struct suite *suite, const char *name, void *func)
 {
 	struct test *t;
 	list_for_each(&suite->tests, t, node) {
@@ -82,13 +82,13 @@ test_common_add_tcase(struct suite *suite, const char *name, void *func)
 }
 
 void
-test_common_add(const char *suite, const char *name, void *func)
+tptest_add(const char *suite, const char *name, void *func)
 {
 	struct suite *s;
 
 	list_for_each(&all_tests, s, node) {
 		if (strcmp(s->name, suite) == 0) {
-			test_common_add_tcase(s, name, func);
+			tptest_add_tcase(s, name, func);
 			return;
 		}
 	}
@@ -98,7 +98,7 @@ test_common_add(const char *suite, const char *name, void *func)
 	s->suite = suite_create(s->name);
 	list_head_init(&s->tests);
 	list_add_tail(&all_tests, &s->node);
-	test_common_add_tcase(s, name, func);
+	tptest_add_tcase(s, name, func);
 }
 
 int is_debugger_attached()
@@ -130,7 +130,7 @@ int is_debugger_attached()
 
 
 int
-test_common_run(void) {
+tptest_run(void) {
 	struct suite *s, *next;
 	int failed;
 	SRunner *sr = NULL;
@@ -282,7 +282,7 @@ static const struct touchpad_interface interface = {
 };
 
 struct device *
-test_common_create_device(enum device_type which)
+tptest_create_device(enum device_type which)
 {
 	struct device *d = zalloc(sizeof(*d));
 	int fd;
@@ -316,7 +316,7 @@ test_common_create_device(enum device_type which)
 }
 
 int
-test_common_handle_events(struct device *d)
+tptest_handle_events(struct device *d)
 {
 	struct pollfd fds[2];
 
@@ -345,7 +345,7 @@ test_common_handle_events(struct device *d)
 }
 
 void
-test_common_delete_device(struct device *d)
+tptest_delete_device(struct device *d)
 {
 	if (!d)
 		return;
@@ -359,7 +359,7 @@ test_common_delete_device(struct device *d)
 }
 
 void
-test_common_touch_down(struct device *d, unsigned int slot, int x, int y)
+tptest_touch_down(struct device *d, unsigned int slot, int x, int y)
 {
 	static int tracking_id;
 	struct input_event *ev;
@@ -379,7 +379,7 @@ test_common_touch_down(struct device *d, unsigned int slot, int x, int y)
 }
 
 void
-test_common_touch_up(struct device *d, unsigned int slot)
+tptest_touch_up(struct device *d, unsigned int slot)
 {
 	struct input_event *ev;
 	struct input_event up[] = {
@@ -393,7 +393,7 @@ test_common_touch_up(struct device *d, unsigned int slot)
 }
 
 void
-test_common_touch_move(struct device *d, unsigned int slot, int x, int y)
+tptest_touch_move(struct device *d, unsigned int slot, int x, int y)
 {
 	struct input_event *ev;
 	struct input_event move[] = {
@@ -412,13 +412,13 @@ test_common_touch_move(struct device *d, unsigned int slot, int x, int y)
 }
 
 void
-test_common_touch_move_to(struct device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps)
+tptest_touch_move_to(struct device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps)
 {
 	if (steps == -1)
 		touchpad_config_get(d->touchpad, TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE, &steps,
 						 TOUCHPAD_CONFIG_NONE);
 
 	for (int i = 0; i < steps - 1; i++)
-		test_common_touch_move(d, slot, x_from + (x_to - x_from)/steps * i, y_from + (y_to - y_from)/steps * i);
-	test_common_touch_move(d, slot, x_to, y_to);
+		tptest_touch_move(d, slot, x_from + (x_to - x_from)/steps * i, y_from + (y_to - y_from)/steps * i);
+	tptest_touch_move(d, slot, x_to, y_to);
 }
