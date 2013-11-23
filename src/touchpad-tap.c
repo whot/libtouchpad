@@ -448,7 +448,9 @@ touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userd
 	if (tp->tap.state == TAP_STATE_IDLE || tp->tap.state == TAP_STATE_DEAD)
 		touchpad_tap_clear_timer(tp, userdata);
 
+#if 0
 	log_debug("%s\n", tap_state_to_str(tp->tap.state));
+#endif
 }
 
 static bool
