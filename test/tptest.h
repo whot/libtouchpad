@@ -59,13 +59,13 @@ struct device {
 	unsigned int latest_timer;
 };
 
-void test_common_add(const char *suite, const char *name, void *func);
-int test_common_run(void);
-struct device * test_common_create_device(enum device_type which);
-void test_common_delete_device(struct device *d);
-int test_common_handle_events(struct device *d);
+void tptest_add(const char *suite, const char *name, void *func);
+int tptest_run(void);
+struct device * tptest_create_device(enum device_type which);
+void tptest_delete_device(struct device *d);
+int tptest_handle_events(struct device *d);
 
-void test_common_touch_up(struct device *d, unsigned int slot);
-void test_common_touch_move(struct device *d, unsigned int slot, int x, int y);
-void test_common_touch_down(struct device *d, unsigned int slot, int x, int y);
-void test_common_touch_move_to(struct device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps);
+void tptest_touch_up(struct device *d, unsigned int slot);
+void tptest_touch_move(struct device *d, unsigned int slot, int x, int y);
+void tptest_touch_down(struct device *d, unsigned int slot, int x, int y);
+void tptest_touch_move_to(struct device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps);
