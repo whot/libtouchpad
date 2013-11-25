@@ -1,21 +1,22 @@
 EXTRA_DIST = touchpad-tap-state-machine.svg
 
 if HAVE_DOXYGEN
-all-local: doxygen
 
-doxygen: libtouchpad.doxygen
-	doxygen $<
+noinst_DATA = html/index.html
+
+header_files = \
+	$(top_srcdir)/src/touchpad.h
+
+html/index.html: libtouchpad.doxygen $(header_files)
+	$(AM_V_GEN)$(DOXYGEN) $<
 
 clean-local:
-	rm -rf html
+	$(AM_V_at)rm -rf html
 
-.PHONY: doxygen
+doc_src= $(shell find html -type f -printf "html/%P\n" 2>/dev/null)
+EXTRA_DIST += $(builddir)/html/index.html $(doc_src)
 
-doc_src= $(shell find html -type f -printf "html/%P\n")
-EXTRA_DIST += $(doc_src) libtouchpad.doxygen 
 endif
-
-dist_noinst_DATA = libtouchpad.doxygen.in
 
 # make sure doc was built before running dist
 dist-hook:
