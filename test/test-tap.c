@@ -370,6 +370,42 @@ START_TEST(tap_double_finger)
 }
 END_TEST
 
+START_TEST(tap_double_finger_invert_release)
+{
+	struct device *dev;
+	bool tap_down = false, tap_up = false;
+	struct event *e;
+
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 1, 4000, 4000);
+	/* same as tap_double_finger but touchpoints released in different
+	   order */
+	tptest_touch_up(dev, 1);
+	tptest_touch_up(dev, 0);
+
+	while (tptest_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press)
+				tap_down = true;
+			 else
+				tap_up = true;
+			 ck_assert_int_eq(e->button, 2);
+		}
+	}
+
+	ck_assert(tap_down);
+	ck_assert(tap_up);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
 int main(void) {
 	tptest_add("tap", "tap_single_finger", tap_single_finger);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_move);
@@ -380,5 +416,6 @@ int main(void) {
 	tptest_add("tap", "tap_single_finger", tap_single_finger_multi_drag);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_read_delay);
 	tptest_add("tap", "tap_double_finger", tap_double_finger);
+	tptest_add("tap", "tap_double_finger", tap_double_finger_invert_release);
 	return tptest_run();
 }
