@@ -406,6 +406,84 @@ START_TEST(tap_double_finger_invert_release)
 }
 END_TEST
 
+START_TEST(tap_double_finger_move)
+{
+	struct device *dev;
+	bool tap_down = false, tap_up = false;
+	struct event *e;
+
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
+	tptest_touch_up(dev, 1);
+
+	while (tptest_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press)
+				tap_down = true;
+			 else
+				tap_up = true;
+			 ck_assert_int_eq(e->button, 2);
+		}
+	}
+
+	ck_assert(!tap_down);
+	ck_assert(!tap_up);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
+START_TEST(tap_double_finger_hold)
+{
+	struct device *dev;
+	bool tap_down = false, tap_up = false;
+	struct event *e;
+	int tap_timeout;
+
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 1, 4000, 4000);
+
+	while (tptest_handle_events(dev))
+		;
+
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+
+	usleep(tap_timeout * 2 * 1000);
+	tptest_touch_up(dev, 0);
+	tptest_touch_up(dev, 1);
+
+	while (tptest_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press)
+				tap_down = true;
+			 else
+				tap_up = true;
+			 ck_assert_int_eq(e->button, 2);
+		}
+	}
+
+	ck_assert(!tap_down);
+	ck_assert(!tap_up);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
 int main(void) {
 	tptest_add("tap", "tap_single_finger", tap_single_finger);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_move);
@@ -417,5 +495,7 @@ int main(void) {
 	tptest_add("tap", "tap_single_finger", tap_single_finger_read_delay);
 	tptest_add("tap", "tap_double_finger", tap_double_finger);
 	tptest_add("tap", "tap_double_finger", tap_double_finger_invert_release);
+	tptest_add("tap", "tap_double_finger", tap_double_finger_move);
+	tptest_add("tap", "tap_double_finger", tap_double_finger_hold);
 	return tptest_run();
 }
