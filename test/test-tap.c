@@ -95,6 +95,44 @@ START_TEST(tap_single_finger_move)
 }
 END_TEST
 
+START_TEST(tap_single_finger_hold)
+{
+	struct device *dev;
+	struct event *e;
+	bool tap_down = false, tap_up = false;
+	int tap_timeout;
+
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	tptest_touch_down(dev, 0, 3000, 3000);
+
+	while (tptest_handle_events(dev))
+		;
+
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+
+	usleep(tap_timeout * 2 * 1000);
+	tptest_touch_up(dev, 0);
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_TAP) {
+			if (e->is_press)
+				tap_down = true;
+			else
+				tap_up = true;
+			ck_assert_int_eq(e->button, 1);
+		}
+	}
+
+	ck_assert(!tap_down);
+	ck_assert(!tap_up);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
 START_TEST(tap_single_finger_doubletap)
 {
 	struct device *dev;
@@ -335,6 +373,7 @@ END_TEST
 int main(void) {
 	tptest_add("tap", "tap_single_finger", tap_single_finger);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_move);
+	tptest_add("tap", "tap_single_finger", tap_single_finger_hold);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_doubletap);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_tap_move);
 	tptest_add("tap", "tap_single_finger", tap_single_finger_drag);
