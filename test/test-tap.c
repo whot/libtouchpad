@@ -31,7 +31,7 @@
 
 START_TEST(tap_single_finger)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 
@@ -64,7 +64,7 @@ END_TEST
 
 START_TEST(tap_single_finger_move)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 
@@ -97,7 +97,7 @@ END_TEST
 
 START_TEST(tap_single_finger_hold)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
@@ -135,7 +135,7 @@ END_TEST
 
 START_TEST(tap_single_finger_doubletap)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 
@@ -169,7 +169,7 @@ END_TEST
 
 START_TEST(tap_single_finger_tap_move)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 
@@ -204,7 +204,7 @@ END_TEST
 
 START_TEST(tap_single_finger_drag)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 	int button_state = 0;
@@ -245,7 +245,7 @@ END_TEST
 
 START_TEST(tap_single_finger_multi_drag)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 	int button_state = 0;
@@ -292,7 +292,7 @@ END_TEST
 
 START_TEST(tap_single_finger_read_delay)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
@@ -338,7 +338,7 @@ END_TEST
 
 START_TEST(tap_double_finger)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
@@ -372,7 +372,7 @@ END_TEST
 
 START_TEST(tap_double_finger_invert_release)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
@@ -408,7 +408,7 @@ END_TEST
 
 START_TEST(tap_double_finger_move)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
@@ -443,7 +443,7 @@ END_TEST
 
 START_TEST(tap_double_finger_hold)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 	int tap_timeout;
@@ -486,7 +486,7 @@ END_TEST
 
 START_TEST(tap_double_finger_move_tap)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
@@ -526,7 +526,7 @@ END_TEST
 
 START_TEST(tap_double_finger_hold_tap)
 {
-	struct device *dev;
+	struct tptest_device *dev;
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 	int tap_timeout;

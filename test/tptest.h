@@ -29,7 +29,7 @@
 #include <touchpad.h>
 #endif
 
-enum device_type {
+enum tptest_device_type {
 	TOUCHPAD_SYNAPTICS_CLICKPAD,
 };
 
@@ -65,7 +65,7 @@ union tptest_event {
 	struct tptest_scroll_event scroll;
 };
 
-struct device {
+struct tptest_device {
 	struct libevdev *evdev;
 	struct libevdev_uinput *uinput;
 	struct touchpad *touchpad;
@@ -78,11 +78,11 @@ struct device {
 
 void tptest_add(const char *suite, const char *name, void *func);
 int tptest_run(void);
-struct device * tptest_create_device(enum device_type which);
-void tptest_delete_device(struct device *d);
-int tptest_handle_events(struct device *d);
+struct tptest_device * tptest_create_device(enum tptest_device_type which);
+void tptest_delete_device(struct tptest_device *d);
+int tptest_handle_events(struct tptest_device *d);
 
-void tptest_touch_up(struct device *d, unsigned int slot);
-void tptest_touch_move(struct device *d, unsigned int slot, int x, int y);
-void tptest_touch_down(struct device *d, unsigned int slot, int x, int y);
-void tptest_touch_move_to(struct device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps);
+void tptest_touch_up(struct tptest_device *d, unsigned int slot);
+void tptest_touch_move(struct tptest_device *d, unsigned int slot, int x, int y);
+void tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y);
+void tptest_touch_move_to(struct tptest_device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps);
