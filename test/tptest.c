@@ -213,9 +213,9 @@ test_commmon_create_synaptics_clickpad(struct device *d)
 }
 
 static void
-push_event(struct device *d, const struct event *e)
+push_event(struct device *d, const union tptest_event *e)
 {
-	struct event *event = &d->events[d->idx++];
+	union tptest_event *event = &d->events[d->idx++];
 	*event = *e;
 }
 
@@ -223,10 +223,9 @@ static void
 motion(struct touchpad *t, void *userdata, int x, int y)
 {
 	struct device *d = userdata;
-	struct event e = { .type = EVTYPE_MOTION,
-			   .x = x,
-			   .y = y};
-
+	union tptest_event e = { .motion.type = EVTYPE_MOTION,
+				 .motion.x = x,
+				 .motion.y = y};
 	push_event(d, &e);
 }
 
@@ -234,10 +233,9 @@ static void
 button(struct touchpad *t, void *userdata, unsigned int button, bool is_press)
 {
 	struct device *d = userdata;
-	struct event e = { .type = EVTYPE_BUTTON,
-			   .button = button,
-			   .is_press = is_press };
-
+	union tptest_event e = { .button.type = EVTYPE_BUTTON,
+				 .button.button = button,
+				 .button.is_press = is_press };
 	push_event(d, &e);
 }
 
@@ -245,10 +243,9 @@ static void
 tap(struct touchpad *t, void *userdata, unsigned int fingers, bool is_press)
 {
 	struct device *d = userdata;
-	struct event e = { .type = EVTYPE_TAP,
-			   .button = fingers,
-			   .is_press = is_press };
-
+	union tptest_event e = { .button.type = EVTYPE_TAP,
+				  .button.button = fingers,
+				  .button.is_press = is_press };
 	push_event(d, &e);
 }
 
@@ -256,9 +253,9 @@ static void
 scroll(struct touchpad *t, void *userdata, enum touchpad_scroll_direction dir, double units)
 {
 	struct device *d = userdata;
-	struct event e = { .type = EVTYPE_SCROLL,
-			   .dir = dir,
-			   .units = units };
+	union tptest_event e = { .scroll.type = EVTYPE_SCROLL,
+				  .scroll.dir = dir,
+				  .scroll.units = units };
 	push_event(d, &e);
 }
 
