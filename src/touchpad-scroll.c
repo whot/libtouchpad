@@ -58,7 +58,7 @@ static int
 touchpad_scroll_handle_2fg(struct touchpad *tp, void *userdata,
 			   enum touchpad_scroll_direction direction)
 {
-	int i;
+	struct touch *t;
 	double delta = 0;
 	double dist = 0;
 
@@ -71,8 +71,7 @@ touchpad_scroll_handle_2fg(struct touchpad *tp, void *userdata,
 		return 0;
 	}
 
-	for (i = 0; i < tp->ntouches; i++) {
-		struct touch *t = touchpad_touch(tp, i);
+	touchpad_for_each_touch(tp, t) {
 		double d;
 
 		if (!t->dirty || t->state != TOUCH_UPDATE)
