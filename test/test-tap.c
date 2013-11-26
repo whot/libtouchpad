@@ -32,7 +32,7 @@
 START_TEST(tap_single_finger)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
@@ -47,11 +47,11 @@ START_TEST(tap_single_finger)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 	}
 
@@ -65,7 +65,7 @@ END_TEST
 START_TEST(tap_single_finger_move)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
@@ -80,11 +80,11 @@ START_TEST(tap_single_finger_move)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 	}
 
@@ -98,7 +98,7 @@ END_TEST
 START_TEST(tap_single_finger_hold)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
 
@@ -118,11 +118,11 @@ START_TEST(tap_single_finger_hold)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 	}
 
@@ -136,7 +136,7 @@ END_TEST
 START_TEST(tap_single_finger_doubletap)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
@@ -152,11 +152,11 @@ START_TEST(tap_single_finger_doubletap)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down++;
 			else
 				tap_up++;
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 	}
 
@@ -170,7 +170,7 @@ END_TEST
 START_TEST(tap_single_finger_tap_move)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
@@ -187,11 +187,11 @@ START_TEST(tap_single_finger_tap_move)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down++;
 			else
 				tap_up++;
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 	}
 
@@ -205,7 +205,7 @@ END_TEST
 START_TEST(tap_single_finger_drag)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 	int button_state = 0;
 
@@ -223,14 +223,14 @@ START_TEST(tap_single_finger_drag)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press) {
-				button_state |= (1 << (e->button - 1));
+			if (e->button.is_press) {
+				button_state |= (1 << (e->button.button - 1));
 				tap_down++;
 			} else {
-				button_state &= ~(1 << (e->button -1));
+				button_state &= ~(1 << (e->button.button -1));
 				tap_up++;
 			}
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 		if (e->type == EVTYPE_MOTION)
 			ck_assert_int_eq(button_state, 1);
@@ -246,7 +246,7 @@ END_TEST
 START_TEST(tap_single_finger_multi_drag)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 	int button_state = 0;
 
@@ -270,14 +270,14 @@ START_TEST(tap_single_finger_multi_drag)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press) {
-				button_state |= (1 << (e->button - 1));
+			if (e->button.is_press) {
+				button_state |= (1 << (e->button.button - 1));
 				tap_down++;
 			} else {
-				button_state &= ~(1 << (e->button -1));
+				button_state &= ~(1 << (e->button.button -1));
 				tap_up++;
 			}
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 		if (e->type == EVTYPE_MOTION)
 			ck_assert_int_eq(button_state, 1);
@@ -293,7 +293,7 @@ END_TEST
 START_TEST(tap_single_finger_read_delay)
 {
 	struct device *dev;
-	struct event *e;
+	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
 
@@ -321,11 +321,11 @@ START_TEST(tap_single_finger_read_delay)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->button, 1);
+			ck_assert_int_eq(e->button.button, 1);
 		}
 	}
 
@@ -340,7 +340,7 @@ START_TEST(tap_double_finger)
 {
 	struct device *dev;
 	bool tap_down = false, tap_up = false;
-	struct event *e;
+	union tptest_event *e;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 	tptest_touch_down(dev, 0, 3000, 3000);
@@ -355,11 +355,11 @@ START_TEST(tap_double_finger)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->button, 2);
+			 ck_assert_int_eq(e->button.button, 2);
 		}
 	}
 
@@ -374,7 +374,7 @@ START_TEST(tap_double_finger_invert_release)
 {
 	struct device *dev;
 	bool tap_down = false, tap_up = false;
-	struct event *e;
+	union tptest_event *e;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 	tptest_touch_down(dev, 0, 3000, 3000);
@@ -391,11 +391,11 @@ START_TEST(tap_double_finger_invert_release)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->button, 2);
+			 ck_assert_int_eq(e->button.button, 2);
 		}
 	}
 
@@ -410,7 +410,7 @@ START_TEST(tap_double_finger_move)
 {
 	struct device *dev;
 	bool tap_down = false, tap_up = false;
-	struct event *e;
+	union tptest_event *e;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 	tptest_touch_down(dev, 0, 3000, 3000);
@@ -426,11 +426,11 @@ START_TEST(tap_double_finger_move)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->button, 2);
+			 ck_assert_int_eq(e->button.button, 2);
 		}
 	}
 
@@ -445,7 +445,7 @@ START_TEST(tap_double_finger_hold)
 {
 	struct device *dev;
 	bool tap_down = false, tap_up = false;
-	struct event *e;
+	union tptest_event *e;
 	int tap_timeout;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
@@ -469,11 +469,11 @@ START_TEST(tap_double_finger_hold)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->button, 2);
+			 ck_assert_int_eq(e->button.button, 2);
 		}
 	}
 
@@ -488,7 +488,7 @@ START_TEST(tap_double_finger_move_tap)
 {
 	struct device *dev;
 	bool tap_down = false, tap_up = false;
-	struct event *e;
+	union tptest_event *e;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 	tptest_touch_down(dev, 0, 3000, 3000);
@@ -509,11 +509,11 @@ START_TEST(tap_double_finger_move_tap)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->button, 2);
+			 ck_assert_int_eq(e->button.button, 2);
 		}
 	}
 
@@ -528,7 +528,7 @@ START_TEST(tap_double_finger_hold_tap)
 {
 	struct device *dev;
 	bool tap_down = false, tap_up = false;
-	struct event *e;
+	union tptest_event *e;
 	int tap_timeout;
 
 	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
@@ -553,11 +553,11 @@ START_TEST(tap_double_finger_hold_tap)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->is_press)
+			if (e->button.is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->button, 2);
+			 ck_assert_int_eq(e->button.button, 2);
 		}
 	}
 

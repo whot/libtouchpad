@@ -33,7 +33,7 @@ enum device_type {
 	TOUCHPAD_SYNAPTICS_CLICKPAD,
 };
 
-enum event_type {
+enum tptest_event_type {
 	EVTYPE_NONE = 0,
 	EVTYPE_MOTION,
 	EVTYPE_BUTTON,
@@ -41,20 +41,35 @@ enum event_type {
 	EVTYPE_SCROLL,
 };
 
-struct event {
-	enum event_type type;
-	int x, y; /* for motion */
-	unsigned button; /* for tap/button */
-	bool is_press; /* for tap/button */
-	double units; /* for scroll */
-	enum touchpad_scroll_direction dir; /* for scroll */
+struct tptest_motion_event {
+	enum tptest_event_type type;
+	int x, y;
+};
+
+struct tptest_button_event {
+	enum tptest_event_type type;
+	unsigned button;
+	bool is_press;
+};
+
+struct tptest_scroll_event {
+	enum tptest_event_type type;
+	double units;
+	enum touchpad_scroll_direction dir;
+};
+
+union tptest_event {
+	enum tptest_event_type type;
+	struct tptest_motion_event motion;
+	struct tptest_button_event button;
+	struct tptest_scroll_event scroll;
 };
 
 struct device {
 	struct libevdev *evdev;
 	struct libevdev_uinput *uinput;
 	struct touchpad *touchpad;
-	struct event events[100];
+	union tptest_event events[100];
 	size_t idx;
 
 	int timerfd;
