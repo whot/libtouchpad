@@ -47,11 +47,11 @@ START_TEST(tap_single_finger)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 	}
 
@@ -80,11 +80,11 @@ START_TEST(tap_single_finger_move)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 	}
 
@@ -118,11 +118,11 @@ START_TEST(tap_single_finger_hold)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 	}
 
@@ -152,11 +152,11 @@ START_TEST(tap_single_finger_doubletap)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down++;
 			else
 				tap_up++;
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 	}
 
@@ -187,11 +187,11 @@ START_TEST(tap_single_finger_tap_move)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down++;
 			else
 				tap_up++;
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 	}
 
@@ -223,14 +223,14 @@ START_TEST(tap_single_finger_drag)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press) {
-				finger_state |= (1 << (e->tap.fingers - 1));
+			if (tptest_tap_event(e)->is_press) {
+				finger_state |= (1 << (tptest_tap_event(e)->fingers - 1));
 				tap_down++;
 			} else {
-				finger_state &= ~(1 << (e->tap.fingers -1));
+				finger_state &= ~(1 << (tptest_tap_event(e)->fingers -1));
 				tap_up++;
 			}
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 		if (e->type == EVTYPE_MOTION)
 			ck_assert_int_eq(finger_state, 1);
@@ -270,14 +270,14 @@ START_TEST(tap_single_finger_multi_drag)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press) {
-				finger_state |= (1 << (e->tap.fingers - 1));
+			if (tptest_tap_event(e)->is_press) {
+				finger_state |= (1 << (tptest_tap_event(e)->fingers - 1));
 				tap_down++;
 			} else {
-				finger_state &= ~(1 << (e->tap.fingers -1));
+				finger_state &= ~(1 << (tptest_tap_event(e)->fingers -1));
 				tap_up++;
 			}
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 		if (e->type == EVTYPE_MOTION)
 			ck_assert_int_eq(finger_state, 1);
@@ -321,11 +321,11 @@ START_TEST(tap_single_finger_read_delay)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			else
 				tap_up = true;
-			ck_assert_int_eq(e->tap.fingers, 1);
+			ck_assert_int_eq(tptest_tap_event(e)->fingers, 1);
 		}
 	}
 
@@ -355,11 +355,11 @@ START_TEST(tap_double_finger)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->tap.fingers, 2);
+			 ck_assert_int_eq(tptest_tap_event(e)->fingers, 2);
 		}
 	}
 
@@ -391,11 +391,11 @@ START_TEST(tap_double_finger_invert_release)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->tap.fingers, 2);
+			 ck_assert_int_eq(tptest_tap_event(e)->fingers, 2);
 		}
 	}
 
@@ -426,11 +426,11 @@ START_TEST(tap_double_finger_move)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->tap.fingers, 2);
+			 ck_assert_int_eq(tptest_tap_event(e)->fingers, 2);
 		}
 	}
 
@@ -469,11 +469,11 @@ START_TEST(tap_double_finger_hold)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->tap.fingers, 2);
+			 ck_assert_int_eq(tptest_tap_event(e)->fingers, 2);
 		}
 	}
 
@@ -509,11 +509,11 @@ START_TEST(tap_double_finger_move_tap)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->tap.fingers, 2);
+			 ck_assert_int_eq(tptest_tap_event(e)->fingers, 2);
 		}
 	}
 
@@ -553,11 +553,11 @@ START_TEST(tap_double_finger_hold_tap)
 		if (e->type == EVTYPE_NONE)
 			break;
 		if (e->type == EVTYPE_TAP) {
-			if (e->tap.is_press)
+			if (tptest_tap_event(e)->is_press)
 				tap_down = true;
 			 else
 				tap_up = true;
-			 ck_assert_int_eq(e->tap.fingers, 2);
+			 ck_assert_int_eq(tptest_tap_event(e)->fingers, 2);
 		}
 	}
 
