@@ -21,6 +21,6 @@ test_config_LDFLAGS = -static
 
 # build-test only
 test_build_pedantic_SOURCES = test-build-pedantic.c
-test_build_pedantic_CFLAGS = $(AM_CPPFLAGS) -Wpedantic -Werror
+test_build_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror
 
 endif
