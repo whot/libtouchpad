@@ -52,6 +52,12 @@ struct tptest_button_event {
 	bool is_press;
 };
 
+struct tptest_tap_event {
+	enum tptest_event_type type;
+	unsigned fingers;
+	bool is_press;
+};
+
 struct tptest_scroll_event {
 	enum tptest_event_type type;
 	double units;
@@ -62,6 +68,7 @@ union tptest_event {
 	enum tptest_event_type type;
 	struct tptest_motion_event motion;
 	struct tptest_button_event button;
+	struct tptest_tap_event tap;
 	struct tptest_scroll_event scroll;
 };
 

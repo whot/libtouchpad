@@ -243,9 +243,9 @@ static void
 tap(struct touchpad *t, void *userdata, unsigned int fingers, bool is_press)
 {
 	struct tptest_device *d = userdata;
-	union tptest_event e = { .button.type = EVTYPE_TAP,
-				  .button.button = fingers,
-				  .button.is_press = is_press };
+	union tptest_event e = { .tap.type = EVTYPE_TAP,
+				 .tap.fingers = fingers,
+				 .tap.is_press = is_press };
 	push_event(d, &e);
 }
 
