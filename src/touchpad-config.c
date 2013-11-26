@@ -184,7 +184,7 @@ touchpad_config_get_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int *value)
 {
-	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE);
+	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_LAST);
 
 	if (value == NULL)
 		return -1;
