@@ -431,3 +431,27 @@ tptest_touch_move_to(struct tptest_device *d, unsigned int slot, int x_from, int
 		tptest_touch_move(d, slot, x_from + (x_to - x_from)/steps * i, y_from + (y_to - y_from)/steps * i);
 	tptest_touch_move(d, slot, x_to, y_to);
 }
+
+struct tptest_button_event *tptest_button_event(union tptest_event *e)
+{
+	assert(e->type == EVTYPE_BUTTON);
+	return &e->button;
+}
+
+struct tptest_motion_event *tptest_motion_event(union tptest_event *e)
+{
+	assert(e->type == EVTYPE_MOTION);
+	return &e->motion;
+}
+
+struct tptest_tap_event *tptest_tap_event(union tptest_event *e)
+{
+	assert(e->type == EVTYPE_TAP);
+	return &e->tap;
+}
+
+struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e)
+{
+	assert(e->type == EVTYPE_SCROLL);
+	return &e->scroll;
+}

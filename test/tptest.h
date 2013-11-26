@@ -93,3 +93,8 @@ void tptest_touch_up(struct tptest_device *d, unsigned int slot);
 void tptest_touch_move(struct tptest_device *d, unsigned int slot, int x, int y);
 void tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y);
 void tptest_touch_move_to(struct tptest_device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps);
+
+struct tptest_button_event *tptest_button_event(union tptest_event *e);
+struct tptest_motion_event *tptest_motion_event(union tptest_event *e);
+struct tptest_tap_event *tptest_tap_event(union tptest_event *e);
+struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e);
