@@ -122,6 +122,47 @@
  */
 
 /**
+ * @page softbuttons Software-button emulation
+ *
+ * Clickpads provide only one physical button, BTN_LEFT. Right-button
+ * clicks are emulated based on the location of the finger at click-time.
+ *
+ * libtouchpad supports software buttons, for left, right and middle clicks.
+ * The buttons are always aligned in a horizontal layout of user-defined
+ * height. Note that a button click with the finger outside of the button
+ * area will always result in a left click.
+ *
+ *      +------------------------+   +------------------------+   +------------------------+
+ *	|                        |   |    LEFT    |   RIGHT   |   |                        |
+ *	|                        |   +------------------------+   |                        |
+ *	|          LEFT          |   |                        |   |          LEFT          |
+ *	|                        |   |                        |   |                        |
+ *	|                        |   |                        |   |                        |
+ *	+------------------------+   |                        |   +------------------------+
+ *	|    LEFT    |   RIGHT   |   |                        |   |          RIGHT         |
+ *	+------------------------+   +------------------------+   +------------------------+
+ *
+ * Button selection
+ * ================
+ * A button click for a right button is generated if
+ * * the finger clicking is on top of the right button area, or
+ * * any other finger is on top of the right button area when a click happens
+ *
+ * A button click for a right button is not generated if
+ * * the finger started outside of the button area and moved into the button
+ *   area before the click
+ *
+ * Finger behavior
+ * ===============
+ * A finger inside the button area does not generate movement. For the left
+ * button area this only affects the area shared with the right button area,
+ * not the rest of the touchpad.
+ *
+ * If a finger leaves the button area and stays outside past a timeout, the
+ * finger may generate movement without the need for releasing the finger.
+ */
+
+/**
  * @defgroup callbackinterface Callback interface
  *
  * Event notifications are sent to the callers through a callback interface.

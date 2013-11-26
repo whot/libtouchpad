@@ -38,7 +38,7 @@
 
 void touchpad_error_log(const char *msg, ...);
 #define argcheck_log(_file, _line, _func, msg, ...)  \
-	touchpad_error_log("%s:%d %s(): " msg, _file, _line, _func, __VA_ARGS__)
+	touchpad_error_log("%s:%d %s(): " msg, _file, _line, _func, ##__VA_ARGS__)
 #include <ccan/argcheck/argcheck.h>
 
 
@@ -66,6 +66,32 @@ struct touch_history {
 	size_t size;
 };
 
+enum button_state {
+	BUTTON_STATE_NONE = 16,
+	BUTTON_STATE_AREA,
+	BUTTON_STATE_LEFT,
+	BUTTON_STATE_LEFT_NEW,
+	BUTTON_STATE_RIGHT,
+	BUTTON_STATE_RIGHT_NEW,
+	BUTTON_STATE_LEFT_TO_AREA,
+	BUTTON_STATE_RIGHT_TO_AREA,
+	BUTTON_STATE_LEFT_TO_RIGHT,
+	BUTTON_STATE_RIGHT_TO_LEFT,
+	BUTTON_STATE_PRESSED_RIGHT,
+	BUTTON_STATE_PRESSED_LEFT,
+};
+
+enum button_event {
+	BUTTON_EVENT_IN_R = 30,
+	BUTTON_EVENT_IN_L,
+	BUTTON_EVENT_IN_AREA,
+	BUTTON_EVENT_UP,
+	BUTTON_EVENT_PRESS,
+	BUTTON_EVENT_RELEASE,
+	BUTTON_EVENT_TIMEOUT,
+};
+
+
 struct touch {
 	bool dirty;
 	bool pointer; /* is this the pointer-moving touchpoint? */
@@ -77,6 +103,9 @@ struct touch {
 
 	unsigned int number;
 	struct touch_history history;
+
+	enum button_state button_state; /**< state for softbuttons */
+	unsigned int button_timeout;
 };
 
 enum tap_state {
@@ -133,9 +162,23 @@ struct scroll {
 	enum touchpad_scroll_direction direction;
 };
 
+struct button_config {
+	int top, bottom;
+	int right[2]; /* left, right */
+	unsigned int leave_timeout;
+	unsigned int enter_timeout;
+};
+
 struct buttons {
+	struct button_config config;
+	/* currently active soft-button, used for release event in case
+	 * the area changes between press and release */
+	int active_softbutton;
+
 	uint32_t state;
 	uint32_t old_state;
+
+	unsigned int timeout;
 };
 
 enum event_types {
@@ -236,6 +279,12 @@ struct touch_history_point * touchpad_history_get_last(struct touch *t);
 int touchpad_tap_handle_state(struct touchpad *tp, void *userdata);
 unsigned int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
 int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
+int touchpad_button_handle_state(struct touchpad *tp, void *userdata);
+void touchpad_button_pre_process_touch(struct touchpad *tp, struct touch *t, void *userdata);
+bool touchpad_button_select_pointer_touch(struct touchpad *tp, struct touch *t);
+int touchpad_button_handle_timeout(struct touchpad *tp, unsigned int now, void *userdata);
 int touchpad_request_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int delta);
 
+void touchpad_config_set_dynamic_defaults(struct touchpad *tp);
+void touchpad_config_set_static_defaults(struct touchpad *tp);
 #endif

@@ -47,6 +47,20 @@ struct touchpad_config touchpad_defaults = {
 	.motion_history_size = 10,
 };
 
+struct button_config button_defaults_static = {
+	.top = 0,
+	.bottom = 0,
+	.right = {0, 0 },
+	.leave_timeout = 300,
+	.enter_timeout = 150,
+};
+
+struct button_config button_defaults_dynamic = {
+	.top = 82,
+	.bottom = 100,
+	.right = {50, 100},
+};
+
 #define apply_value(what, value, deflt) \
 	if (value == TOUCHPAD_CONFIG_USE_DEFAULT) what = deflt; \
 	else what = value;
@@ -60,6 +74,105 @@ config_error(enum touchpad_config_error error, enum touchpad_config_error *error
 		*error_out = error;
 
 	return error != TOUCHPAD_CONFIG_ERROR_NO_ERROR;
+}
+
+static int
+config_set_softbutton(struct touchpad *tp,
+		      enum touchpad_config_error *error,
+		      enum touchpad_config_parameter button,
+		      int value)
+{
+	int deflt;
+	int *v;
+	int min, max;
+
+	if (value < 0)
+		return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW, error);
+	if (value > 100)
+		return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
+
+	switch (button) {
+		case TOUCHPAD_CONFIG_SOFTBUTTON_TOP:
+			deflt = button_defaults_dynamic.top;
+			v = &tp->buttons.config.top;
+			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM:
+			deflt = button_defaults_dynamic.bottom;
+			v = &tp->buttons.config.bottom;
+			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT:
+			deflt = button_defaults_dynamic.right[0];
+			v = &tp->buttons.config.right[0];
+			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT:
+			deflt = button_defaults_dynamic.right[1];
+			v = &tp->buttons.config.right[1];
+			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			break;
+		default:
+			log_bug(tp, button, "invalid config param for softbuttons\n");
+			return config_error(TOUCHPAD_CONFIG_ERROR_NOT_SUPPORTED, error);
+	}
+
+	/* scale to device dimensions */
+	apply_value(value, value, deflt);
+
+	/* touchpads are notorious liars. if 100/0 is requested, use
+	 * INT_MAX/INT_MIN to make sure we really catch any events. For all
+	 * other values, use the min/max range announced, even if it's wrong
+	 */
+	if (value == 100)
+		*v = INT_MAX;
+	else if (value == 0)
+		*v = INT_MIN;
+	else
+		*v = 1.0 * (max - min + 1) * value/100.0 + min;
+
+	return config_error(TOUCHPAD_CONFIG_ERROR_NO_ERROR, error);
+}
+
+static int
+config_get_softbutton(struct touchpad *tp,
+		      enum touchpad_config_parameter button,
+		      int *value)
+{
+	int min, max;
+	int v;
+
+	switch (button) {
+		case TOUCHPAD_CONFIG_SOFTBUTTON_TOP:
+			v = tp->buttons.config.top;
+			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM:
+			v = tp->buttons.config.bottom;
+			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT:
+			v = tp->buttons.config.right[0];
+			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT:
+			v = tp->buttons.config.right[1];
+			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			break;
+		default:
+			return 1;
+	}
+
+	if (v == INT_MAX)
+		v = 100;
+	else if (v == INT_MIN)
+		v = 0;
+	else
+		v = (v - min) * 100.0/(max - min + 1) + 0.5;
+
+	*value = v;
+
+	return 0;
 }
 
 /**
@@ -106,6 +219,17 @@ touchpad_config_set_key_value(struct touchpad *tp,
 				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
 			apply_value(tp->config.motion_history_size, value, touchpad_defaults.motion_history_size);
 			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_LEAVE_TIMEOUT:
+			apply_value(tp->buttons.config.leave_timeout, value, button_defaults_static.leave_timeout);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_ENTER_TIMEOUT:
+			apply_value(tp->buttons.config.enter_timeout, value, button_defaults_static.enter_timeout);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_TOP:
+		case TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM:
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT:
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT:
+			return config_set_softbutton(tp, error, key, value);
 		default:
 			return config_error(TOUCHPAD_CONFIG_ERROR_KEY_INVALID, error);
 	}
@@ -183,6 +307,17 @@ touchpad_config_get_key_value(struct touchpad *tp,
 		case TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE:
 			*value = tp->config.motion_history_size;
 			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_LEAVE_TIMEOUT:
+			*value = tp->buttons.config.leave_timeout;
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_ENTER_TIMEOUT:
+			*value = tp->buttons.config.enter_timeout;
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_TOP:
+		case TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM:
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT:
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT:
+			return config_get_softbutton(tp, key, value);
 		default:
 			return 1;
 	}
@@ -222,10 +357,28 @@ touchpad_config_get(struct touchpad *tp, ...)
 }
 
 void
-touchpad_config_set_defaults(struct touchpad *tp)
+touchpad_config_set_static_defaults(struct touchpad *tp)
 {
 	tp->tap.config = tap_defaults;
 	tp->scroll.config = scroll_defaults;
+	tp->buttons.config = button_defaults_static;
 	tp->config = touchpad_defaults;
 }
 
+void
+touchpad_config_set_dynamic_defaults(struct touchpad *tp)
+{
+	touchpad_config_set(tp, NULL,
+			TOUCHPAD_CONFIG_SOFTBUTTON_TOP, button_defaults_dynamic.top,
+			TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, button_defaults_dynamic.bottom,
+			TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, button_defaults_dynamic.right[0],
+			TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, button_defaults_dynamic.right[1],
+			TOUCHPAD_CONFIG_NONE);
+}
+
+void
+touchpad_config_set_defaults(struct touchpad *tp)
+{
+	touchpad_config_set_static_defaults(tp);
+	touchpad_config_set_dynamic_defaults(tp);
+}

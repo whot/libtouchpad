@@ -138,10 +138,10 @@ touchpad_pin_finger(struct touchpad *tp)
 			new_pointer_touch->pointer = true;
 	}
 
-	argcheck_ptr_not_null(t);
-
-	t->pinned = true;
-	t->pointer = false;
+	if (t) {
+		t->pinned = true;
+		t->pointer = false;
+	}
 
 	return ;
 }
@@ -167,24 +167,6 @@ touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 }
 
 static void
-touchpad_post_button_events(struct touchpad *tp, void *userdata)
-{
-	uint32_t current, old, shift;
-
-	current = tp->buttons.state;
-	old = tp->buttons.old_state;
-	shift = 0;
-	while (current || old) {
-		if ((current & 0x1) ^ (old  & 0x1))
-			tp->interface->button(tp, userdata, BTN_LEFT + shift, !!(current & 0x1));
-		shift++;
-		current >>= 1;
-		old >>= 1;
-	}
-	tp->buttons.old_state = tp->buttons.state;
-}
-
-static void
 touchpad_update_pointer_touch(struct touchpad *tp)
 {
 	struct touch *t;
@@ -203,7 +185,7 @@ touchpad_select_pointer_touch(struct touchpad *tp)
 		return;
 
 	touchpad_for_each_touch(tp, t) {
-		if (t->state == TOUCH_BEGIN) {
+		if (touchpad_button_select_pointer_touch(tp, t)) {
 			t->pointer = true;
 			break;
 		}
@@ -211,7 +193,7 @@ touchpad_select_pointer_touch(struct touchpad *tp)
 }
 
 static void
-touchpad_pre_process_touches(struct touchpad *tp)
+touchpad_pre_process_touches(struct touchpad *tp, void *userdata)
 {
 	struct touch *t;
 
@@ -234,6 +216,7 @@ touchpad_touch_reset(struct touchpad *tp, struct touch *t)
 	t->state = TOUCH_NONE;
 	t->pointer = false;
 	t->pinned = false;
+	t->button_state = BUTTON_STATE_NONE;
 	touchpad_history_reset(tp, t);
 }
 
@@ -267,10 +250,10 @@ touchpad_post_process_touches(struct touchpad *tp)
 static void
 touchpad_post_events(struct touchpad *tp, void *userdata)
 {
+	touchpad_button_handle_state(tp, userdata);
 	touchpad_tap_handle_state(tp, userdata);
 	if (touchpad_scroll_handle_state(tp, userdata) == 0) {
 		touchpad_post_motion_events(tp, userdata);
-		touchpad_post_button_events(tp, userdata);
 	}
 }
 
@@ -299,7 +282,7 @@ touchpad_handle_event(struct touchpad *tp,
 			if (tp->queued == EVENT_NONE)
 				break;
 			tp->ms = timeval_to_millis(&ev->time);
-			touchpad_pre_process_touches(tp);
+			touchpad_pre_process_touches(tp, userdata);
 			touchpad_post_events(tp, userdata);
 			touchpad_post_process_touches(tp);
 			break;
