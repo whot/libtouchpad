@@ -38,6 +38,7 @@ enum event_type {
 	EVTYPE_MOTION,
 	EVTYPE_BUTTON,
 	EVTYPE_TAP,
+	EVTYPE_SCROLL,
 };
 
 struct event {
@@ -45,7 +46,8 @@ struct event {
 	int x, y; /* for motion */
 	unsigned button; /* for tap/button */
 	bool is_press; /* for tap/button */
-	double unit; /* for scroll */
+	double units; /* for scroll */
+	enum touchpad_scroll_direction dir; /* for scroll */
 };
 
 struct device {

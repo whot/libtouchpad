@@ -252,6 +252,16 @@ tap(struct touchpad *t, void *userdata, unsigned int fingers, bool is_press)
 	push_event(d, &e);
 }
 
+static void
+scroll(struct touchpad *t, void *userdata, enum touchpad_scroll_direction dir, double units)
+{
+	struct device *d = userdata;
+	struct event e = { .type = EVTYPE_SCROLL,
+			   .dir = dir,
+			   .units = units };
+	push_event(d, &e);
+}
+
 static int
 register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
 {
@@ -278,6 +288,7 @@ static const struct touchpad_interface interface = {
 	.motion = motion,
 	.button = button,
 	.tap = tap,
+	.scroll = scroll,
 	.register_timer = register_timer,
 };
 
