@@ -140,7 +140,7 @@ touchpad_history_get(struct touch *t, int when)
 	assert(when != 0);
 
 	when = abs(when);
-	index = ((t->history.index - when) + t->history.size) % t->history.size;
+	index = (((int)t->history.index - when) + t->history.size) % t->history.size;
 
 	return when > t->history.valid ? NULL : &t->history.points[index];
 }
