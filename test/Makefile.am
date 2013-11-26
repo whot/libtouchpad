@@ -7,7 +7,7 @@ libtptest_la_SOURCES = \
 	tptest.h \
 	tptest.c
 
-noinst_PROGRAMS = test-tap test-config test-build-pedantic
+noinst_PROGRAMS = test-tap test-config test-scroll test-build-pedantic
 
 TESTS = $(noinst_PROGRAMS)
 
@@ -18,6 +18,10 @@ test_tap_LDFLAGS = -static
 test_config_SOURCES = test-config.c
 test_config_LDADD = $(TEST_LIBS)
 test_config_LDFLAGS = -static
+
+test_scroll_SOURCES = test-scroll.c
+test_scroll_LDADD = $(TEST_LIBS)
+test_scroll_LDFLAGS = -static
 
 # build-test only
 test_build_pedantic_SOURCES = test-build-pedantic.c
