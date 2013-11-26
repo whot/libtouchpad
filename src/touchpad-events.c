@@ -166,24 +166,6 @@ touchpad_post_motion_events(struct touchpad *tp, void *userdata)
 }
 
 static void
-touchpad_post_button_events(struct touchpad *tp, void *userdata)
-{
-	uint32_t current, old, shift;
-
-	current = tp->buttons.state;
-	old = tp->buttons.old_state;
-	shift = 0;
-	while (current || old) {
-		if ((current & 0x1) ^ (old  & 0x1))
-			tp->interface->button(tp, userdata, BTN_LEFT + shift, !!(current & 0x1));
-		shift++;
-		current >>= 1;
-		old >>= 1;
-	}
-	tp->buttons.old_state = tp->buttons.state;
-}
-
-static void
 touchpad_pre_process_touches(struct touchpad *tp)
 {
 	struct touch *t;
@@ -230,10 +212,11 @@ touchpad_post_process_touches(struct touchpad *tp)
 static void
 touchpad_post_events(struct touchpad *tp, void *userdata)
 {
+	touchpad_button_handle_state(tp, userdata);
 	touchpad_tap_handle_state(tp, userdata);
 	if (touchpad_scroll_handle_state(tp, userdata) == 0) {
 		touchpad_post_motion_events(tp, userdata);
-		touchpad_post_button_events(tp, userdata);
+		touchpad_button_handle_state(tp, userdata);
 	}
 }
 

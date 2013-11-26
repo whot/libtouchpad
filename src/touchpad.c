@@ -61,7 +61,7 @@ touchpad_reset(struct touchpad *tp)
 {
 	int i;
 
-	touchpad_config_set_defaults(tp);
+	touchpad_config_set_static_defaults(tp);
 	for (i = 0; i < MAX_TOUCHPOINTS; i++)
 		touch_init(tp, &tp->touches[i]);
 	tp->slot = libevdev_get_current_slot(tp->dev);
@@ -124,6 +124,8 @@ touchpad_new_from_path(const char *path)
 	tp->ntouches = ntouches;
 	tp->slot = libevdev_get_current_slot(tp->dev);
 	tp->path = strdup(path);
+
+	touchpad_config_set_dynamic_defaults(tp);
 
 	return tp;
 fail:

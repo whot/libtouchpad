@@ -134,6 +134,9 @@ struct button_config {
 
 struct buttons {
 	struct button_config config;
+	/* currently active soft-button, used for release event in case
+	 * the area changes between press and release */
+	int active_softbutton;
 
 	uint32_t state;
 	uint32_t old_state;
@@ -229,6 +232,9 @@ struct touch_history_point * touchpad_history_get_last(struct touch *t);
 int touchpad_tap_handle_state(struct touchpad *tp, void *userdata);
 unsigned int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
 int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
+int touchpad_button_handle_state(struct touchpad *tp, void *userdata);
 int touchpad_request_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int delta);
 
+void touchpad_config_set_dynamic_defaults(struct touchpad *tp);
+void touchpad_config_set_static_defaults(struct touchpad *tp);
 #endif
