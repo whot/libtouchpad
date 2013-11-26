@@ -48,7 +48,7 @@ touchpad_scroll_units(struct touchpad *tp, struct touch *t,
 			break;
 		default:
 			log_bug(direction, "invalid scroll direction %d\n", direction);
-			return false;
+			return 0;
 	}
 
 	return delta/threshold;
