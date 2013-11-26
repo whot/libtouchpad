@@ -162,6 +162,48 @@ START_TEST(scroll_two_finger_single_finger_vert_up)
 }
 END_TEST
 
+START_TEST(scroll_two_finger_vert_lock)
+{
+	struct tptest_device *dev;
+	union tptest_event *e;
+	union tptest_event *scroll = NULL;
+
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	touchpad_config_set(dev->touchpad, NULL,
+			    TOUCHPAD_CONFIG_SCROLL_METHOD,
+			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL|TOUCHPAD_SCROLL_VERTICAL,
+			    TOUCHPAD_CONFIG_NONE);
+
+	tptest_touch_down(dev, 0, 2000, 2000);
+	tptest_touch_down(dev, 1, 3000, 2000);
+	tptest_touch_move_to(dev, 0, 2000, 2000, 2000, 3000, -1);
+	tptest_touch_move_to(dev, 1, 3000, 2000, 3000, 3000, -1);
+	/* horiz movement, must not cause events */
+	tptest_touch_move_to(dev, 0, 2000, 3000, 4000, 3000, -1);
+	tptest_touch_move_to(dev, 1, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_up(dev, 0);
+	tptest_touch_up(dev, 1);
+
+	while (tptest_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_SCROLL) {
+			ck_assert_int_ge(tptest_scroll_event(e)->units, 0);
+			ck_assert_int_eq(tptest_scroll_event(e)->dir, TOUCHPAD_SCROLL_VERTICAL);
+			scroll = e;
+		}
+	}
+
+	ck_assert(scroll != NULL);
+	ck_assert(scroll->scroll.units == 0.0);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
 START_TEST(scroll_two_finger_horiz_right)
 {
 	struct tptest_device *dev;
@@ -320,15 +362,60 @@ START_TEST(scroll_two_finger_single_finger_horiz_left)
 }
 END_TEST
 
+START_TEST(scroll_two_finger_horiz_lock)
+{
+	struct tptest_device *dev;
+	union tptest_event *e;
+	union tptest_event *scroll = NULL;
+
+	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+
+	touchpad_config_set(dev->touchpad, NULL,
+			    TOUCHPAD_CONFIG_SCROLL_METHOD,
+			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL|TOUCHPAD_SCROLL_VERTICAL,
+			    TOUCHPAD_CONFIG_NONE);
+
+	tptest_touch_down(dev, 0, 2000, 2000);
+	tptest_touch_down(dev, 1, 2000, 3000);
+	tptest_touch_move_to(dev, 0, 2000, 2000, 4000, 2000, -1);
+	tptest_touch_move_to(dev, 1, 2000, 3000, 4000, 3000, -1);
+	/* vert movement, must not cause events */
+	tptest_touch_move_to(dev, 0, 4000, 2000, 4000, 4000, -1);
+	tptest_touch_move_to(dev, 1, 4000, 3000, 4000, 4000, -1);
+	tptest_touch_up(dev, 0);
+	tptest_touch_up(dev, 1);
+
+	while (tptest_handle_events(dev))
+		;
+
+	ARRAY_FOR_EACH(dev->events, e) {
+		if (e->type == EVTYPE_NONE)
+			break;
+		if (e->type == EVTYPE_SCROLL) {
+			ck_assert_int_ge(tptest_scroll_event(e)->units, 0);
+			ck_assert_int_eq(tptest_scroll_event(e)->dir, TOUCHPAD_SCROLL_HORIZONTAL);
+			scroll = e;
+		}
+	}
+
+	ck_assert(scroll != NULL);
+	ck_assert(scroll->scroll.units == 0.0);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
 int main(void) {
 	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_vert_down);
 	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_vert_up);
 	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_single_finger_vert_down);
 	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_single_finger_vert_up);
+	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_vert_lock);
 
 	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_horiz_left);
 	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_horiz_right);
 	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_left);
 	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_right);
+	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_horiz_lock);
 	return tptest_run();
 }
