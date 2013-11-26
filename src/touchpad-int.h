@@ -127,7 +127,14 @@ struct scroll {
 	enum touchpad_scroll_direction direction;
 };
 
+struct button_config {
+	int right[4]; /* left, right, top, bottom */
+	int middle[4]; /* left, right, top, bottom */
+};
+
 struct buttons {
+	struct button_config config;
+
 	uint32_t state;
 	uint32_t old_state;
 };

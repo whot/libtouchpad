@@ -44,9 +44,15 @@ struct scroll_config scroll_defaults = {
 	.hdelta = 100,
 };
 
+struct button_config button_defaults = {
+	.right = {50, 0, 82, 0},
+	.middle = {0, 0, 0, 0},
+};
+
 struct touchpad_config touchpad_defaults = {
 	.motion_history_size = 10,
 };
+
 
 #define apply_value(what, value, deflt) \
 	if (value == TOUCHPAD_CONFIG_USE_DEFAULT) what = deflt; \
@@ -106,6 +112,34 @@ touchpad_config_set_key_value(struct touchpad *tp,
 			if (value >= MAX_MOTION_HISTORY_SIZE)
 				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
 			apply_value(tp->config.motion_history_size, value, touchpad_defaults.motion_history_size);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_LEFT:
+			if (value < 0)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW, error);
+			if (value > 100)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
+			apply_value(tp->buttons.config.right[0], value, button_defaults.right[0]);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_RIGHT:
+			if (value < 0)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW, error);
+			if (value > 100)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
+			apply_value(tp->buttons.config.right[1], value, button_defaults.right[1]);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_TOP:
+			if (value < 0)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW, error);
+			if (value > 100)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
+			apply_value(tp->buttons.config.right[2], value, button_defaults.right[2]);
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_BOTTOM:
+			if (value < 0)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW, error);
+			if (value > 100)
+				return config_error(TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH, error);
+			apply_value(tp->buttons.config.right[3], value, button_defaults.right[3]);
 			break;
 		default:
 			return config_error(TOUCHPAD_CONFIG_ERROR_KEY_INVALID, error);
@@ -184,6 +218,18 @@ touchpad_config_get_key_value(struct touchpad *tp,
 		case TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE:
 			*value = tp->config.motion_history_size;
 			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_LEFT:
+			*value = tp->buttons.config.right[0];
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_RIGHT:
+			*value = tp->buttons.config.right[1];
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_TOP:
+			*value = tp->buttons.config.right[2];
+			break;
+		case TOUCHPAD_CONFIG_SOFTBUTTON_RIGHT_EDGE_BOTTOM:
+			*value = tp->buttons.config.right[4];
+			break;
 		default:
 			return 1;
 	}
@@ -228,5 +274,6 @@ touchpad_config_set_defaults(struct touchpad *tp)
 	tp->tap.config = tap_defaults;
 	tp->scroll.config = scroll_defaults;
 	tp->config = touchpad_defaults;
+	tp->buttons.config = button_defaults;
 }
 
