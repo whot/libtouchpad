@@ -170,7 +170,7 @@ tptest_run(void) {
 }
 
 static void
-test_commmon_create_synaptics_clickpad(struct device *d)
+test_commmon_create_synaptics_clickpad(struct tptest_device *d)
 {
 	struct libevdev *dev;
 	struct input_absinfo abs[] = {
@@ -213,7 +213,7 @@ test_commmon_create_synaptics_clickpad(struct device *d)
 }
 
 static void
-push_event(struct device *d, const union tptest_event *e)
+push_event(struct tptest_device *d, const union tptest_event *e)
 {
 	union tptest_event *event = &d->events[d->idx++];
 	*event = *e;
@@ -222,7 +222,7 @@ push_event(struct device *d, const union tptest_event *e)
 static void
 motion(struct touchpad *t, void *userdata, int x, int y)
 {
-	struct device *d = userdata;
+	struct tptest_device *d = userdata;
 	union tptest_event e = { .motion.type = EVTYPE_MOTION,
 				 .motion.x = x,
 				 .motion.y = y};
@@ -232,7 +232,7 @@ motion(struct touchpad *t, void *userdata, int x, int y)
 static void
 button(struct touchpad *t, void *userdata, unsigned int button, bool is_press)
 {
-	struct device *d = userdata;
+	struct tptest_device *d = userdata;
 	union tptest_event e = { .button.type = EVTYPE_BUTTON,
 				 .button.button = button,
 				 .button.is_press = is_press };
@@ -242,7 +242,7 @@ button(struct touchpad *t, void *userdata, unsigned int button, bool is_press)
 static void
 tap(struct touchpad *t, void *userdata, unsigned int fingers, bool is_press)
 {
-	struct device *d = userdata;
+	struct tptest_device *d = userdata;
 	union tptest_event e = { .button.type = EVTYPE_TAP,
 				  .button.button = fingers,
 				  .button.is_press = is_press };
@@ -252,7 +252,7 @@ tap(struct touchpad *t, void *userdata, unsigned int fingers, bool is_press)
 static void
 scroll(struct touchpad *t, void *userdata, enum touchpad_scroll_direction dir, double units)
 {
-	struct device *d = userdata;
+	struct tptest_device *d = userdata;
 	union tptest_event e = { .scroll.type = EVTYPE_SCROLL,
 				  .scroll.dir = dir,
 				  .scroll.units = units };
@@ -263,7 +263,7 @@ static int
 register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
 {
 	int rc;
-	struct device *d = userdata;
+	struct tptest_device *d = userdata;
 	struct itimerspec t;
 
 	t.it_value.tv_sec = ms/1000;
@@ -289,10 +289,10 @@ static const struct touchpad_interface interface = {
 	.register_timer = register_timer,
 };
 
-struct device *
-tptest_create_device(enum device_type which)
+struct tptest_device *
+tptest_create_device(enum tptest_device_type which)
 {
-	struct device *d = zalloc(sizeof(*d));
+	struct tptest_device *d = zalloc(sizeof(*d));
 	int fd;
 	int rc;
 	const char *path;
@@ -325,7 +325,7 @@ tptest_create_device(enum device_type which)
 }
 
 int
-tptest_handle_events(struct device *d)
+tptest_handle_events(struct tptest_device *d)
 {
 	struct pollfd fds[2];
 
@@ -354,7 +354,7 @@ tptest_handle_events(struct device *d)
 }
 
 void
-tptest_delete_device(struct device *d)
+tptest_delete_device(struct tptest_device *d)
 {
 	if (!d)
 		return;
@@ -368,7 +368,7 @@ tptest_delete_device(struct device *d)
 }
 
 void
-tptest_touch_down(struct device *d, unsigned int slot, int x, int y)
+tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y)
 {
 	static int tracking_id;
 	struct input_event *ev;
@@ -388,7 +388,7 @@ tptest_touch_down(struct device *d, unsigned int slot, int x, int y)
 }
 
 void
-tptest_touch_up(struct device *d, unsigned int slot)
+tptest_touch_up(struct tptest_device *d, unsigned int slot)
 {
 	struct input_event *ev;
 	struct input_event up[] = {
@@ -402,7 +402,7 @@ tptest_touch_up(struct device *d, unsigned int slot)
 }
 
 void
-tptest_touch_move(struct device *d, unsigned int slot, int x, int y)
+tptest_touch_move(struct tptest_device *d, unsigned int slot, int x, int y)
 {
 	struct input_event *ev;
 	struct input_event move[] = {
@@ -421,7 +421,7 @@ tptest_touch_move(struct device *d, unsigned int slot, int x, int y)
 }
 
 void
-tptest_touch_move_to(struct device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps)
+tptest_touch_move_to(struct tptest_device *d, unsigned int slot, int x_from, int y_from, int x_to, int y_to, int steps)
 {
 	if (steps == -1)
 		touchpad_config_get(d->touchpad, TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE, &steps,

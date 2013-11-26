@@ -33,7 +33,7 @@ START_TEST(config_get)
 {
 	int value;
 
-	struct device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 
 	for (int i = TOUCHPAD_CONFIG_NONE + 1; i < TOUCHPAD_CONFIG_LAST; i++)
 		ck_assert_int_eq(touchpad_config_get(dev->touchpad,
@@ -46,7 +46,7 @@ END_TEST
 START_TEST(config_get_invalid)
 {
 	int value;
-	struct device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
 					     TOUCHPAD_CONFIG_LAST, &value,
@@ -63,7 +63,7 @@ END_TEST
 START_TEST(config_get_empty)
 {
 	int value = 10;
-	struct device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_NONE, &value), 0);
 	ck_assert_int_eq(value, 10);
@@ -74,7 +74,7 @@ END_TEST
 START_TEST(config_set_tap_enabled)
 {
 	enum touchpad_config_error error;
-	struct device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 	int value;
 	enum touchpad_config_parameter p = TOUCHPAD_CONFIG_TAP_ENABLE;
 
