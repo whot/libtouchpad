@@ -62,10 +62,6 @@ touchpad_update_abs_state(struct touchpad *tp,
 				tp->fingers_down--;
 				argcheck_int_ge(tp->fingers_down, 0);
 			} else {
-				struct touch *ptr = touchpad_pointer_touch(tp);
-				if (ptr == NULL)
-					t->pointer = true;
-
 				t->state = TOUCH_BEGIN;
 				t->number = ev->value;
 				tp->fingers_down++;
@@ -189,9 +185,37 @@ touchpad_post_button_events(struct touchpad *tp, void *userdata)
 }
 
 static void
+touchpad_update_pointer_touch(struct touchpad *tp)
+{
+	struct touch *t;
+
+	t = touchpad_pointer_touch(tp);
+	if (t && t->state == TOUCH_END)
+		t->pointer = false;
+}
+
+static void
+touchpad_select_pointer_touch(struct touchpad *tp)
+{
+	struct touch *t = touchpad_pointer_touch(tp);
+
+	if (t)
+		return;
+
+	touchpad_for_each_touch(tp, t) {
+		if (t->state == TOUCH_BEGIN) {
+			t->pointer = true;
+			break;
+		}
+	}
+}
+
+static void
 touchpad_pre_process_touches(struct touchpad *tp)
 {
 	struct touch *t;
+
+	touchpad_select_pointer_touch(tp);
 
 	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_BEGIN)
@@ -236,6 +260,8 @@ touchpad_post_process_touches(struct touchpad *tp)
 		touchpad_unpin_finger(tp);
 
 	tp->queued = EVENT_NONE;
+
+	touchpad_update_pointer_touch(tp);
 }
 
 static void
