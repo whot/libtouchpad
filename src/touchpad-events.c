@@ -125,7 +125,6 @@ touchpad_pin_finger(struct touchpad *tp)
 
 		/* Pick the finger lowest to the bottom of the touchpad */
 		touchpad_for_each_touch(tp, tmp) {
-			printf("%d\n", tmp->y);
 			if (tmp->y > maxy) {
 				t = tmp;
 				maxy = tmp->y;
