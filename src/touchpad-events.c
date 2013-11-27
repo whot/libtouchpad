@@ -39,7 +39,6 @@ touchpad_update_abs_state(struct touchpad *tp,
 	int rc = 0;
 	struct touch *t = touchpad_current_touch(tp);
 
-	t->millis = timeval_to_millis(&ev->time);
 	switch (ev->code) {
 		case ABS_MT_POSITION_X:
 			t->x = ev->value;
@@ -53,6 +52,7 @@ touchpad_update_abs_state(struct touchpad *tp,
 			break;
 		case ABS_MT_SLOT:
 			tp->slot = ev->value;
+			t = touchpad_current_touch(tp);
 			break;
 		case ABS_MT_TRACKING_ID:
 			if (ev->value == -1) {
@@ -71,6 +71,8 @@ touchpad_update_abs_state(struct touchpad *tp,
 			tp->queued |= EVENT_MOTION;
 			break;
 	}
+
+	t->millis = timeval_to_millis(&ev->time);
 
 	return rc;
 }
