@@ -327,6 +327,7 @@ static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
 	b = xf86SetBoolOption(pInfo->options, "VertTwoFingerScroll", true);
 	if (b)
 		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL;
+	b = xf86SetBoolOption(pInfo->options, "HorizTwoFingerScroll", true);
 	if (b)
 		scroll_methods |= TOUCHPAD_SCROLL_TWOFINGER_VERTICAL;
 	return touchpad_config_set(tp, NULL, TOUCHPAD_CONFIG_SCROLL_METHOD, scroll_methods) == 0;
