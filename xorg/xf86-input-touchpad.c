@@ -319,6 +319,8 @@ static bool xf86touchpad_apply_config(InputInfoPtr pInfo,
 	enum touchpad_config_parameter scroll_methods = TOUCHPAD_SCROLL_NONE;
 	bool b;
 
+	pInfo->options = xf86ReplaceIntOption(pInfo->options, "ConstantDeceleration", 6);
+
 	ARRAY_FOR_EACH(options, opt) {
 		int value = xf86SetIntOption(pInfo->options, opt->name, INT_MAX);
 		if (value != INT_MAX)
