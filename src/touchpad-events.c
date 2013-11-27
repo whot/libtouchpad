@@ -205,6 +205,15 @@ touchpad_pre_process_touches(struct touchpad *tp)
 }
 
 static void
+touchpad_touch_reset(struct touchpad *tp, struct touch *t)
+{
+	t->state = TOUCH_NONE;
+	t->pointer = false;
+	t->pinned = false;
+	touchpad_history_reset(tp, t);
+}
+
+static void
 touchpad_post_process_touches(struct touchpad *tp)
 {
 	struct touch *t;
@@ -215,12 +224,9 @@ touchpad_post_process_touches(struct touchpad *tp)
 
 		touchpad_history_push(t, t->x, t->y, t->millis);
 
-		if (t->state == TOUCH_END) {
-			t->state = TOUCH_NONE;
-			t->pointer = false;
-			t->pinned = false;
-			touchpad_history_reset(tp, t);
-		} else if (t->state == TOUCH_BEGIN)
+		if (t->state == TOUCH_END)
+			touchpad_touch_reset(tp, t);
+		 else if (t->state == TOUCH_BEGIN)
 			t->state = TOUCH_UPDATE;
 
 		t->dirty = false;
