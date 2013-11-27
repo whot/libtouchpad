@@ -139,6 +139,7 @@ xf86touchpad_init(DeviceIntPtr dev)
 {
 	InputInfoPtr pInfo = dev->public.devicePrivate;
 	struct xf86touchpad *touchpad = pInfo->private;
+	int min, max, res;
 
 	unsigned char btnmap[TOUCHPAD_MAX_BUTTONS + 1];
 	Atom btnlabels[TOUCHPAD_MAX_BUTTONS];
@@ -157,6 +158,15 @@ xf86touchpad_init(DeviceIntPtr dev)
 				GetMotionHistorySize(),
 				TOUCHPAD_NUM_AXES,
 				axislabels);
+
+	touchpad_get_min_max(xf86touchpad(pInfo), ABS_MT_POSITION_X, &min, &max, &res);
+	xf86InitValuatorAxisStruct(dev, 0,
+			           XIGetKnownProperty(AXIS_LABEL_PROP_REL_X),
+				   min, max, res * 1000, 0, res * 1000, Relative);
+	touchpad_get_min_max(xf86touchpad(pInfo), ABS_MT_POSITION_Y, &min, &max, &res);
+	xf86InitValuatorAxisStruct(dev, 1,
+			           XIGetKnownProperty(AXIS_LABEL_PROP_REL_Y),
+				   min, max, res * 1000, 0, res * 1000, Relative);
 
 	touchpad_config_get(xf86touchpad(pInfo),
 			    TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ, &touchpad->scroll_hdist,
@@ -195,16 +205,8 @@ xf86touchpad_motion(struct touchpad *tp, void *userdata, int x, int y)
 {
 	InputInfoPtr pInfo = userdata;
 	DeviceIntPtr dev = pInfo->dev;
-	struct xf86touchpad *touchpad = pInfo->private;
-	double dx, dy;
 
-	dx = x * touchpad->scale.x + touchpad->scale.x_remainder;
-	dy = y * touchpad->scale.y + touchpad->scale.y_remainder;
-
-	xf86PostMotionEvent(dev, Relative, 0, 2, (int)dx, (int)dy);
-
-	touchpad->scale.x_remainder = (dx > -1.0 && dx < 1.0) ? dx : remainder(dx, (int)dx);
-	touchpad->scale.y_remainder = (dy > -1.0 && dy < 1.0) ? dy : remainder(dy, (int)dy);
+	xf86PostMotionEvent(dev, Relative, 0, 2, x, y);
 }
 
 static void
