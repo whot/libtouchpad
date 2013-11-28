@@ -28,7 +28,7 @@ AC_CONFIG_SRCDIR([src/touchpad.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR(.)
 AC_USE_SYSTEM_EXTENSIONS
-AM_INIT_AUTOMAKE([foreign dist-bzip2])
+AM_INIT_AUTOMAKE([foreign dist-xz no-dist-gzip])
 AM_SILENT_RULES([yes])
 
 AC_PROG_LIBTOOL
