@@ -20,14 +20,13 @@
  * OF THIS SOFTWARE.
  */
 
-#ifndef TEST_COMMON_H
-#define TEST_COMMON_H
+#ifndef TPTEST_H
+#define TPTEST_H
 
 #include <check.h>
 #include <libevdev/libevdev.h>
 #include <libevdev/libevdev-uinput.h>
 #include <touchpad.h>
-#endif
 
 enum tptest_device_type {
 	TOUCHPAD_SYNAPTICS_CLICKPAD,
@@ -99,3 +98,5 @@ struct tptest_button_event *tptest_button_event(union tptest_event *e);
 struct tptest_motion_event *tptest_motion_event(union tptest_event *e);
 struct tptest_tap_event *tptest_tap_event(union tptest_event *e);
 struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e);
+
+#endif /* TPTEST_H */
