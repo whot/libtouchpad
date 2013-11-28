@@ -25,7 +25,6 @@
 #include "config.h"
 #endif
 
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -125,7 +124,8 @@ touchpad_new_from_path(const char *path, struct touchpad **tp_out)
 	int fd, rc;
 	int ntouches;
 
-	assert(path);
+	if (!path)
+		return -EINVAL;
 
 	tp = touchpad_alloc();
 
@@ -179,7 +179,8 @@ touchpad_close(struct touchpad *tp)
 {
 	int fd;
 
-	assert(tp);
+	if (!argcheck_ptr_not_null(tp))
+		return 0;
 
 	fd = libevdev_get_fd(tp->dev);
 	if (fd > -1) {
@@ -203,7 +204,8 @@ touchpad_reopen(struct touchpad *tp)
 {
 	int fd;
 
-	assert(tp);
+	if (!argcheck_ptr_not_null(tp))
+		return -ENODEV;
 
 	fd = libevdev_get_fd(tp->dev);
 	if (fd > -1)
@@ -224,7 +226,8 @@ touchpad_reopen(struct touchpad *tp)
 int
 touchpad_get_min_max(struct touchpad *tp, int axis, int *min, int *max, int *res)
 {
-	assert(tp);
+	if (!argcheck_ptr_not_null(tp))
+		return -1;
 
 	if (!libevdev_has_event_code(tp->dev, EV_ABS, axis))
 			return -1;
@@ -241,8 +244,14 @@ touchpad_get_min_max(struct touchpad *tp, int axis, int *min, int *max, int *res
 void
 touchpad_set_interface(struct touchpad *tp, const struct touchpad_interface *interface)
 {
-	assert(tp);
-	assert(interface);
+	if (!argcheck_ptr_not_null(interface))
+		return;
+	argcheck_ptr_not_null(interface->motion);
+	argcheck_ptr_not_null(interface->button);
+	argcheck_ptr_not_null(interface->scroll);
+	argcheck_ptr_not_null(interface->tap);
+	argcheck_ptr_not_null(interface->rotate);
+	argcheck_ptr_not_null(interface->pinch);
 
 	tp->interface = interface;
 }
@@ -317,8 +326,7 @@ touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 	int rc = 0;
 	enum libevdev_read_flag mode = LIBEVDEV_READ_FLAG_NORMAL;
 
-	assert(tp);
-	assert(tp->interface);
+	argcheck_ptr_not_null(tp->interface);
 
 	do {
 		struct input_event ev;

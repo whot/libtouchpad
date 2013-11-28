@@ -30,7 +30,6 @@
 #include <touchpad-int.h>
 #include <touchpad-config.h>
 
-#include <assert.h>
 #include <stdarg.h>
 
 struct tap_config tap_defaults = {
