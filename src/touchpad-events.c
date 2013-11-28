@@ -60,6 +60,7 @@ touchpad_update_abs_state(struct touchpad *tp,
 
 				t->state = TOUCH_END;
 				tp->fingers_down--;
+				argcheck_int_ge(tp->fingers_down, 0);
 			} else {
 				struct touch *ptr = touchpad_pointer_touch(tp);
 				if (ptr == NULL)
@@ -68,6 +69,7 @@ touchpad_update_abs_state(struct touchpad *tp,
 				t->state = TOUCH_BEGIN;
 				t->number = ev->value;
 				tp->fingers_down++;
+				argcheck_int_ge(tp->fingers_down, 1);
 			}
 			t->dirty = true;
 			tp->queued |= EVENT_MOTION;
