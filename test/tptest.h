@@ -89,6 +89,7 @@ struct tptest_device * tptest_create_device(enum tptest_device_type which);
 void tptest_delete_device(struct tptest_device *d);
 int tptest_handle_events(struct tptest_device *d);
 
+void tptest_event(struct tptest_device *t, unsigned int type, unsigned int code, int value);
 void tptest_touch_up(struct tptest_device *d, unsigned int slot);
 void tptest_touch_move(struct tptest_device *d, unsigned int slot, int x, int y);
 void tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y);

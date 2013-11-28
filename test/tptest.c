@@ -368,6 +368,12 @@ tptest_delete_device(struct tptest_device *d)
 }
 
 void
+tptest_event(struct tptest_device *d, unsigned int type, unsigned int code, int value)
+{
+	libevdev_uinput_write_event(d->uinput, type, code, value);
+}
+
+void
 tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y)
 {
 	static int tracking_id;
@@ -384,7 +390,7 @@ tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y)
 	};
 
 	ARRAY_FOR_EACH(down, ev)
-		libevdev_uinput_write_event(d->uinput, ev->type, ev->code, ev->value);
+		tptest_event(d, ev->type, ev->code, ev->value);
 }
 
 void
@@ -398,7 +404,7 @@ tptest_touch_up(struct tptest_device *d, unsigned int slot)
 	};
 
 	ARRAY_FOR_EACH(up, ev)
-		libevdev_uinput_write_event(d->uinput, ev->type, ev->code, ev->value);
+		tptest_event(d, ev->type, ev->code, ev->value);
 }
 
 void
@@ -417,7 +423,7 @@ tptest_touch_move(struct tptest_device *d, unsigned int slot, int x, int y)
 	};
 
 	ARRAY_FOR_EACH(move, ev)
-		libevdev_uinput_write_event(d->uinput, ev->type, ev->code, ev->value);
+		tptest_event(d, ev->type, ev->code, ev->value);
 }
 
 void
