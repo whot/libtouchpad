@@ -56,6 +56,9 @@ touchpad_update_abs_state(struct touchpad *tp,
 			break;
 		case ABS_MT_TRACKING_ID:
 			if (ev->value == -1) {
+				if (t->state == TOUCH_NONE)
+					return rc;
+
 				t->state = TOUCH_END;
 				tp->fingers_down--;
 			} else {
