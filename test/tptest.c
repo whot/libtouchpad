@@ -281,11 +281,25 @@ register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned i
 	return rc < 0 ? -errno : 0;
 }
 
+static void
+rotate(struct touchpad *tp, void *userdata, int degrees)
+{
+	argcheck_not_reached();
+}
+
+static void
+pinch(struct touchpad *tp, void *userdata, int scale)
+{
+	argcheck_not_reached();
+}
+
 static const struct touchpad_interface interface = {
 	.motion = motion,
 	.button = button,
 	.tap = tap,
 	.scroll = scroll,
+	.rotate = rotate,
+	.pinch = pinch,
 	.register_timer = register_timer,
 };
 
