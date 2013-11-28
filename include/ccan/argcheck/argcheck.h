@@ -104,6 +104,41 @@ argcheck_log_(const char *file, int line, const char *func,
 #define argcheck_int_range(arg, min, max) \
 	argcheck_int_range_(arg, min, max, #arg, #min, #max, __FILE__, __LINE__, __func__)
 /**
+ * argcheck_uint_eq - check the argument is equal to the value.
+ */
+#define argcheck_uint_eq(arg, val) \
+	argcheck_uint_eq_(arg, val, #arg, #val, __FILE__, __LINE__, __func__)
+/**
+ * argcheck_uint_ne - check the argument is not equal to the value
+ */
+#define argcheck_uint_ne(arg, val) \
+	argcheck_uint_ne_(arg, val, #arg, #val, __FILE__, __LINE__, __func__)
+/**
+ * argcheck_uint_ge - check the argument is equal or greater than the value
+ */
+#define argcheck_uint_ge(arg, val) \
+	argcheck_uint_ge_(arg, val, #arg, #val, __FILE__, __LINE__, __func__)
+/**
+ * argcheck_uint_gt - check the argument is greater than the value
+ */
+#define argcheck_uint_gt(arg, val) \
+	argcheck_uint_gt_(arg, val, #arg, #val, __FILE__, __LINE__, __func__)
+/**
+ * argcheck_uint_le - check the argument is equal or less than the value
+ */
+#define argcheck_uint_le(arg, val) \
+	argcheck_uint_le_(arg, val, #arg, #val, __FILE__, __LINE__, __func__)
+/**
+ * argcheck_uint_lt - check the argument is less than the value
+ */
+#define argcheck_uint_lt(arg, val) \
+	argcheck_uint_lt_(arg, val, #arg, #val, __FILE__, __LINE__, __func__)
+/**
+ * argcheck_uint_range - check the argument is within a range (inclusive)
+ */
+#define argcheck_uint_range(arg, min, max) \
+	argcheck_uint_range_(arg, min, max, #arg, #min, #max, __FILE__, __LINE__, __func__)
+/**
  * argcheck_flag_set - check if a flag is set
  */
 #define argcheck_flag_set(arg, flag) \
@@ -260,6 +295,89 @@ static inline int argcheck_int_range_(int v, int min,  int max,
 
 	argcheck_log(file, line, func,
 		     "condition \"(%s <= %s <= %s)\" (%d <= %d <= %d) failed\n",
+		     minstr, vstr, maxstr, min, v, max);
+	return 0;
+}
+
+static inline int argcheck_uint_eq_(unsigned int a, unsigned int b, const char *astr, const char *bstr,
+				    const char *file, int line, const char *func)
+{
+	if (likely(a == b))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s == %s)\" (%u == %u) failed\n", astr, bstr, a, b);
+	return 0;
+}
+
+static inline int argcheck_uint_ne_(unsigned int a, unsigned int b, const char *astr, const char *bstr,
+				    const char *file, int line, const char *func)
+{
+	if (likely(a != b))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s != %s)\" (%u != %u) failed\n", astr, bstr, a, b);
+	return 0;
+}
+
+static inline int argcheck_uint_ge_(unsigned int a, unsigned int b, const char *astr, const char *bstr,
+				    const char *file, int line, const char *func)
+{
+	if (likely(a >= b))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s >= %s)\" (%u >= %u) failed\n", astr, bstr, a, b);
+	return 0;
+}
+
+static inline int argcheck_uint_gt_(unsigned int a, unsigned int b, const char *astr, const char *bstr,
+				    const char *file, int line, const char *func)
+{
+	if (likely(a > b))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s > %s)\" (%u > %u) failed\n", astr, bstr, a, b);
+	return 0;
+}
+
+static inline int argcheck_uint_le_(unsigned int a, unsigned int b, const char *astr, const char *bstr,
+				    const char *file, int line, const char *func)
+{
+	if (likely(a <= b))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s <= %s)\" (%u <= %u) failed\n", astr, bstr, a, b);
+	return 0;
+}
+
+static inline int argcheck_uint_lt_(unsigned int a, unsigned int b, const char *astr, const char *bstr,
+				    const char *file, int line, const char *func)
+{
+	if (likely(a < b))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s < %s)\" (%u < %u) failed\n", astr, bstr, a, b);
+	return 0;
+}
+
+static inline int argcheck_uint_range_(unsigned int v, unsigned int min,  unsigned int max,
+				       const char *vstr,
+				       const char *minstr, const char *maxstr,
+				       const char *file, int line, const char *func)
+{
+	if (!argcheck_uint_le_(min, max, minstr, maxstr, file, line, func))
+		return 0;
+
+	if (likely(v >= min && v <= max))
+		return 1;
+
+	argcheck_log(file, line, func,
+		     "condition \"(%s <= %s <= %s)\" (%u <= %u <= %u) failed\n",
 		     minstr, vstr, maxstr, min, v, max);
 	return 0;
 }
