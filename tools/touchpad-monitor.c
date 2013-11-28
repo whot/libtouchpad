@@ -122,6 +122,7 @@ int mainloop(struct touchpad *tp, struct tpdata *data) {
 }
 
 int main (int argc, char **argv) {
+	int rc;
 	const char *path;
 	struct touchpad *tp;
 	struct tpdata tpdata;
@@ -131,7 +132,8 @@ int main (int argc, char **argv) {
 
 	path = argv[1];
 
-	tp = touchpad_new_from_path(path);
+	rc = touchpad_new_from_path(path, &tp);
+	assert(rc == 0);
 	touchpad_set_interface(tp, &interface);
 
 	tpdata.timerfd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC|TFD_NONBLOCK);

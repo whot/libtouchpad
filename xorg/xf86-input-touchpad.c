@@ -357,6 +357,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 				 InputInfoPtr pInfo,
 				 int flags)
 {
+	int rc;
 	struct xf86touchpad *driver_data = NULL;
 	struct touchpad *tp = NULL;
 	char *device;
@@ -375,9 +376,11 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	device = xf86SetStrOption(pInfo->options, "Device", NULL);
 	if (!device)
 		goto fail;
-	tp = touchpad_new_from_path(device);
-	if (!tp)
+	rc = touchpad_new_from_path(device, &tp);
+	if (rc != 0) {
+		xf86IDrvMsg(pInfo, X_ERROR, "Opening %s failed with %s\n", device, strerror(-rc));
 		goto fail;
+	}
 
 	touchpad_set_interface(tp, &xf86touchpad_interface);
 	touchpad_close(tp);

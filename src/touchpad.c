@@ -93,8 +93,8 @@ open_path(const char *path)
 	return fd;
 }
 
-struct touchpad*
-touchpad_new_from_path(const char *path)
+int
+touchpad_new_from_path(const char *path, struct touchpad **tp_out)
 {
 	struct touchpad *tp;
 	int fd, rc;
@@ -125,12 +125,13 @@ touchpad_new_from_path(const char *path)
 	tp->slot = libevdev_get_current_slot(tp->dev);
 	tp->path = strdup(path);
 
-	return tp;
+	*tp_out = tp;
+	return 0;
 fail:
 	close(fd);
 	touchpad_free(tp);
-	touchpad_log("Failed to open %s:  %s", path, strerror(-rc));
-	return NULL;
+	touchpad_log("Failed to open %s:  %s\n", path, strerror(-rc));
+	return rc;
 }
 
 void

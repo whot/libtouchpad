@@ -265,9 +265,10 @@ struct touchpad_interface {
  * check permissions.
  *
  * @param path The path to the device file
- * @return A new touchpad device, or NULL on failure.
+ * @param tp Set to the new touchpad device, undefined on failure
+ * @return 0 on success or a negative errno on failure.
  */
-struct touchpad* touchpad_new_from_path(const char *path);
+int touchpad_new_from_path(const char *path, struct touchpad **tp);
 /**
  * @ingroup api
  * Free the touchpad device.
