@@ -64,6 +64,11 @@ argcheck_log_(const char *file, int line, const char *func,
 #endif
 
 /**
+ * argcheck_not_reached - complain if we get here
+ */
+#define argcheck_not_reached() \
+	argcheck_log(__FILE__, __LINE__, __func__, "invalid code path, must not get here\n")
+/**
  * argcheck_int_eq - check the argument is equal to the value.
  */
 #define argcheck_int_eq(arg, val) \
