@@ -36,11 +36,15 @@
 #include "touchpad.h"
 #include "touchpad-util.h"
 
+void touchpad_error_log(const char *msg, ...);
+#define argcheck_log(_file, _line, _func, msg, ...)  \
+	touchpad_error_log("%s:%d %s(): " msg, _file, _line, _func, __VA_ARGS__)
+#include <ccan/argcheck/argcheck.h>
+
+
 #define MAX_TOUCHPOINTS 10 /* update when mutants are commonplace */
 #define MAX_MOTION_HISTORY_SIZE 10
 #define MAX_TAP_EVENTS 10
-
-#include <ccan/argcheck/argcheck.h>
 
 enum touch_state {
 	TOUCH_NONE = 7,

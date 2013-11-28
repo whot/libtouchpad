@@ -26,7 +26,6 @@
 #include "config.h"
 #endif
 
-#include <ccan/argcheck/argcheck.h>
 #include <touchpad-int.h>
 #include <touchpad-config.h>
 

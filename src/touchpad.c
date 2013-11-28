@@ -39,6 +39,20 @@
 #include "touchpad-int.h"
 #include "touchpad-config.h"
 
+static touchpad_error_log_func_t error_log_func;
+
+void
+touchpad_error_log(const char *msg, ...)
+{
+	va_list args;
+
+	va_start(args, msg);
+	if (error_log_func)
+		error_log_func(msg, args);
+	else
+		vfprintf(stderr, msg, args);
+	va_end(args);
+}
 
 static void
 default_log_func(struct touchpad *tp,
@@ -69,6 +83,12 @@ touchpad_set_log_func(struct touchpad *tp, touchpad_log_func_t func, void *data)
 {
 	tp->log.func = func;
 	tp->log.data = data;
+}
+
+void
+touchpad_set_error_log_func(touchpad_error_log_func_t func)
+{
+	error_log_func = func;
 }
 
 void touch_init(struct touchpad *tp, struct touch *t)

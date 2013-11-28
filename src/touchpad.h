@@ -380,4 +380,12 @@ typedef void (*touchpad_log_func_t)(struct touchpad *tp,
  */
 void touchpad_set_log_func(struct touchpad *tp, touchpad_log_func_t logfunc, void *userdata);
 
+typedef void (*touchpad_error_log_func_t)(const char *format, va_list args);
+/**
+ * Set the library-wide logging function for internal errors. This function
+ * is called when something goes wrong. Look at the output of this, it
+ * always indicates a bug. Default is fprintf(stderr).
+ */
+void touchpad_set_error_log_func(touchpad_error_log_func_t func);
+
 #endif
