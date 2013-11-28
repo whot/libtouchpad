@@ -354,6 +354,15 @@ static bool xf86touchpad_calc_scale(struct xf86touchpad *touchpad)
 }
 
 static void
+xf86touchpad_error_log(const char *format, va_list args)
+{
+	ErrorFSigSafe("----- DRIVER BUG ----\n");
+	xorg_backtrace();
+	VErrorFSigSafe(format, args);
+	ErrorFSigSafe("---------------------\n");
+}
+
+static void
 xf86touchpad_log(struct touchpad *tp,
 		 enum touchpad_log_priority priority,
 		 void *data,
@@ -414,6 +423,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 		goto fail;
 	}
 
+	touchpad_set_error_log_func(xf86touchpad_error_log);
 	touchpad_set_log_func(tp, xf86touchpad_log, pInfo);
 	touchpad_set_interface(tp, &xf86touchpad_interface);
 	touchpad_close(tp);
