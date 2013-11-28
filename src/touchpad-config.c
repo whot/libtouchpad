@@ -26,6 +26,7 @@
 #include "config.h"
 #endif
 
+#include <ccan/argcheck/argcheck.h>
 #include <touchpad-int.h>
 #include <touchpad-config.h>
 
@@ -56,7 +57,7 @@ struct touchpad_config touchpad_defaults = {
 static int
 config_error(enum touchpad_config_error error, enum touchpad_config_error *error_out)
 {
-	arg_require_int_range(error, TOUCHPAD_CONFIG_ERROR_NO_ERROR, TOUCHPAD_CONFIG_ERROR_NOT_SUPPORTED);
+	argcheck_int_range(error, TOUCHPAD_CONFIG_ERROR_NO_ERROR, TOUCHPAD_CONFIG_ERROR_NOT_SUPPORTED);
 	if (error_out)
 		*error_out = error;
 
@@ -72,7 +73,7 @@ touchpad_config_set_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int value)
 {
-	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_LAST);
+	argcheck_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_LAST);
 
 	switch(key) {
 		case TOUCHPAD_CONFIG_NONE: /* filtered before */
@@ -150,7 +151,7 @@ touchpad_config_get_key_value(struct touchpad *tp,
 			      enum touchpad_config_parameter key,
 			      int *value)
 {
-	arg_require_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_LAST);
+	argcheck_int_range(key, TOUCHPAD_CONFIG_TAP_ENABLE, TOUCHPAD_CONFIG_LAST);
 
 	if (value == NULL)
 		return -1;

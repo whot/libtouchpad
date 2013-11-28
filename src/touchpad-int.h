@@ -40,6 +40,8 @@
 #define MAX_MOTION_HISTORY_SIZE 10
 #define MAX_TAP_EVENTS 10
 
+#include <ccan/argcheck/argcheck.h>
+
 enum touch_state {
 	TOUCH_NONE = 7,
 	TOUCH_BEGIN,
@@ -183,7 +185,7 @@ touchpad_pointer_touch(struct touchpad *tp)
 	struct touch *t;
 	touchpad_for_each_touch(tp, t) {
 		if (t->pointer) {
-			arg_require_int_ne(t->state, TOUCH_NONE);
+			argcheck_int_ne(t->state, TOUCH_NONE);
 			return t;
 		}
 	}

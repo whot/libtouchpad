@@ -51,7 +51,7 @@ touchpad_hysteresis_filter_motion(struct touch *t, int *x, int *y)
 	struct touch_history_point *old = touchpad_history_get_last(t);
 	const int hysteresis_margin = 8;
 
-	arg_require_not_null(old);
+	argcheck_ptr_not_null(old);
 
 	*x = hysteresis(*x, old->x, hysteresis_margin);
 	*y = hysteresis(*y, old->y, hysteresis_margin);

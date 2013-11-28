@@ -283,7 +283,7 @@ touchpad_handle_timeouts(struct touchpad *tp, void *userdata, unsigned int now)
 		return 0;
 
 	tp->next_timeout = touchpad_tap_handle_timeout(tp, now, userdata);
-	arg_require_int_min(tp->next_timeout - now, 0);
+	argcheck_int_ge(tp->next_timeout - now, 0);
 
 	return 0;
 }

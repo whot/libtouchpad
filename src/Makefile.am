@@ -1,4 +1,4 @@
-AM_CPPFLAGS = $(LIBEVDEV_CFLAGS)
+AM_CPPFLAGS = $(LIBEVDEV_CFLAGS) -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libtouchpad.la
 libtouchpad_la_SOURCES = \

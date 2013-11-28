@@ -25,7 +25,6 @@
 #include "config.h"
 #endif
 
-
 #include <stdlib.h>
 #include <linux/input.h>
 #include <libevdev/libevdev.h>
@@ -114,7 +113,7 @@ touchpad_pin_finger(struct touchpad *tp)
 {
 	struct touch *t;
 
-	arg_require_flag_set(tp->queued, EVENT_BUTTON_PRESS);
+	argcheck_flag_set(tp->queued, EVENT_BUTTON_PRESS);
 
 	t = touchpad_pinned_touch(tp);
 	if (t)
@@ -136,12 +135,12 @@ touchpad_pin_finger(struct touchpad *tp)
 				new_pointer_touch = tmp;
 		}
 
-		arg_require_not_null(new_pointer_touch);
+		argcheck_ptr_not_null(new_pointer_touch);
 		if (new_pointer_touch->state != TOUCH_NONE)
 			new_pointer_touch->pointer = true;
 	}
 
-	arg_require_not_null(t);
+	argcheck_ptr_not_null(t);
 
 	t->pinned = true;
 	t->pointer = false;

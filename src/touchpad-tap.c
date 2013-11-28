@@ -43,7 +43,7 @@
 
 static inline const char*
 tap_state_to_str(enum tap_state state) {
-	arg_require_int_range(state, TAP_STATE_IDLE, TAP_STATE_DEAD);
+	argcheck_int_range(state, TAP_STATE_IDLE, TAP_STATE_DEAD);
 
 	switch(state) {
 		CASE_RETURN_STRING(TAP_STATE_IDLE);
@@ -65,7 +65,7 @@ tap_state_to_str(enum tap_state state) {
 
 static inline const char*
 tap_event_to_str(enum tap_event event) {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch(event) {
 		CASE_RETURN_STRING(TAP_EVENT_TOUCH);
@@ -94,7 +94,7 @@ touchpad_tap_clear_timer(struct touchpad *tp, void *userdata)
 static void
 touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -116,7 +116,7 @@ touchpad_tap_idle_handle_event(struct touchpad *tp, enum tap_event event, void *
 static void
 touchpad_tap_touch_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -142,7 +142,7 @@ touchpad_tap_touch_handle_event(struct touchpad *tp, enum tap_event event, void 
 static void
 touchpad_tap_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -164,7 +164,7 @@ touchpad_tap_hold_handle_event(struct touchpad *tp, enum tap_event event, void *
 static void
 touchpad_tap_tapped_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_MOTION:
@@ -189,7 +189,7 @@ touchpad_tap_tapped_handle_event(struct touchpad *tp, enum tap_event event, void
 static void
 touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -216,7 +216,7 @@ touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void
 static void
 touchpad_tap_touch2_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -239,7 +239,7 @@ touchpad_tap_touch2_hold_handle_event(struct touchpad *tp, enum tap_event event,
 static void
 touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -262,7 +262,7 @@ touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void
 static void
 touchpad_tap_touch3_hold_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -309,7 +309,7 @@ touchpad_tap_dragging_or_doubletap_handle_event(struct touchpad *tp, enum tap_ev
 static void
 touchpad_tap_dragging_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -333,7 +333,7 @@ touchpad_tap_dragging_handle_event(struct touchpad *tp, enum tap_event event, vo
 static void
 touchpad_tap_dragging_wait_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
@@ -357,7 +357,7 @@ touchpad_tap_dragging_wait_handle_event(struct touchpad *tp, enum tap_event even
 static void
 touchpad_tap_dragging2_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_RELEASE:
@@ -381,7 +381,7 @@ touchpad_tap_dragging2_handle_event(struct touchpad *tp, enum tap_event event, v
 static void
 touchpad_tap_dead_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	switch (event) {
 		case TAP_EVENT_RELEASE:
@@ -399,7 +399,7 @@ touchpad_tap_dead_handle_event(struct touchpad *tp, enum tap_event event, void *
 static void
 touchpad_tap_handle_event(struct touchpad *tp, enum tap_event event, void *userdata)
 {
-	arg_require_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
+	argcheck_int_range(event, TAP_EVENT_TOUCH, TAP_EVENT_TIMEOUT);
 
 	if (!tp->tap.config.enabled)
 		return;
