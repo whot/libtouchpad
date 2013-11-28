@@ -48,6 +48,7 @@ START_TEST(config_get_invalid)
 	int value;
 	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
 
+	tptest_allow_errors(true);
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
 					     TOUCHPAD_CONFIG_LAST, &value,
 					     TOUCHPAD_CONFIG_NONE), 1);
@@ -56,6 +57,7 @@ START_TEST(config_get_invalid)
 					     TOUCHPAD_CONFIG_NONE), 1);
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
 					     TOUCHPAD_CONFIG_NONE), 0);
+	tptest_allow_errors(false);
 	tptest_delete_device(dev);
 }
 END_TEST
