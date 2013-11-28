@@ -18,3 +18,12 @@ Features (eventually):
 * tap-to-click
 * two-finger scrolling
 * software button emulation
+
+TODO
+====
+* drop callbacks, switch to list of events instead
+* make the test suite use different devices automatically
+** requires all coords be given in percent of the touchpad
+* optimise the loops through the touch points
+* single-touch devices can map ABS_X to a single touchpoint and use this driver too
+
