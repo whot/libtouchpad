@@ -40,13 +40,36 @@
 #include "touchpad-int.h"
 #include "touchpad-config.h"
 
+
+static void
+default_log_func(struct touchpad *tp,
+		 enum touchpad_log_priority priority,
+		 void *data,
+		 const char *format, va_list args)
+{
+	vprintf(format, args);
+}
+
 void
-touchpad_log(const char *fmt, ...)
+touchpad_log(struct touchpad *tp,
+	     enum touchpad_log_priority priority,
+	     const char *format, ...)
 {
 	va_list args;
-	va_start(args, fmt);
-	vprintf(fmt, args);
+
+	if (!tp->log.func)
+		return;
+
+	va_start(args, format);
+	tp->log.func(tp, priority, tp->log.data, format, args);
 	va_end(args);
+}
+
+void
+touchpad_set_log_func(struct touchpad *tp, touchpad_log_func_t func, void *data)
+{
+	tp->log.func = func;
+	tp->log.data = data;
 }
 
 void touch_init(struct touchpad *tp, struct touch *t)
@@ -77,6 +100,8 @@ touchpad_alloc(void)
 	if (tp) {
 		tp->ntouches = 0;
 		tp->dev = libevdev_new();
+		tp->log.func = default_log_func;
+		tp->log.data = NULL;
 		touchpad_reset(tp);
 	}
 	return tp;
@@ -116,7 +141,6 @@ touchpad_new_from_path(const char *path, struct touchpad **tp_out)
 
 	ntouches = libevdev_get_num_slots(tp->dev);
 	if (ntouches <= 0) {
-		touchpad_log("This device does not support multitouch\n");
 		rc = -ECANCELED;
 		goto fail;
 	}
@@ -130,7 +154,6 @@ touchpad_new_from_path(const char *path, struct touchpad **tp_out)
 fail:
 	close(fd);
 	touchpad_free(tp);
-	touchpad_log("Failed to open %s:  %s\n", path, strerror(-rc));
 	return rc;
 }
 

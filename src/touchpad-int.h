@@ -166,9 +166,17 @@ struct touchpad {
     enum event_types queued;
 
     unsigned int next_timeout;
+
+    struct {
+	    touchpad_log_func_t func;
+	    void *data;
+    } log;
 };
 
-void touchpad_log(const char *fmt, ...);
+void
+touchpad_log(struct touchpad *tp,
+	     enum touchpad_log_priority priority,
+	     const char *format, ...);
 
 #define touchpad_for_each_touch(_tp, _t) \
 	for (int _i = 0; (_t = touchpad_touch(_tp, _i)) && _i < tp->ntouches; _i++)

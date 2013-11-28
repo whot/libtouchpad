@@ -52,15 +52,16 @@
 #define _unlikely_(x) (__builtin_expect(!!(x), 0))
 #define _likely_(x) (__builtin_expect(!!(x), 1))
 
-#define log_bug(cond, ...) \
+#define log_bug(_tp, cond, ...) \
 	do { \
 		if (_unlikely_(cond)) { \
-			touchpad_log("BUG: %s:%d %s() 'if (" # cond ")'\n", __FILE__, __LINE__, __func__); \
-			touchpad_log( __VA_ARGS__); \
+			touchpad_log(_tp, TOUCHPAD_LOG_BUG, \
+				     "BUG: %s:%d %s():\n", __FILE__, __LINE__, __func__); \
+			touchpad_log(_tp, TOUCHPAD_LOG_BUG, __VA_ARGS__); \
 		} } while(0)
 
-#define log_debug(msg, ...) \
-	do { touchpad_log("%s:%d %s() " msg, __FILE__, __LINE__, __func__, __VA_ARGS__); } while(0)
+#define log_debug(_tp, msg, ...) \
+	do { touchpad_log(_tp, TOUCHPAD_LOG_DEBUG, "%s:%d %s() " msg, __FILE__, __LINE__, __func__, ## __VA_ARGS__); } while(0)
 
 static inline void*
 zalloc(size_t sz) {

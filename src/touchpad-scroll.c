@@ -47,7 +47,7 @@ touchpad_scroll_units(struct touchpad *tp, struct touch *t,
 			threshold = tp->scroll.config.hdelta;
 			break;
 		default:
-			log_bug(direction, "invalid scroll direction %d\n", direction);
+			log_bug(tp, direction, "invalid scroll direction %d\n", direction);
 			return 0;
 	}
 

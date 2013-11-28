@@ -25,6 +25,7 @@
 #define TOUCHPAD_H
 
 #include <stdbool.h>
+#include <stdarg.h>
 
 /**
  * @mainpage
@@ -346,5 +347,37 @@ int touchpad_get_fd(struct touchpad *tp);
  * @return the backend libevdev device
  */
 struct libevdev *touchpad_get_device(struct touchpad *tp);
+
+enum touchpad_log_priority {
+	TOUCHPAD_LOG_ERROR = 10,        /**< critical errors and application bugs */
+	TOUCHPAD_LOG_INFO  = 20,        /**< informational messages */
+	TOUCHPAD_LOG_BUG = 30,          /**< internal bugs */
+	TOUCHPAD_LOG_DEBUG = 40         /**< debug information */
+};
+
+/**
+ * Logging function called by library-internal logging.
+ * This function is expected to treat its input like printf would.
+ *
+ * @param tp A previously opened touchpad device
+ * @param priority Log priority of this message
+ * @param data User-supplied data pointer (see libevdev_set_log_function())
+ * @param format printf-style format string
+ * @param args List of arguments
+ */
+
+typedef void (*touchpad_log_func_t)(struct touchpad *tp,
+				    enum touchpad_log_priority priority,
+				    void *data,
+				    const char *format, va_list args);
+/**
+ * Set the logging function for this device. This function is called for any
+ * output logging from inside the touchpad. The default is printf.
+ *
+ * @param tp A previously opened touchpad device
+ * @param logfunc Log function to call
+ * @param userdata The data to be supplied in the callback interface.
+ */
+void touchpad_set_log_func(struct touchpad *tp, touchpad_log_func_t logfunc, void *userdata);
 
 #endif
