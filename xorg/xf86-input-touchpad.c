@@ -67,13 +67,13 @@ xf86touchpad_on(DeviceIntPtr dev)
 {
 	InputInfoPtr pInfo = dev->public.devicePrivate;
 	struct touchpad *tp = xf86touchpad(pInfo);
-	int fd;
+	int rc;
 
-	fd = touchpad_reopen(tp);
-	if (fd > -1) {
+	rc = touchpad_reopen(tp);
+	if (rc == 0) {
 		struct libevdev *evdev = touchpad_get_device(tp);
 		libevdev_set_clock_id(evdev, CLOCK_MONOTONIC);
-		pInfo->fd = fd;
+		pInfo->fd = touchpad_get_fd(tp);
 		xf86AddEnabledDevice(pInfo);
 		dev->public.on = TRUE;
 	}

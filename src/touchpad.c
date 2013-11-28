@@ -184,7 +184,7 @@ touchpad_reopen(struct touchpad *tp)
 
 	fd = libevdev_get_fd(tp->dev);
 	if (fd > -1)
-		return fd;
+		return 0;
 
 	fd = open_path(tp->path);
 	if (fd < 0)
@@ -195,7 +195,7 @@ touchpad_reopen(struct touchpad *tp)
 
 	touchpad_reset(tp);
 
-	return touchpad_get_fd(tp);
+	return 0;
 }
 
 int
