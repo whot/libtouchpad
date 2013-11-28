@@ -285,7 +285,7 @@ void touchpad_free(struct touchpad *tp);
  *
  * @return 0 on success or a negative errno on failure
  */
-int touchpad_set_fd(struct touchpad *tp, int fd);
+int touchpad_change_fd(struct touchpad *tp, int fd);
 /**
  * @ingroup api
  * Re-open the path used in touchpad_new_from_path()

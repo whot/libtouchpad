@@ -146,7 +146,7 @@ touchpad_free(struct touchpad *tp)
 }
 
 int
-touchpad_set_fd(struct touchpad *tp, int fd) {
+touchpad_change_fd(struct touchpad *tp, int fd) {
 	return libevdev_change_fd(tp->dev, fd);
 }
 
@@ -190,7 +190,7 @@ touchpad_reopen(struct touchpad *tp)
 	if (fd < 0)
 		return fd;
 
-	if (touchpad_set_fd(tp, fd) < 0)
+	if (touchpad_change_fd(tp, fd) < 0)
 		return -EINVAL;
 
 	touchpad_reset(tp);
