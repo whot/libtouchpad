@@ -99,4 +99,9 @@ struct tptest_motion_event *tptest_motion_event(union tptest_event *e);
 struct tptest_tap_event *tptest_tap_event(union tptest_event *e);
 struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e);
 
+void tptest_error(const char *msg, ...);
+#define argcheck_log(_file, _line, _func, msg, ...)  \
+	tptest_error("%s:%d %s(): " msg, _file, _line, _func, ## __VA_ARGS__)
+#include <ccan/argcheck/argcheck.h>
+
 #endif /* TPTEST_H */

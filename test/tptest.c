@@ -33,6 +33,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
@@ -303,6 +304,31 @@ static const struct touchpad_interface interface = {
 	.register_timer = register_timer,
 };
 
+static bool errors_allowed = false;
+
+static void
+error_log(const char *format, va_list args)
+{
+	vfprintf(stderr, format, args);
+	if (!errors_allowed)
+		ck_abort_msg("error function hit when errors are not allowed\n");
+}
+
+void
+tptest_error(const char *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	error_log(msg, args);
+	va_end(args);
+}
+
+void
+tptest_allow_errors(bool allow)
+{
+	errors_allowed = allow;
+}
+
 struct tptest_device *
 tptest_create_device(enum tptest_device_type which)
 {
@@ -310,6 +336,8 @@ tptest_create_device(enum tptest_device_type which)
 	int fd;
 	int rc;
 	const char *path;
+
+	touchpad_set_error_log_func(error_log);
 
 	ck_assert(d != NULL);
 
