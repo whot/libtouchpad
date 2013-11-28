@@ -353,6 +353,38 @@ static bool xf86touchpad_calc_scale(struct xf86touchpad *touchpad)
 
 }
 
+static void
+xf86touchpad_log(struct touchpad *tp,
+		 enum touchpad_log_priority priority,
+		 void *data,
+		 const char *format, va_list args)
+{
+	InputInfoPtr pInfo = data;
+	MessageType type;
+	int verbosity;
+
+	switch(priority) {
+		case TOUCHPAD_LOG_BUG:
+		case TOUCHPAD_LOG_ERROR:
+			type = X_ERROR;
+			verbosity = -1;
+			break;
+		case TOUCHPAD_LOG_DEBUG:
+			type = X_INFO;
+			verbosity = 4;
+			break;
+		case TOUCHPAD_LOG_INFO:
+			type = X_INFO;
+			verbosity = 6;
+			break;
+		default:
+			return;
+	}
+
+	LogMessageVerbSigSafe(type, verbosity, "%s: ", pInfo->name);
+	LogVMessageVerbSigSafe(type, verbosity, format, args);
+}
+
 static int xf86touchpad_pre_init(InputDriverPtr drv,
 				 InputInfoPtr pInfo,
 				 int flags)
@@ -382,6 +414,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 		goto fail;
 	}
 
+	touchpad_set_log_func(tp, xf86touchpad_log, pInfo);
 	touchpad_set_interface(tp, &xf86touchpad_interface);
 	touchpad_close(tp);
 
