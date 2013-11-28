@@ -342,6 +342,9 @@ int touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now
  */
 int touchpad_get_fd(struct touchpad *tp);
 
+/**
+ * @return the backend libevdev device
+ */
 struct libevdev *touchpad_get_device(struct touchpad *tp);
 
 #endif
