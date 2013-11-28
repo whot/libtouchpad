@@ -263,6 +263,8 @@ touchpad_handle_event(struct touchpad *tp,
 			break;
 		/* we never get a SYN_DROPPED, it's filtered higer up */
 		case EV_SYN:
+			if (tp->queued == EVENT_NONE)
+				break;
 			tp->ms = timeval_to_millis(&ev->time);
 			touchpad_pre_process_touches(tp);
 			touchpad_post_events(tp, userdata);
