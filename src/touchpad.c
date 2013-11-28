@@ -84,7 +84,6 @@ touchpad_reset(struct touchpad *tp)
 {
 	int i;
 
-	touchpad_config_set_defaults(tp);
 	for (i = 0; i < MAX_TOUCHPOINTS; i++)
 		touch_init(tp, &tp->touches[i]);
 	tp->slot = libevdev_get_current_slot(tp->dev);
@@ -102,6 +101,7 @@ touchpad_alloc(void)
 		tp->dev = libevdev_new();
 		tp->log.func = default_log_func;
 		tp->log.data = NULL;
+		touchpad_config_set_defaults(tp);
 		touchpad_reset(tp);
 	}
 	return tp;
