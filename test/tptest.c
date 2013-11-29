@@ -480,6 +480,20 @@ tptest_touch_move_to(struct tptest_device *d, unsigned int slot, int x_from, int
 	tptest_touch_move(d, slot, x_to, y_to);
 }
 
+void
+tptest_click(struct tptest_device *d, bool is_press)
+{
+
+	struct input_event *ev;
+	struct input_event click[] = {
+		{ .type = EV_KEY, .code = BTN_LEFT, .value = is_press ? 1 : 0 },
+		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
+	};
+
+	ARRAY_FOR_EACH(click, ev)
+		tptest_event(d, ev->type, ev->code, ev->value);
+}
+
 struct tptest_button_event *tptest_button_event(union tptest_event *e)
 {
 	assert(e->type == EVTYPE_BUTTON);
