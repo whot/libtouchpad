@@ -1,2 +1,8 @@
 test-*.log
 test-*.trs
+test-tap
+test-config
+test-scroll
+test-device
+test-events
+test-build-pedantic
