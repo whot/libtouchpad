@@ -203,6 +203,7 @@ touchpad_tap_touch2_handle_event(struct touchpad *tp, enum tap_event event, void
 			touchpad_tap_clear_timer(tp, userdata);
 			break;
 		case TAP_EVENT_MOTION:
+			touchpad_tap_clear_timer(tp, userdata);
 		case TAP_EVENT_TIMEOUT:
 			tp->tap.state = TAP_STATE_TOUCH_2_HOLD;
 			break;
