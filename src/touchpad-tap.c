@@ -494,8 +494,10 @@ touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata
 	if (!tp->tap.config.enabled)
 		return 0;
 
-	if (tp->tap.timeout && tp->tap.timeout <= ms)
+	if (tp->tap.timeout && tp->tap.timeout <= ms) {
+		touchpad_tap_clear_timer(tp, userdata);
 		touchpad_tap_handle_event(tp, TAP_EVENT_TIMEOUT, userdata);
+	}
 
 	return tp->tap.timeout;
 }
