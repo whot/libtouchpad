@@ -68,8 +68,8 @@ struct touch_history {
 
 struct touch {
 	bool dirty;
-	bool pointer; /* is this the pointer-moving touchpoint? */
-	bool pinned; /* touch is pinned from phys. button press, movement is ignored */
+	bool pointer; /**< is this the pointer-moving touchpoint? */
+	bool pinned; /**< touch is pinned from phys. button press, movement is ignored */
 
 	enum touch_state state;
 	int millis;
