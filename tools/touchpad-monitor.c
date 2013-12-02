@@ -140,6 +140,9 @@ int main (int argc, char **argv) {
 		return 1;
 	}
 
+	if (!isatty(fileno(stdout)))
+		setbuf(stdout, NULL);
+
 	rc = touchpad_new_from_fd(fd, &tp);
 	assert(rc == 0);
 	touchpad_set_interface(tp, &interface);
