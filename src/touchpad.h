@@ -262,14 +262,15 @@ struct touchpad_interface {
 /**
  * @ingroup api
  *
- * Create a new touchpad device from the given path. The caller must
- * check permissions.
+ * Create a new touchpad device from the given fd. The caller must
+ * manage the actual fd, libtouchpad merely uses it.
  *
- * @param path The path to the device file
+ * @param fd Already opened fd to the device
  * @param tp Set to the new touchpad device, undefined on failure
  * @return 0 on success or a negative errno on failure.
  */
-int touchpad_new_from_path(const char *path, struct touchpad **tp);
+int touchpad_new_from_fd(int fd, struct touchpad **tp);
+
 /**
  * @ingroup api
  * Free the touchpad device.
@@ -280,30 +281,17 @@ void touchpad_free(struct touchpad *tp);
  *
  * Set the file descriptor for an existing touchpad device. If the device
  * was opened externally and the fd changed, use this call to change the
- * internal fd.
+ * internal fd. Changing the fd resets run-time information about
+ * touchpoints etc. inside the library.
+ *
  * @param tp A previously opened touchpad device
- * @param fd The new file descriptor
+ * @param fd The new file descriptor, maybe -1 to signal "closing" the
+ * device
  *
  * @return 0 on success or a negative errno on failure
  */
 int touchpad_change_fd(struct touchpad *tp, int fd);
-/**
- * @ingroup api
- * Re-open the path used in touchpad_new_from_path()
- *
- * @param tp A previously opened touchpad device
- * @return 0 on success or a negative errno on failure
- */
-int touchpad_reopen(struct touchpad *tp);
-/**
- * @ingroup api
- *
- * Close the current fd for this device but don't free any information.
- *
- * @param tp A previously opened touchpad device
- * @return 0 on success or a negative errno on failure
- */
-int touchpad_close(struct touchpad *tp);
+
 /**
  * @ingroup api
  *

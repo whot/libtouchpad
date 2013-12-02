@@ -26,30 +26,24 @@
 
 #include <check.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "tptest.h"
 #include "touchpad-util.h"
 #include "touchpad-config.h"
 
-START_TEST(device_open_invalid_path)
-{
-	int rc;
-	struct touchpad *tp = NULL;
-
-	rc = touchpad_new_from_path("/tmp", &tp);
-	ck_assert(tp == NULL);
-	ck_assert_int_eq(rc, -ENOTTY);
-}
-END_TEST
-
 START_TEST(device_open_invalid_device)
 {
-	int rc;
+	int rc, fd;
 	struct touchpad *tp = NULL;
 
-	rc = touchpad_new_from_path("/dev/input/event0", &tp);
+	fd = open("/dev/input/event0", O_RDONLY);
+	ck_assert_int_ge(fd, 0);
+	rc = touchpad_new_from_fd(fd, &tp);
 	ck_assert(tp == NULL);
 	ck_assert_int_eq(rc, -ECANCELED);
+	close(fd);
 }
 END_TEST
 
@@ -74,22 +68,9 @@ START_TEST(device_change_fd)
 }
 END_TEST
 
-START_TEST(device_reopen)
-{
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-
-	touchpad_close(dev->touchpad);
-	ck_assert_int_eq(touchpad_reopen(dev->touchpad), 0);
-
-	tptest_delete_device(dev);
-}
-END_TEST
-
 int main(void) {
 	tptest_add("device", "open", device_open_invalid_device);
-	tptest_add("device", "open", device_open_invalid_path);
 	tptest_add("device", "open", device_change_fd);
-	tptest_add("device", "open", device_reopen);
 
 	return tptest_run();
 }

@@ -354,7 +354,8 @@ tptest_create_device(enum tptest_device_type which)
 
 	rc = libevdev_new_from_fd(fd, &d->evdev);
 	ck_assert_int_eq(rc, 0);
-	rc = touchpad_new_from_path(path, &d->touchpad);
+
+	rc = touchpad_new_from_fd(fd, &d->touchpad);
 	ck_assert_int_eq(rc, 0);
 	touchpad_set_interface(d->touchpad, &interface);
 

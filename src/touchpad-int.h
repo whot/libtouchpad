@@ -152,7 +152,6 @@ struct touchpad_config {
 
 struct touchpad {
     struct libevdev *dev;
-    char *path;
     int fingers_down;		/* number of fingers down */
     int slot;			/* current slot */
 

@@ -29,11 +29,13 @@
 #include <sys/timerfd.h>
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <poll.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 #include "touchpad.h"
@@ -123,6 +125,7 @@ int mainloop(struct touchpad *tp, struct tpdata *data) {
 
 int main (int argc, char **argv) {
 	int rc;
+	int fd;
 	const char *path;
 	struct touchpad *tp;
 	struct tpdata tpdata;
@@ -131,8 +134,13 @@ int main (int argc, char **argv) {
 		return usage();
 
 	path = argv[1];
+	fd = open(path, O_RDONLY|O_NONBLOCK);
+	if (fd < 0) {
+		fprintf(stderr, "Error opening the device: %s\n", strerror(errno));
+		return 1;
+	}
 
-	rc = touchpad_new_from_path(path, &tp);
+	rc = touchpad_new_from_fd(fd, &tp);
 	assert(rc == 0);
 	touchpad_set_interface(tp, &interface);
 
@@ -140,6 +148,8 @@ int main (int argc, char **argv) {
 	assert(tpdata.timerfd > -1);
 
 	mainloop(tp, &tpdata);
+
+	close(fd);
 
 	return 0;
 }

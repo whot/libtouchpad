@@ -25,7 +25,10 @@
 #include "config.h"
 #endif
 
+#include <errno.h>
+#include <fcntl.h>
 #include <time.h>
+#include <unistd.h>
 #include <xorg-server.h>
 #include <exevents.h>
 #include <xf86Xinput.h>
@@ -40,6 +43,7 @@
 #define TOUCHPAD_NUM_AXES 4 /* x, y, hscroll, vscroll */
 
 struct xf86touchpad {
+	char *path;
 	struct touchpad *tp;
 	OsTimerPtr timer;
 
@@ -66,17 +70,21 @@ static int
 xf86touchpad_on(DeviceIntPtr dev)
 {
 	InputInfoPtr pInfo = dev->public.devicePrivate;
+	struct xf86touchpad *touchpad = pInfo->private;
 	struct touchpad *tp = xf86touchpad(pInfo);
-	int rc;
+	int fd;
+	struct libevdev *evdev;
 
-	rc = touchpad_reopen(tp);
-	if (rc == 0) {
-		struct libevdev *evdev = touchpad_get_device(tp);
-		libevdev_set_clock_id(evdev, CLOCK_MONOTONIC);
-		pInfo->fd = touchpad_get_fd(tp);
-		xf86AddEnabledDevice(pInfo);
-		dev->public.on = TRUE;
-	}
+	fd = open(touchpad->path, O_RDONLY|O_NONBLOCK);
+	if (fd < 0)
+		return !Success;
+
+	pInfo->fd = fd;
+	touchpad_change_fd(tp, fd);
+	evdev = touchpad_get_device(tp);
+	libevdev_set_clock_id(evdev, CLOCK_MONOTONIC);
+	xf86AddEnabledDevice(pInfo);
+	dev->public.on = TRUE;
 
 	return dev->public.on ? Success : !Success;
 }
@@ -87,8 +95,9 @@ xf86touchpad_off(DeviceIntPtr dev)
 	InputInfoPtr pInfo = dev->public.devicePrivate;
 	struct touchpad *tp = xf86touchpad(pInfo);
 
-	touchpad_close(tp);
 	xf86RemoveEnabledDevice(pInfo);
+	touchpad_change_fd(tp, -1);
+	close(pInfo->fd);
 	pInfo->fd = -1;
 	dev->public.on = FALSE;
 	return Success;
@@ -421,16 +430,22 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	device = xf86SetStrOption(pInfo->options, "Device", NULL);
 	if (!device)
 		goto fail;
-	rc = touchpad_new_from_path(device, &tp);
+
+	pInfo->fd = open(device, O_RDONLY|O_NONBLOCK);
+	if (pInfo->fd == -1) {
+		xf86IDrvMsg(pInfo, X_ERROR, "Opening %s failed with %s\n", device, strerror(errno));
+		goto fail;
+	}
+	rc = touchpad_new_from_fd(pInfo->fd, &tp);
 	if (rc != 0) {
-		xf86IDrvMsg(pInfo, X_ERROR, "Opening %s failed with %s\n", device, strerror(-rc));
+		xf86IDrvMsg(pInfo, X_ERROR, "Creating a touchpad for %s failed with %s\n", device, strerror(-rc));
 		goto fail;
 	}
 
 	touchpad_set_error_log_func(xf86touchpad_error_log);
 	touchpad_set_log_func(tp, xf86touchpad_log, pInfo);
 	touchpad_set_interface(tp, &xf86touchpad_interface);
-	touchpad_close(tp);
+	touchpad_change_fd(tp, -1);
 
 	if (!xf86touchpad_apply_config(pInfo, tp))
 		goto fail;
@@ -440,6 +455,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 	driver_data->timer = TimerSet(NULL, 0, 0, NULL, NULL);
 	pInfo->private = driver_data;
 	driver_data->tp = tp;
+	driver_data->path = device;
 
 	if (!xf86touchpad_calc_scale(driver_data))
 		goto fail;
@@ -449,6 +465,7 @@ static int xf86touchpad_pre_init(InputDriverPtr drv,
 fail:
 	if (driver_data && driver_data->timer)
 		TimerFree(driver_data->timer);
+	close(pInfo->fd);
 	free(device);
 	free(driver_data);
 	return BadValue;
@@ -464,6 +481,7 @@ xf86touchpad_uninit(InputDriverPtr drv,
 		struct touchpad *tp = xf86touchpad(pInfo);
 		touchpad_free(tp);
 		TimerFree(touchpad->timer);
+		free(touchpad->path);
 		free(touchpad);
 		pInfo->private = NULL;
 	}

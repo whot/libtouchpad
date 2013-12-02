@@ -138,22 +138,16 @@ open_path(const char *path)
 }
 
 int
-touchpad_new_from_path(const char *path, struct touchpad **tp_out)
+touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 {
 	struct touchpad *tp;
-	int fd, rc;
+	int rc;
 	int ntouches;
 
-	if (!path)
-		return -EINVAL;
+	if (fd < 0)
+		return -EBADF;
 
 	tp = touchpad_alloc();
-
-	fd = open_path(path);
-	if (fd < 0) {
-		rc = fd;
-		goto fail;
-	}
 
 	rc = libevdev_set_fd(tp->dev, fd);
 	if (rc < 0)
@@ -167,12 +161,10 @@ touchpad_new_from_path(const char *path, struct touchpad **tp_out)
 
 	tp->ntouches = ntouches;
 	tp->slot = libevdev_get_current_slot(tp->dev);
-	tp->path = strdup(path);
 
 	*tp_out = tp;
 	return 0;
 fail:
-	close(fd);
 	touchpad_free(tp);
 	return rc;
 }
@@ -184,63 +176,22 @@ touchpad_free(struct touchpad *tp)
 		return;
 
 	libevdev_free(tp->dev);
-	free(tp->path);
 	free(tp);
 }
 
 int
 touchpad_change_fd(struct touchpad *tp, int fd) {
-	return libevdev_change_fd(tp->dev, fd);
-}
-
-
-int
-touchpad_close(struct touchpad *tp)
-{
-	int fd;
-
-	if (!argcheck_ptr_not_null(tp))
-		return 0;
-
-	fd = libevdev_get_fd(tp->dev);
-	if (fd > -1) {
-		close(fd);
-		libevdev_change_fd(tp->dev, -1);
+	int rc;
+	rc = libevdev_change_fd(tp->dev, fd);
+	if (rc == 0)
 		touchpad_reset(tp);
-	}
-
-	return 0;
+	return rc;
 }
 
 int
 touchpad_get_fd(struct touchpad *tp)
 {
 	return libevdev_get_fd(tp->dev);
-}
-
-
-int
-touchpad_reopen(struct touchpad *tp)
-{
-	int fd;
-
-	if (!argcheck_ptr_not_null(tp))
-		return -ENODEV;
-
-	fd = libevdev_get_fd(tp->dev);
-	if (fd > -1)
-		return 0;
-
-	fd = open_path(tp->path);
-	if (fd < 0)
-		return fd;
-
-	if (touchpad_change_fd(tp, fd) < 0)
-		return -EINVAL;
-
-	touchpad_reset(tp);
-
-	return 0;
 }
 
 int
