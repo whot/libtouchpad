@@ -45,6 +45,26 @@ enum touchpad_config_parameter {
 	TOUCHPAD_CONFIG_SCROLL_DELTA_VERT,
 	TOUCHPAD_CONFIG_SCROLL_DELTA_HORIZ,
 	TOUCHPAD_CONFIG_MOTION_HISTORY_SIZE,
+	TOUCHPAD_CONFIG_SOFTBUTTON_TOP, /* in % of the height */
+	TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, /* 0 for bottom, 1 for top */
+	TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, /* in % of the touchpad width */
+	TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, /* in % of the touchpad width*/
+	/**
+	 * The timeout in ms until leaving a software-defined button counts
+	 * as leaving a button proper. For example, if the finger moves from
+	 * the right-button area into the general touchpad area, after this
+	 * timeout the finger will not generate right-button events anymore.
+	 */
+	TOUCHPAD_CONFIG_SOFTBUTTON_LEAVE_TIMEOUT,
+
+	/**
+	 * The timeout in ms until entering a software-defined button counts
+	 * as entering that button proper. For example, if the finger starts
+	 * in the left button area but moves to the right button area within
+	 * this timeout (and stays there until the timeout expires), the
+	 * finger will trigger right button events.
+	 */
+	TOUCHPAD_CONFIG_SOFTBUTTON_ENTER_TIMEOUT,
 
 	TOUCHPAD_CONFIG_LAST,
 	/**

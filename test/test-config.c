@@ -101,10 +101,141 @@ START_TEST(config_set_tap_enabled)
 }
 END_TEST
 
+START_TEST(config_buttons_get_defaults)
+{
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	int values[4];
+
+	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, &values[0],
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, &values[1],
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, &values[2],
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, &values[3],
+					     TOUCHPAD_CONFIG_NONE), 0);
+	ck_assert_int_ge(values[0], 0);
+	ck_assert_int_ge(values[1], 0);
+	ck_assert_int_ge(values[2], 0);
+	ck_assert_int_ge(values[3], 0);
+	ck_assert_int_le(values[0], 100);
+	ck_assert_int_le(values[1], 100);
+	ck_assert_int_le(values[2], 100);
+	ck_assert_int_le(values[3], 100);
+	ck_assert_int_le(values[0], values[1]);
+	ck_assert_int_le(values[2], values[3]);
+	tptest_delete_device(dev);
+}
+END_TEST
+
+START_TEST(config_buttons_set_invalid)
+{
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	enum touchpad_config_error error;
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 101,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 0,
+					     TOUCHPAD_CONFIG_NONE), 1);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 101,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 0,
+					     TOUCHPAD_CONFIG_NONE), 2);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 101,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 0,
+					     TOUCHPAD_CONFIG_NONE), 3);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 101,
+					     TOUCHPAD_CONFIG_NONE), 4);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_HIGH);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, -1,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 0,
+					     TOUCHPAD_CONFIG_NONE), 1);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, -1,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 0,
+					     TOUCHPAD_CONFIG_NONE), 2);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, -1,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 0,
+					     TOUCHPAD_CONFIG_NONE), 3);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW);
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 0,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, -1,
+					     TOUCHPAD_CONFIG_NONE), 4);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW);
+
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
+START_TEST(config_buttons_set_get)
+{
+	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	enum touchpad_config_error error;
+	int values[4];
+
+	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, 30,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, 70,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, 40,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 90,
+					     TOUCHPAD_CONFIG_NONE), 0);
+	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_NO_ERROR);
+	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT, &values[0],
+					     TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT, &values[1],
+					     TOUCHPAD_CONFIG_SOFTBUTTON_TOP, &values[2],
+					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, &values[3],
+					     TOUCHPAD_CONFIG_NONE), 0);
+	ck_assert_int_eq(values[0], 30);
+	ck_assert_int_eq(values[1], 70);
+	ck_assert_int_eq(values[2], 40);
+	ck_assert_int_eq(values[3], 90);
+
+	tptest_delete_device(dev);
+}
+END_TEST
+
 int main(void) {
 	tptest_add("config", "config_get", config_get);
 	tptest_add("config", "config_get", config_get_invalid);
 	tptest_add("config", "config_get", config_get_empty);
 	tptest_add("config", "config_set", config_set_tap_enabled);
+
+	tptest_add("config", "config_buttons", config_buttons_get_defaults);
+	tptest_add("config", "config_buttons", config_buttons_set_invalid);
+	tptest_add("config", "config_buttons", config_buttons_set_get);
 	return tptest_run();
 }

@@ -7,7 +7,7 @@ libtptest_la_SOURCES = \
 	tptest.h \
 	tptest.c
 
-noinst_PROGRAMS = test-tap test-config test-scroll test-device test-events test-build-pedantic
+noinst_PROGRAMS = test-tap test-config test-scroll test-device test-events test-buttons test-build-pedantic
 
 TESTS = $(noinst_PROGRAMS)
 
@@ -26,6 +26,10 @@ test_scroll_LDFLAGS = -static
 test_device_SOURCES = test-device.c
 test_device_LDADD = $(TEST_LIBS)
 test_device_LDFLAGS = -static
+
+test_buttons_SOURCES = test-buttons.c
+test_buttons_LDADD = $(TEST_LIBS)
+test_buttons_LDFLAGS = -static
 
 test_events_SOURCES = test-events.c
 test_events_LDADD = $(TEST_LIBS)

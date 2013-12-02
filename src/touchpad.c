@@ -91,10 +91,12 @@ touchpad_set_error_log_func(touchpad_error_log_func_t func)
 	error_log_func = func;
 }
 
-void touch_init(struct touchpad *tp, struct touch *t)
+void
+touch_init(struct touchpad *tp, struct touch *t)
 {
 	t->x = t->y = 0;
 	t->state = TOUCH_NONE;
+	t->button_state = BUTTON_STATE_NONE;
 	touchpad_history_reset(tp, t);
 }
 
@@ -120,7 +122,7 @@ touchpad_alloc(void)
 		tp->dev = libevdev_new();
 		tp->log.func = default_log_func;
 		tp->log.data = NULL;
-		touchpad_config_set_defaults(tp);
+		touchpad_config_set_static_defaults(tp);
 		touchpad_reset(tp);
 	}
 	return tp;
@@ -161,6 +163,8 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 
 	tp->ntouches = ntouches;
 	tp->slot = libevdev_get_current_slot(tp->dev);
+
+	touchpad_config_set_dynamic_defaults(tp);
 
 	*tp_out = tp;
 	return 0;
@@ -282,10 +286,21 @@ touchpad_request_timer(struct touchpad *tp, void *userdata,
 static int
 touchpad_handle_timeouts(struct touchpad *tp, void *userdata, unsigned int now)
 {
+	int timeout;
+	int next_timeout = INT_MAX;
+
 	if (tp->next_timeout == 0 || tp->next_timeout > now)
 		return 0;
 
-	tp->next_timeout = touchpad_tap_handle_timeout(tp, now, userdata);
+	timeout = touchpad_button_handle_timeout(tp, now, userdata);
+	if (timeout)
+		next_timeout = timeout;
+
+	timeout = touchpad_tap_handle_timeout(tp, now, userdata);
+	if (timeout)
+		next_timeout = min(timeout, next_timeout);
+
+	tp->next_timeout = (next_timeout == INT_MAX) ? 0 : next_timeout;
 	if (tp->next_timeout)
 		argcheck_uint_ge(tp->next_timeout, now);
 
