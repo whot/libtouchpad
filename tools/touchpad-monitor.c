@@ -25,6 +25,7 @@
 #include "config.h"
 #endif
 
+#include <libevdev/libevdev.h>
 #include <sys/time.h>
 #include <sys/timerfd.h>
 #include <assert.h>
@@ -47,25 +48,25 @@ struct tpdata {
 static void
 motion(struct touchpad *tp, void *userdata, int x, int y)
 {
-	printf("motion: %d/%d\n", x, y);
+	printf("%4d/%-4d\n", x, y);
 }
 
 static void
 button(struct touchpad *tp, void *userdata, unsigned int button, bool is_press)
 {
-	printf("button: %d %s\n", button, is_press ? "press" : "release");
+	printf("%10s %s (%s)\n", "", libevdev_event_code_get_name(EV_KEY, button), is_press ? "press" : "release");
 }
 
 static void
 tap(struct touchpad *tp, void *userdata, unsigned int fingers, bool is_press)
 {
-	printf("tap button: %d %s\n", fingers, is_press ? "press" : "release");
+	printf("%30s tap %d (%s)\n", "", fingers, is_press ? "press" : "release");
 }
 
 static void
 scroll(struct touchpad *tp, void *userdata, enum touchpad_scroll_direction dir, double units)
 {
-	printf("scroll: %s %.2f\n", dir == TOUCHPAD_SCROLL_HORIZONTAL ? "horizontal" : "vertical", units);
+	printf("%50s %s scroll: %.2f\n", "", dir == TOUCHPAD_SCROLL_HORIZONTAL ? "horizontal" : "vertical", units);
 }
 
 static int
