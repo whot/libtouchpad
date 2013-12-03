@@ -49,7 +49,7 @@ END_TEST
 
 START_TEST(device_change_fd)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	int fd;
 
 	fd = touchpad_get_fd(dev->touchpad);
@@ -63,14 +63,12 @@ START_TEST(device_change_fd)
 
 	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, fd));
 	ck_assert_int_eq(fd, touchpad_get_fd(dev->touchpad));
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 int main(void) {
-	tptest_add("device", "open", device_open_invalid_device);
-	tptest_add("device", "open", device_change_fd);
+	tptest_add("device_open", device_open_invalid_device, TOUCHPAD_NO_DEVICE);
+	tptest_add("device_open", device_change_fd, TOUCHPAD_ALL_DEVICES);
 
 	return tptest_run();
 }

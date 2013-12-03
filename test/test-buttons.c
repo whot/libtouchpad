@@ -35,7 +35,7 @@
 
 START_TEST(left_click_generic)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
@@ -61,14 +61,12 @@ START_TEST(left_click_generic)
 
 	ck_assert(btn_down);
 	ck_assert(btn_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(left_click_in_area)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
@@ -101,14 +99,12 @@ START_TEST(left_click_in_area)
 
 	ck_assert(btn_down);
 	ck_assert(btn_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(left_click_in_area_with_rbtn)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
@@ -141,14 +137,12 @@ START_TEST(left_click_in_area_with_rbtn)
 
 	ck_assert(btn_down);
 	ck_assert(btn_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(right_click_in_area)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
@@ -181,14 +175,12 @@ START_TEST(right_click_in_area)
 
 	ck_assert(btn_down);
 	ck_assert(btn_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(right_click_in_area_with_lbtn)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
@@ -221,14 +213,12 @@ START_TEST(right_click_in_area_with_lbtn)
 
 	ck_assert(btn_down);
 	ck_assert(btn_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(right_click_whole_touchpad)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
@@ -261,19 +251,17 @@ START_TEST(right_click_whole_touchpad)
 
 	ck_assert(btn_down);
 	ck_assert(btn_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 int main(void) {
-	tptest_add("buttons", "left_click", left_click_generic);
-	tptest_add("buttons", "left_click", left_click_in_area);
-	tptest_add("buttons", "left_click", left_click_in_area_with_rbtn);
+	tptest_add("buttons_left_click", left_click_generic, TOUCHPAD_ALL_DEVICES);
+	tptest_add("buttons_left_click", left_click_in_area, TOUCHPAD_ALL_DEVICES);
+	tptest_add("buttons_left_click", left_click_in_area_with_rbtn, TOUCHPAD_ALL_DEVICES);
 
-	tptest_add("buttons", "right_click", right_click_in_area);
-	tptest_add("buttons", "right_click", right_click_in_area_with_lbtn);
-	tptest_add("buttons", "right_click", right_click_whole_touchpad);
+	tptest_add("buttons_right_click", right_click_in_area, TOUCHPAD_ALL_DEVICES);
+	tptest_add("buttons_right_click", right_click_in_area_with_lbtn, TOUCHPAD_ALL_DEVICES);
+	tptest_add("buttons_right_click", right_click_whole_touchpad, TOUCHPAD_ALL_DEVICES);
 
 	return tptest_run();
 }

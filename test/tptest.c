@@ -51,6 +51,7 @@ struct test {
 	struct list_node node;
 	char *name;
 	TCase *tc;
+	enum tptest_device_type devices;
 };
 
 struct suite {
@@ -60,14 +61,62 @@ struct suite {
 	Suite *suite;
 };
 
+static struct tptest_device *current_device;
+
+struct tptest_device *tptest_current_device(void) {
+	return current_device;
+}
+
+static void synaptics_clickpad_setup(void)
+{
+	current_device = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+}
+
+static void device_teardown(void)
+{
+	tptest_delete_device(current_device);
+	current_device = NULL;
+}
+
+struct device {
+	enum tptest_device_type type;
+	const char *shortname;
+	void (*setup)(void);
+	void (*teardown)(void);
+} devices[] = {
+	{
+		.type = TOUCHPAD_SYNAPTICS_CLICKPAD,
+		.shortname = "synaptics",
+		.setup = synaptics_clickpad_setup,
+		.teardown = device_teardown,
+	},
+	{ TOUCHPAD_NO_DEVICE, "no device", NULL, NULL },
+};
+
+
 static struct list_head all_tests = LIST_HEAD_INIT(all_tests);
 
+const struct device*
+lookup_device(enum tptest_device_type type)
+{
+	struct device *d = devices;
+	while (d->type != TOUCHPAD_NO_DEVICE) {
+		if (d->type == type)
+			return d;
+		d++;
+	}
+	return d;
+}
+
 static void
-tptest_add_tcase(struct suite *suite, const char *name, void *func)
+tptest_add_tcase_for_device(struct suite *suite, void *func, enum tptest_device_type device)
 {
 	struct test *t;
+	const struct device *dev = lookup_device(device);
+	const char *test_name = dev->shortname;
+
 	list_for_each(&suite->tests, t, node) {
-		if (strcmp(t->name, name) != 0)
+		if (strcmp(t->name, test_name) != 0)
 			continue;
 
 		tcase_add_test(t->tc, func);
@@ -75,31 +124,47 @@ tptest_add_tcase(struct suite *suite, const char *name, void *func)
 	}
 
 	t = zalloc(sizeof(*t));
-	t->name = strdup(name);
-	t->tc = tcase_create(name);
+	t->name = strdup(test_name);
+	t->tc = tcase_create(test_name);
 	list_add_tail(&suite->tests, &t->node);
+	if (device != TOUCHPAD_NO_DEVICE)
+		tcase_add_checked_fixture(t->tc, dev->setup, dev->teardown);
 	tcase_add_test(t->tc, func);
 	suite_add_tcase(suite->suite, t->tc);
 }
 
+static void
+tptest_add_tcase(struct suite *suite, void *func, enum tptest_device_type devices)
+{
+	if (devices != TOUCHPAD_NO_DEVICE) {
+		enum tptest_device_type mask = TOUCHPAD_SYNAPTICS_CLICKPAD;
+		while (mask <= devices) {
+			if (devices & mask)
+				tptest_add_tcase_for_device(suite, func, mask);
+			mask <<= 1;
+		}
+	} else
+		tptest_add_tcase_for_device(suite, func, TOUCHPAD_NO_DEVICE);
+}
+
 void
-tptest_add(const char *suite, const char *name, void *func)
+tptest_add(const char *name, void *func, enum tptest_device_type devices)
 {
 	struct suite *s;
 
 	list_for_each(&all_tests, s, node) {
-		if (strcmp(s->name, suite) == 0) {
-			tptest_add_tcase(s, name, func);
+		if (strcmp(s->name, name) == 0) {
+			tptest_add_tcase(s, func, devices);
 			return;
 		}
 	}
 
 	s = zalloc(sizeof(*s));
-	s->name = strdup(suite);
+	s->name = strdup(name);
 	s->suite = suite_create(s->name);
 	list_head_init(&s->tests);
 	list_add_tail(&all_tests, &s->node);
-	tptest_add_tcase(s, name, func);
+	tptest_add_tcase(s, func, devices);
 }
 
 int is_debugger_attached()
@@ -344,6 +409,9 @@ tptest_create_device(enum tptest_device_type which)
 	switch(which) {
 		case TOUCHPAD_SYNAPTICS_CLICKPAD:
 			tptest_create_synaptics_clickpad(d);
+			break;
+		case TOUCHPAD_NO_DEVICE:
+			ck_abort_msg("Invalid device type %d\n", which);
 			break;
 	}
 

@@ -34,7 +34,7 @@ START_TEST(scroll_two_finger_vert_down)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 2000, 2000);
 	tptest_touch_down(dev, 1, 3000, 2000);
 	tptest_touch_move_to(dev, 0, 2000, 2000, 2000, 4000, -1);
@@ -57,8 +57,6 @@ START_TEST(scroll_two_finger_vert_down)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -68,7 +66,7 @@ START_TEST(scroll_two_finger_vert_up)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 2000, 4000);
 	tptest_touch_down(dev, 1, 3000, 4000);
 	tptest_touch_move_to(dev, 0, 2000, 4000, 2000, 2000, -1);
@@ -91,8 +89,6 @@ START_TEST(scroll_two_finger_vert_up)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -102,7 +98,7 @@ START_TEST(scroll_two_finger_single_finger_vert_down)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 2000, 2000);
 	tptest_touch_down(dev, 1, 3000, 2000);
 	tptest_touch_move_to(dev, 1, 3000, 2000, 3000, 4000, -1);
@@ -124,8 +120,6 @@ START_TEST(scroll_two_finger_single_finger_vert_down)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -135,7 +129,7 @@ START_TEST(scroll_two_finger_single_finger_vert_up)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 2000, 4000);
 	tptest_touch_down(dev, 1, 3000, 4000);
 	tptest_touch_move_to(dev, 1, 3000, 4000, 3000, 2000, -1);
@@ -157,8 +151,6 @@ START_TEST(scroll_two_finger_single_finger_vert_up)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -168,7 +160,7 @@ START_TEST(scroll_two_finger_vert_lock)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 	touchpad_config_set(dev->touchpad, NULL,
 			    TOUCHPAD_CONFIG_SCROLL_METHOD,
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL|TOUCHPAD_SCROLL_VERTICAL,
@@ -199,8 +191,6 @@ START_TEST(scroll_two_finger_vert_lock)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -210,7 +200,7 @@ START_TEST(scroll_two_finger_horiz_right)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 
 	touchpad_config_set(dev->touchpad, NULL,
 			    TOUCHPAD_CONFIG_SCROLL_METHOD,
@@ -239,8 +229,6 @@ START_TEST(scroll_two_finger_horiz_right)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -250,7 +238,7 @@ START_TEST(scroll_two_finger_horiz_left)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 
 	touchpad_config_set(dev->touchpad, NULL,
 			    TOUCHPAD_CONFIG_SCROLL_METHOD,
@@ -279,8 +267,6 @@ START_TEST(scroll_two_finger_horiz_left)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -290,7 +276,7 @@ START_TEST(scroll_two_finger_single_finger_horiz_right)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 
 	touchpad_config_set(dev->touchpad, NULL,
 			    TOUCHPAD_CONFIG_SCROLL_METHOD,
@@ -318,8 +304,6 @@ START_TEST(scroll_two_finger_single_finger_horiz_right)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -329,7 +313,7 @@ START_TEST(scroll_two_finger_single_finger_horiz_left)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 
 	touchpad_config_set(dev->touchpad, NULL,
 			    TOUCHPAD_CONFIG_SCROLL_METHOD,
@@ -357,8 +341,6 @@ START_TEST(scroll_two_finger_single_finger_horiz_left)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -368,7 +350,7 @@ START_TEST(scroll_two_finger_horiz_lock)
 	union tptest_event *e;
 	union tptest_event *scroll = NULL;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	dev = tptest_current_device();
 
 	touchpad_config_set(dev->touchpad, NULL,
 			    TOUCHPAD_CONFIG_SCROLL_METHOD,
@@ -400,22 +382,20 @@ START_TEST(scroll_two_finger_horiz_lock)
 
 	ck_assert(scroll != NULL);
 	ck_assert(scroll->scroll.units == 0.0);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 int main(void) {
-	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_vert_down);
-	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_vert_up);
-	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_single_finger_vert_down);
-	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_single_finger_vert_up);
-	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_vert_lock);
+	tptest_add("scroll_two_finger_vert", scroll_two_finger_vert_down, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_vert", scroll_two_finger_vert_up, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_vert", scroll_two_finger_single_finger_vert_down, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_vert", scroll_two_finger_single_finger_vert_up, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_vert", scroll_two_finger_vert_lock, TOUCHPAD_ALL_DEVICES);
 
-	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_horiz_left);
-	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_horiz_right);
-	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_left);
-	tptest_add("scroll", "scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_right);
-	tptest_add("scroll", "scroll_two_finger_vert", scroll_two_finger_horiz_lock);
+	tptest_add("scroll_two_finger_horiz", scroll_two_finger_horiz_left, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_horiz", scroll_two_finger_horiz_right, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_left, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_right, TOUCHPAD_ALL_DEVICES);
+	tptest_add("scroll_two_finger_vert", scroll_two_finger_horiz_lock, TOUCHPAD_ALL_DEVICES);
 	return tptest_run();
 }
