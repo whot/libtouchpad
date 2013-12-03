@@ -171,7 +171,7 @@ tptest_run(void) {
 }
 
 static void
-test_commmon_create_synaptics_clickpad(struct tptest_device *d)
+tptest_create_synaptics_clickpad(struct tptest_device *d)
 {
 	struct libevdev *dev;
 	struct input_absinfo abs[] = {
@@ -343,7 +343,7 @@ tptest_create_device(enum tptest_device_type which)
 
 	switch(which) {
 		case TOUCHPAD_SYNAPTICS_CLICKPAD:
-			test_commmon_create_synaptics_clickpad(d);
+			tptest_create_synaptics_clickpad(d);
 			break;
 	}
 
