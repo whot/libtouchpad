@@ -6,3 +6,4 @@ test-scroll
 test-device
 test-events
 test-build-pedantic
+test-buttons
