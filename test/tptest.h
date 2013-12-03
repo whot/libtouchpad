@@ -86,7 +86,7 @@ struct tptest_device {
 };
 
 void tptest_add(const char *name, void *func, enum tptest_device_type devices);
-int tptest_run(void);
+int tptest_run(int argc, char **argv);
 struct tptest_device * tptest_create_device(enum tptest_device_type which);
 struct tptest_device *tptest_current_device(void);
 void tptest_delete_device(struct tptest_device *d);

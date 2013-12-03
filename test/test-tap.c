@@ -540,7 +540,7 @@ START_TEST(tap_double_finger_hold_tap)
 }
 END_TEST
 
-int main(void) {
+int main(int argc, char **argv) {
 	tptest_add("tap_single_finger", tap_single_finger, TOUCHPAD_ALL_DEVICES);
 	tptest_add("tap_single_finger", tap_single_finger_move, TOUCHPAD_ALL_DEVICES);
 	tptest_add("tap_single_finger", tap_single_finger_hold, TOUCHPAD_ALL_DEVICES);
@@ -555,5 +555,5 @@ int main(void) {
 	tptest_add("tap_double_finger", tap_double_finger_hold, TOUCHPAD_ALL_DEVICES);
 	tptest_add("tap_double_finger", tap_double_finger_hold_tap, TOUCHPAD_ALL_DEVICES);
 	tptest_add("tap_double_finger", tap_double_finger_move_tap, TOUCHPAD_ALL_DEVICES);
-	return tptest_run();
+	return tptest_run(argc, argv);
 }

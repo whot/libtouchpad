@@ -72,10 +72,10 @@ START_TEST(events_touch_start_finish_same_event)
 }
 END_TEST
 
-int main(void) {
+int main(int argc, char **argv) {
 	tptest_add("events_invalid_touches", events_EV_SYN_only, TOUCHPAD_ALL_DEVICES);
 	tptest_add("events_invalid_touches", events_ABS_MT_TRACKING_ID_finishes, TOUCHPAD_ALL_DEVICES);
 	tptest_add("events_invalid_touches", events_touch_start_finish_same_event, TOUCHPAD_ALL_DEVICES);
 
-	return tptest_run();
+	return tptest_run(argc, argv);
 }

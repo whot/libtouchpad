@@ -31,6 +31,7 @@
 #include <check.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <poll.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -195,8 +196,27 @@ int is_debugger_attached()
 }
 
 
+static void
+tptest_list_tests(struct list_head *tests)
+{
+	struct suite *s;
+
+	list_for_each(tests, s, node) {
+		struct test *t;
+		printf("%s:\n", s->name);
+		list_for_each(&s->tests, t, node) {
+			printf("	%s\n", t->name);
+		}
+	}
+}
+
+static const struct option opts[] = {
+	{ "list", 0, 0, 'l' },
+	{ 0, 0, 0, 0}
+};
+
 int
-tptest_run(void) {
+tptest_run(int argc, char **argv) {
 	struct suite *s, *next;
 	int failed;
 	SRunner *sr = NULL;
@@ -212,6 +232,20 @@ tptest_run(void) {
 			sr = srunner_create(s->suite);
 		else
 			srunner_add_suite(sr, s->suite);
+	}
+
+	while(1) {
+		int c;
+		int option_index = 0;
+
+		c = getopt_long(argc, argv, "", opts, &option_index);
+		if (c == -1)
+			break;
+		switch(c) {
+			case 'l':
+				tptest_list_tests(&all_tests);
+				return 0;
+		}
 	}
 
 	srunner_run_all(sr, CK_NORMAL);

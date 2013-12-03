@@ -385,7 +385,7 @@ START_TEST(scroll_two_finger_horiz_lock)
 }
 END_TEST
 
-int main(void) {
+int main(int argc, char **argv) {
 	tptest_add("scroll_two_finger_vert", scroll_two_finger_vert_down, TOUCHPAD_ALL_DEVICES);
 	tptest_add("scroll_two_finger_vert", scroll_two_finger_vert_up, TOUCHPAD_ALL_DEVICES);
 	tptest_add("scroll_two_finger_vert", scroll_two_finger_single_finger_vert_down, TOUCHPAD_ALL_DEVICES);
@@ -397,5 +397,5 @@ int main(void) {
 	tptest_add("scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_left, TOUCHPAD_ALL_DEVICES);
 	tptest_add("scroll_two_finger_horiz", scroll_two_finger_single_finger_horiz_right, TOUCHPAD_ALL_DEVICES);
 	tptest_add("scroll_two_finger_vert", scroll_two_finger_horiz_lock, TOUCHPAD_ALL_DEVICES);
-	return tptest_run();
+	return tptest_run(argc, argv);
 }

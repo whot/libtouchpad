@@ -218,7 +218,7 @@ START_TEST(config_buttons_set_get)
 }
 END_TEST
 
-int main(void) {
+int main(int argc, char **argv) {
 	tptest_add("config_get", config_get, TOUCHPAD_ALL_DEVICES);
 	tptest_add("config_get", config_get_invalid, TOUCHPAD_ALL_DEVICES);
 	tptest_add("config_get", config_get_empty, TOUCHPAD_ALL_DEVICES);
@@ -227,5 +227,5 @@ int main(void) {
 	tptest_add("config_buttons", config_buttons_get_defaults, TOUCHPAD_ALL_DEVICES);
 	tptest_add("config_buttons", config_buttons_set_invalid, TOUCHPAD_ALL_DEVICES);
 	tptest_add("config_buttons", config_buttons_set_get, TOUCHPAD_ALL_DEVICES);
-	return tptest_run();
+	return tptest_run(argc, argv);
 }
