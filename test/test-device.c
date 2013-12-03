@@ -68,7 +68,7 @@ END_TEST
 
 int main(int argc, char **argv) {
 	tptest_add("device_open", device_open_invalid_device, TOUCHPAD_NO_DEVICE);
-	tptest_add("device_open", device_change_fd, TOUCHPAD_ALL_DEVICES);
+	tptest_add("device_change_fd", device_change_fd, TOUCHPAD_ALL_DEVICES);
 
 	return tptest_run(argc, argv);
 }
