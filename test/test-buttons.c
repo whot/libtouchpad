@@ -39,7 +39,7 @@ START_TEST(left_click_generic)
 	union tptest_event *e;
 	bool btn_up = false, btn_down = false;
 
-	tptest_touch_down(dev, 0, 2000, 2000);
+	tptest_touch_down(dev, 0, 20, 20);
 	tptest_click(dev, true);
 	tptest_click(dev, false);
 	tptest_touch_up(dev, 0);
@@ -77,7 +77,7 @@ START_TEST(left_click_in_area)
 					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 100,
 					     TOUCHPAD_CONFIG_NONE), 0);
 
-	tptest_touch_down(dev, 0, 2000, 4000);
+	tptest_touch_down(dev, 0, 20, 80);
 	tptest_click(dev, true);
 	tptest_click(dev, false);
 	tptest_touch_up(dev, 0);
@@ -115,7 +115,7 @@ START_TEST(left_click_in_area_with_rbtn)
 					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 100,
 					     TOUCHPAD_CONFIG_NONE), 0);
 
-	tptest_touch_down(dev, 0, 2000, 4000);
+	tptest_touch_down(dev, 0, 20, 80);
 	tptest_click(dev, true);
 	tptest_click(dev, false);
 	tptest_touch_up(dev, 0);
@@ -153,7 +153,7 @@ START_TEST(right_click_in_area)
 					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 100,
 					     TOUCHPAD_CONFIG_NONE), 0);
 
-	tptest_touch_down(dev, 0, 2000, 4000);
+	tptest_touch_down(dev, 0, 20, 80);
 	tptest_click(dev, true);
 	tptest_click(dev, false);
 	tptest_touch_up(dev, 0);
@@ -191,7 +191,7 @@ START_TEST(right_click_in_area_with_lbtn)
 					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 100,
 					     TOUCHPAD_CONFIG_NONE), 0);
 
-	tptest_touch_down(dev, 0, 4000, 4000);
+	tptest_touch_down(dev, 0, 80, 80);
 	tptest_click(dev, true);
 	tptest_click(dev, false);
 	tptest_touch_up(dev, 0);
@@ -229,7 +229,7 @@ START_TEST(right_click_whole_touchpad)
 					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, 100,
 					     TOUCHPAD_CONFIG_NONE), 0);
 
-	tptest_touch_down(dev, 0, 2000, 2000);
+	tptest_touch_down(dev, 0, 20, 20);
 	tptest_click(dev, true);
 	tptest_click(dev, false);
 	tptest_touch_up(dev, 0);

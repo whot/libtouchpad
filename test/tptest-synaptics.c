@@ -93,6 +93,11 @@ tptest_synaptics_clickpad_touch_down(struct tptest_device *d, unsigned int slot,
 		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
 	};
 
+	down[0].value = tptest_scale(d, ABS_X, x);
+	down[1].value = tptest_scale(d, ABS_Y, y);
+	down[5].value = tptest_scale(d, ABS_X, x);
+	down[6].value = tptest_scale(d, ABS_Y, y);
+
 	ARRAY_FOR_EACH(down, ev)
 		tptest_event(d, ev->type, ev->code, ev->value);
 }
@@ -111,6 +116,11 @@ tptest_synaptics_clickpad_move(struct tptest_device *d, unsigned int slot, int x
 		{ .type = EV_KEY, .code = BTN_TOUCH, .value = 1 },
 		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
 	};
+
+	move[1].value = tptest_scale(d, ABS_X, x);
+	move[2].value = tptest_scale(d, ABS_Y, y);
+	move[3].value = tptest_scale(d, ABS_X, x);
+	move[4].value = tptest_scale(d, ABS_Y, y);
 
 	ARRAY_FOR_EACH(move, ev)
 		tptest_event(d, ev->type, ev->code, ev->value);

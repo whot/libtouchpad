@@ -36,7 +36,7 @@ START_TEST(tap_single_finger)
 	bool tap_down = false, tap_up = false;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 
 
@@ -67,8 +67,8 @@ START_TEST(tap_single_finger_move)
 	bool tap_down = false, tap_up = false;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -99,7 +99,7 @@ START_TEST(tap_single_finger_hold)
 	int tap_timeout;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 
 	while (tptest_handle_events(dev))
 		;
@@ -134,9 +134,9 @@ START_TEST(tap_single_finger_doubletap)
 	int tap_down = 0, tap_up = 0;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -166,10 +166,10 @@ START_TEST(tap_single_finger_tap_move)
 	int tap_down = 0, tap_up = 0;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -200,10 +200,10 @@ START_TEST(tap_single_finger_drag)
 	int finger_state = 0;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -239,16 +239,16 @@ START_TEST(tap_single_finger_multi_drag)
 	int finger_state = 0;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -284,7 +284,7 @@ START_TEST(tap_single_finger_read_delay)
 	int tap_timeout;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 
 	while (!tptest_handle_events(dev))
 		;
@@ -327,8 +327,8 @@ START_TEST(tap_double_finger)
 	union tptest_event *e;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -359,8 +359,8 @@ START_TEST(tap_double_finger_invert_release)
 	union tptest_event *e;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 	/* same as tap_double_finger but touchpoints released in different
 	   order */
 	tptest_touch_up(dev, 1);
@@ -393,9 +393,9 @@ START_TEST(tap_double_finger_move)
 	union tptest_event *e;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -427,8 +427,8 @@ START_TEST(tap_double_finger_hold)
 	int tap_timeout;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 
 	while (tptest_handle_events(dev))
 		;
@@ -467,11 +467,11 @@ START_TEST(tap_double_finger_move_tap)
 	union tptest_event *e;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
-	tptest_touch_move_to(dev, 1, 4000, 4000, 4000, 3000, -1);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_move_to(dev, 1, 40, 40, 40, 30, -1);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
 
 	while (tptest_handle_events(dev))
@@ -506,8 +506,8 @@ START_TEST(tap_double_finger_hold_tap)
 	int tap_timeout;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 
 	while (tptest_handle_events(dev))
 		;
@@ -517,7 +517,7 @@ START_TEST(tap_double_finger_hold_tap)
 
 	usleep(tap_timeout * 2 * 1000);
 	tptest_touch_up(dev, 1);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
 
 	while (tptest_handle_events(dev))

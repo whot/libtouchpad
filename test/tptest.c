@@ -428,6 +428,10 @@ tptest_create_device(enum tptest_device_type which)
 	ck_assert(d->timerfd > -1);
 
 	d->d = dev;
+	d->d->min[ABS_X] = libevdev_get_abs_minimum(d->evdev, ABS_X);
+	d->d->max[ABS_X] = libevdev_get_abs_maximum(d->evdev, ABS_X);
+	d->d->min[ABS_Y] = libevdev_get_abs_minimum(d->evdev, ABS_Y);
+	d->d->max[ABS_Y] = libevdev_get_abs_maximum(d->evdev, ABS_Y);
 	return d;
 }
 
@@ -554,5 +558,14 @@ struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e)
 {
 	assert(e->type == EVTYPE_SCROLL);
 	return &e->scroll;
+}
+
+int tptest_scale(const struct tptest_device *d, unsigned int axis, int val)
+{
+	ck_assert_int_ge(val, 0);
+	ck_assert_int_le(val, 100);
+	ck_assert_int_le(axis, ABS_Y);
+
+	return (d->d->max[axis] - d->d->min[axis]) * val/100.0 + d->d->min[axis];
 }
 

@@ -37,8 +37,12 @@ struct device {
 	void (*create)(struct tptest_device *d);
 	void (*touch_down)(struct tptest_device *d, unsigned int slot, int x, int y);
 	void (*move)(struct tptest_device *d, unsigned int slot, int x, int y);
+
+	int min[2];
+	int max[2];
 };
 
 void tptest_set_current_device(struct tptest_device *device);
+int tptest_scale(const struct tptest_device *d, unsigned int axis, int val);
 
 #endif

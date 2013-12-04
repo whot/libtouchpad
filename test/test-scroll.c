@@ -35,10 +35,10 @@ START_TEST(scroll_two_finger_vert_down)
 	union tptest_event *scroll = NULL;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 2000, 2000);
-	tptest_touch_down(dev, 1, 3000, 2000);
-	tptest_touch_move_to(dev, 0, 2000, 2000, 2000, 4000, -1);
-	tptest_touch_move_to(dev, 1, 3000, 2000, 3000, 4000, -1);
+	tptest_touch_down(dev, 0, 20, 20);
+	tptest_touch_down(dev, 1, 30, 20);
+	tptest_touch_move_to(dev, 0, 20, 20, 20, 80, -1);
+	tptest_touch_move_to(dev, 1, 30, 20, 30, 80, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -67,10 +67,10 @@ START_TEST(scroll_two_finger_vert_up)
 	union tptest_event *scroll = NULL;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 2000, 4000);
-	tptest_touch_down(dev, 1, 3000, 4000);
-	tptest_touch_move_to(dev, 0, 2000, 4000, 2000, 2000, -1);
-	tptest_touch_move_to(dev, 1, 3000, 4000, 3000, 2000, -1);
+	tptest_touch_down(dev, 0, 20, 80);
+	tptest_touch_down(dev, 1, 30, 80);
+	tptest_touch_move_to(dev, 0, 20, 80, 20, 20, -1);
+	tptest_touch_move_to(dev, 1, 30, 80, 30, 20, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -99,9 +99,9 @@ START_TEST(scroll_two_finger_single_finger_vert_down)
 	union tptest_event *scroll = NULL;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 2000, 2000);
-	tptest_touch_down(dev, 1, 3000, 2000);
-	tptest_touch_move_to(dev, 1, 3000, 2000, 3000, 4000, -1);
+	tptest_touch_down(dev, 0, 20, 20);
+	tptest_touch_down(dev, 1, 30, 20);
+	tptest_touch_move_to(dev, 1, 30, 20, 30, 80, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -130,9 +130,9 @@ START_TEST(scroll_two_finger_single_finger_vert_up)
 	union tptest_event *scroll = NULL;
 
 	dev = tptest_current_device();
-	tptest_touch_down(dev, 0, 2000, 4000);
-	tptest_touch_down(dev, 1, 3000, 4000);
-	tptest_touch_move_to(dev, 1, 3000, 4000, 3000, 2000, -1);
+	tptest_touch_down(dev, 0, 20, 80);
+	tptest_touch_down(dev, 1, 30, 80);
+	tptest_touch_move_to(dev, 1, 30, 80, 30, 20, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -166,13 +166,13 @@ START_TEST(scroll_two_finger_vert_lock)
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL|TOUCHPAD_SCROLL_VERTICAL,
 			    TOUCHPAD_CONFIG_NONE);
 
-	tptest_touch_down(dev, 0, 2000, 2000);
-	tptest_touch_down(dev, 1, 3000, 2000);
-	tptest_touch_move_to(dev, 0, 2000, 2000, 2000, 3000, -1);
-	tptest_touch_move_to(dev, 1, 3000, 2000, 3000, 3000, -1);
+	tptest_touch_down(dev, 0, 20, 20);
+	tptest_touch_down(dev, 1, 30, 20);
+	tptest_touch_move_to(dev, 0, 20, 20, 20, 80, -1);
+	tptest_touch_move_to(dev, 1, 30, 20, 30, 80, -1);
 	/* horiz movement, must not cause events */
-	tptest_touch_move_to(dev, 0, 2000, 3000, 4000, 3000, -1);
-	tptest_touch_move_to(dev, 1, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_move_to(dev, 0, 20, 80, 80, 80, -1);
+	tptest_touch_move_to(dev, 1, 30, 80, 80, 80, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -207,10 +207,10 @@ START_TEST(scroll_two_finger_horiz_right)
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL,
 			    TOUCHPAD_CONFIG_NONE);
 
-	tptest_touch_down(dev, 0, 2000, 2000);
-	tptest_touch_down(dev, 1, 2000, 3000);
-	tptest_touch_move_to(dev, 0, 2000, 2000, 4000, 2000, -1);
-	tptest_touch_move_to(dev, 1, 2000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 20, 20);
+	tptest_touch_down(dev, 1, 20, 30);
+	tptest_touch_move_to(dev, 0, 20, 20, 80, 20, -1);
+	tptest_touch_move_to(dev, 1, 20, 30, 80, 30, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -245,10 +245,10 @@ START_TEST(scroll_two_finger_horiz_left)
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL,
 			    TOUCHPAD_CONFIG_NONE);
 
-	tptest_touch_down(dev, 0, 4000, 2000);
-	tptest_touch_down(dev, 1, 4000, 3000);
-	tptest_touch_move_to(dev, 0, 4000, 2000, 2000, 2000, -1);
-	tptest_touch_move_to(dev, 1, 4000, 3000, 2000, 3000, -1);
+	tptest_touch_down(dev, 0, 80, 20);
+	tptest_touch_down(dev, 1, 80, 30);
+	tptest_touch_move_to(dev, 0, 80, 20, 20, 20, -1);
+	tptest_touch_move_to(dev, 1, 80, 30, 20, 30, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -283,9 +283,9 @@ START_TEST(scroll_two_finger_single_finger_horiz_right)
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL,
 			    TOUCHPAD_CONFIG_NONE);
 
-	tptest_touch_down(dev, 0, 2000, 2000);
-	tptest_touch_down(dev, 1, 2000, 3000);
-	tptest_touch_move_to(dev, 1, 2000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 20, 20);
+	tptest_touch_down(dev, 1, 20, 30);
+	tptest_touch_move_to(dev, 1, 20, 30, 80, 30, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -320,9 +320,9 @@ START_TEST(scroll_two_finger_single_finger_horiz_left)
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL,
 			    TOUCHPAD_CONFIG_NONE);
 
-	tptest_touch_down(dev, 0, 4000, 2000);
-	tptest_touch_down(dev, 1, 4000, 3000);
-	tptest_touch_move_to(dev, 1, 4000, 3000, 2000, 3000, -1);
+	tptest_touch_down(dev, 0, 80, 20);
+	tptest_touch_down(dev, 1, 80, 30);
+	tptest_touch_move_to(dev, 1, 80, 30, 20, 30, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -357,13 +357,13 @@ START_TEST(scroll_two_finger_horiz_lock)
 			    TOUCHPAD_SCROLL_TWOFINGER_HORIZONTAL|TOUCHPAD_SCROLL_VERTICAL,
 			    TOUCHPAD_CONFIG_NONE);
 
-	tptest_touch_down(dev, 0, 2000, 2000);
-	tptest_touch_down(dev, 1, 2000, 3000);
-	tptest_touch_move_to(dev, 0, 2000, 2000, 4000, 2000, -1);
-	tptest_touch_move_to(dev, 1, 2000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 20, 20);
+	tptest_touch_down(dev, 1, 20, 30);
+	tptest_touch_move_to(dev, 0, 20, 20, 40, 20, -1);
+	tptest_touch_move_to(dev, 1, 20, 30, 40, 30, -1);
 	/* vert movement, must not cause events */
-	tptest_touch_move_to(dev, 0, 4000, 2000, 4000, 4000, -1);
-	tptest_touch_move_to(dev, 1, 4000, 3000, 4000, 4000, -1);
+	tptest_touch_move_to(dev, 0, 40, 20, 40, 40, -1);
+	tptest_touch_move_to(dev, 1, 40, 30, 40, 40, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
