@@ -83,6 +83,8 @@ struct tptest_device {
 
 	int timerfd;
 	unsigned int latest_timer;
+
+	struct device *d;
 };
 
 void tptest_add(const char *name, void *func, enum tptest_device_type devices);
@@ -103,7 +105,6 @@ struct tptest_button_event *tptest_button_event(union tptest_event *e);
 struct tptest_motion_event *tptest_motion_event(union tptest_event *e);
 struct tptest_tap_event *tptest_tap_event(union tptest_event *e);
 struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e);
-
 void tptest_error(const char *msg, ...);
 #define argcheck_log(_file, _line, _func, msg, ...)  \
 	tptest_error("%s:%d %s(): " msg, _file, _line, _func, ## __VA_ARGS__)
