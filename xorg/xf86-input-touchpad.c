@@ -73,7 +73,6 @@ xf86touchpad_on(DeviceIntPtr dev)
 	struct xf86touchpad *touchpad = pInfo->private;
 	struct touchpad *tp = xf86touchpad(pInfo);
 	int fd;
-	struct libevdev *evdev;
 
 	fd = open(touchpad->path, O_RDONLY|O_NONBLOCK);
 	if (fd < 0)
@@ -81,9 +80,7 @@ xf86touchpad_on(DeviceIntPtr dev)
 
 	pInfo->fd = fd;
 	touchpad_change_fd(tp, fd);
-	evdev = touchpad_get_device(tp);
-	libevdev_set_clock_id(evdev, CLOCK_MONOTONIC);
-	xf86AddEnabledDevice(pInfo);
+	AddEnabledDevice(pInfo->fd);
 	dev->public.on = TRUE;
 
 	return dev->public.on ? Success : !Success;
@@ -275,31 +272,11 @@ xf86touchpad_scroll(struct touchpad *tp, void *userdata,
 	xf86PostMotionEvent(dev, Relative, first, 1, (int)units);
 }
 
-static CARD32
-timer_func(OsTimerPtr timer, CARD32 now, pointer userdata)
-{
-	InputInfoPtr pInfo = userdata;
-	struct touchpad *tp = xf86touchpad(pInfo);
-	touchpad_handle_events(tp, userdata, now);
-	return 0;
-}
-
-static int
-xf86touchpad_register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
-{
-	InputInfoPtr pInfo = userdata;
-	struct xf86touchpad *touchpad = pInfo->private;
-
-	touchpad->timer = TimerSet(touchpad->timer, 0, ms, timer_func, pInfo);
-	return 0;
-}
-
 static const struct touchpad_interface xf86touchpad_interface = {
 	.motion = xf86touchpad_motion,
 	.button = xf86touchpad_button,
 	.scroll = xf86touchpad_scroll,
 	.tap = xf86touchpad_tap,
-	.register_timer = xf86touchpad_register_timer
 };
 
 static void

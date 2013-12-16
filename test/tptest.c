@@ -43,7 +43,6 @@
 #include <ccan/list/list.h>
 #include <linux/input.h>
 #include <sys/ptrace.h>
-#include <sys/timerfd.h>
 #include <sys/wait.h>
 
 #define MAX_SUITES 100
@@ -315,28 +314,6 @@ scroll(struct touchpad *t, void *userdata, enum touchpad_scroll_direction dir, d
 	push_event(d, &e);
 }
 
-static int
-register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
-{
-	int rc;
-	struct tptest_device *d = userdata;
-	struct itimerspec t;
-
-	t.it_value.tv_sec = ms/1000;
-	t.it_value.tv_nsec = (ms % 1000) * 1000 * 1000;
-	t.it_interval.tv_sec = 0;
-	t.it_interval.tv_nsec = 0;
-
-	rc = timerfd_settime(d->timerfd, 0, &t, NULL);
-
-	if (ms)
-		d->latest_timer = max(now + ms, d->latest_timer);
-	else
-		d->latest_timer = 0;
-
-	return rc < 0 ? -errno : 0;
-}
-
 static void
 rotate(struct touchpad *tp, void *userdata, int degrees)
 {
@@ -356,7 +333,6 @@ static const struct touchpad_interface interface = {
 	.scroll = scroll,
 	.rotate = rotate,
 	.pinch = pinch,
-	.register_timer = register_timer,
 };
 
 static bool errors_allowed = false;
@@ -424,9 +400,6 @@ tptest_create_device(enum tptest_device_type which)
 
 	ck_assert(d->touchpad != NULL);
 
-	d->timerfd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC|TFD_NONBLOCK);
-	ck_assert(d->timerfd > -1);
-
 	d->d = dev;
 	d->d->min[ABS_X] = libevdev_get_abs_minimum(d->evdev, ABS_X);
 	d->d->max[ABS_X] = libevdev_get_abs_maximum(d->evdev, ABS_X);
@@ -438,30 +411,7 @@ tptest_create_device(enum tptest_device_type which)
 int
 tptest_handle_events(struct tptest_device *d)
 {
-	struct pollfd fds[2];
-
-	fds[0].fd = touchpad_get_fd(d->touchpad);
-	fds[0].events = POLLIN;
-	fds[1].fd = d->timerfd;
-	fds[1].events = POLLIN;
-
-	while (poll(fds, ARRAY_LENGTH(fds), 1)) {
-		struct timespec t;
-		unsigned int now;
-
-		clock_gettime(CLOCK_REALTIME, &t);
-		now = t.tv_sec * 1000 + t.tv_nsec/1000000;
-		if (now >= d->latest_timer)
-			d->latest_timer = 0;
-		touchpad_handle_events(d->touchpad, d, now);
-
-		if (fds[1].revents) {
-			uint64_t buf;
-			read(fds[1].fd, &buf, sizeof(buf));
-		}
-	}
-
-	return d->latest_timer != 0;
+	return touchpad_handle_events(d->touchpad, d, 0);
 }
 
 void
@@ -473,7 +423,6 @@ tptest_delete_device(struct tptest_device *d)
 	touchpad_free(d->touchpad);
 	libevdev_free(d->evdev);
 	libevdev_uinput_destroy(d->uinput);
-	close(d->timerfd);
 	memset(d,0, sizeof(*d));
 	free(d);
 }

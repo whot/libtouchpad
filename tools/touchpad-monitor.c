@@ -27,7 +27,6 @@
 
 #include <libevdev/libevdev.h>
 #include <sys/time.h>
-#include <sys/timerfd.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -69,28 +68,11 @@ scroll(struct touchpad *tp, void *userdata, enum touchpad_scroll_direction dir, 
 	printf("%50s %s scroll: %.2f\n", "", dir == TOUCHPAD_SCROLL_HORIZONTAL ? "horizontal" : "vertical", units);
 }
 
-static int
-register_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms)
-{
-	int rc;
-	struct tpdata *tpdata = userdata;
-	struct itimerspec t;
-
-	t.it_value.tv_sec = ms/1000;
-	t.it_value.tv_nsec = (ms % 1000) * 1000 * 1000;
-	t.it_interval.tv_sec = 0;
-	t.it_interval.tv_nsec = 0;
-
-	rc = timerfd_settime(tpdata->timerfd, 0, &t, NULL);
-	return rc < 0 ? -errno : 0;
-}
-
 const struct touchpad_interface interface = {
 	.motion = motion,
 	.button = button,
 	.scroll = scroll,
 	.tap = tap,
-	.register_timer = register_timer,
 };
 
 int usage(void) {
@@ -99,26 +81,15 @@ int usage(void) {
 }
 
 int mainloop(struct touchpad *tp, struct tpdata *data) {
-	struct pollfd fds[2];
+	struct pollfd fds[1];
 
 	fds[0].fd = touchpad_get_fd(tp);
 	fds[0].events = POLLIN;
-	fds[1].fd = data->timerfd;
-	fds[1].events = POLLIN;
 
-	while (poll(fds, 2, -1)) {
-		struct timespec t;
+	while (poll(fds, 1, -1)) {
 		unsigned int millis;
 
-		clock_gettime(CLOCK_REALTIME, &t);
-		millis = t.tv_sec * 1000 + t.tv_nsec/1000000;
-
 		touchpad_handle_events(tp, data, millis);
-
-		if (fds[1].revents) {
-			uint64_t buf;
-			read(fds[1].fd, &buf, sizeof(buf));
-		}
 	}
 
 	return 0;
@@ -147,9 +118,6 @@ int main (int argc, char **argv) {
 	rc = touchpad_new_from_fd(fd, &tp);
 	assert(rc == 0);
 	touchpad_set_interface(tp, &interface);
-
-	tpdata.timerfd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC|TFD_NONBLOCK);
-	assert(tpdata.timerfd > -1);
 
 	mainloop(tp, &tpdata);
 

@@ -26,4 +26,3 @@ TODO
 ** requires all coords be given in percent of the touchpad
 * optimise the loops through the touch points
 * single-touch devices can map ABS_X to a single touchpoint and use this driver too
-* drop the register timer callback, use epoll instead

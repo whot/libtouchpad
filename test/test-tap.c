@@ -34,14 +34,16 @@ START_TEST(tap_single_finger)
 	struct tptest_device *dev;
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
+	int tap_timeout;
 
 	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 
-
-	while (tptest_handle_events(dev))
-		;
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+	usleep(tap_timeout * 2 * 1000);
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -71,8 +73,7 @@ START_TEST(tap_single_finger_move)
 	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -101,14 +102,13 @@ START_TEST(tap_single_finger_hold)
 	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 30, 30);
 
-	while (tptest_handle_events(dev))
-		;
-
 	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
 			&tap_timeout, TOUCHPAD_CONFIG_NONE);
 
 	usleep(tap_timeout * 2 * 1000);
 	tptest_touch_up(dev, 0);
+
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -139,8 +139,7 @@ START_TEST(tap_single_finger_doubletap)
 	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -164,6 +163,7 @@ START_TEST(tap_single_finger_tap_move)
 	struct tptest_device *dev;
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
+	int tap_timeout;
 
 	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 30, 30);
@@ -172,8 +172,11 @@ START_TEST(tap_single_finger_tap_move)
 	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
-	while (tptest_handle_events(dev))
-		;
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+
+	usleep(tap_timeout * 2 * 1000);
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -198,16 +201,22 @@ START_TEST(tap_single_finger_drag)
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 	int finger_state = 0;
+	int tap_timeout;
 
 	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 	tptest_touch_down(dev, 0, 30, 30);
-	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
+	tptest_touch_move_to(dev, 0, 30, 30, 50, 30, -1);
 	tptest_touch_up(dev, 0);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
+
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+
+	usleep(tap_timeout * 2 * 1000);
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -237,6 +246,7 @@ START_TEST(tap_single_finger_multi_drag)
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 	int finger_state = 0;
+	int tap_timeout;
 
 	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 30, 30);
@@ -251,8 +261,11 @@ START_TEST(tap_single_finger_multi_drag)
 	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
-	while (tptest_handle_events(dev))
-		;
+	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
+			&tap_timeout, TOUCHPAD_CONFIG_NONE);
+
+	usleep(tap_timeout * 2 * 1000);
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -286,8 +299,7 @@ START_TEST(tap_single_finger_read_delay)
 	dev = tptest_current_device();
 	tptest_touch_down(dev, 0, 30, 30);
 
-	while (!tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	/* submit the events now, but don't read until later.
 	   If the lib handles this correctly, the tap should
@@ -300,8 +312,7 @@ START_TEST(tap_single_finger_read_delay)
 
 	usleep(tap_timeout * 2 * 1000);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -332,8 +343,7 @@ START_TEST(tap_double_finger)
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -366,8 +376,7 @@ START_TEST(tap_double_finger_invert_release)
 	tptest_touch_up(dev, 1);
 	tptest_touch_up(dev, 0);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -399,8 +408,7 @@ START_TEST(tap_double_finger_move)
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -430,8 +438,7 @@ START_TEST(tap_double_finger_hold)
 	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_down(dev, 1, 40, 40);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
 			&tap_timeout, TOUCHPAD_CONFIG_NONE);
@@ -474,12 +481,7 @@ START_TEST(tap_double_finger_move_tap)
 	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
 
-	while (tptest_handle_events(dev))
-		;
-
-
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)
@@ -509,8 +511,7 @@ START_TEST(tap_double_finger_hold_tap)
 	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_down(dev, 1, 40, 40);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_TAP_TIMEOUT,
 			&tap_timeout, TOUCHPAD_CONFIG_NONE);
@@ -520,8 +521,7 @@ START_TEST(tap_double_finger_hold_tap)
 	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
 
-	while (tptest_handle_events(dev))
-		;
+	tptest_handle_events(dev);
 
 	ARRAY_FOR_EACH(dev->events, e) {
 		if (e->type == EVTYPE_NONE)

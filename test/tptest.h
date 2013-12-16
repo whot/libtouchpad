@@ -81,7 +81,6 @@ struct tptest_device {
 	union tptest_event events[100];
 	size_t idx;
 
-	int timerfd;
 	unsigned int latest_timer;
 
 	struct device *d;

@@ -55,13 +55,10 @@ START_TEST(device_change_fd)
 	fd = touchpad_get_fd(dev->touchpad);
 	ck_assert_int_ge(fd, 0);
 
+	/* Can't add the fd onto itself */
+	ck_assert_int_eq(-EINVAL, touchpad_change_fd(dev->touchpad, fd));
 	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, 0));
-	ck_assert_int_eq(0, touchpad_get_fd(dev->touchpad));
-
-	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, -1));
-	ck_assert_int_eq(-1, touchpad_get_fd(dev->touchpad));
-
-	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, fd));
+	/* changing the fd doesn't change the epoll fd */
 	ck_assert_int_eq(fd, touchpad_get_fd(dev->touchpad));
 }
 END_TEST

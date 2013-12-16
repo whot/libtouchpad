@@ -31,8 +31,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
+#include <sys/epoll.h>
 #include <sys/stat.h>
+#include <sys/timerfd.h>
 #include <sys/types.h>
 #include <libevdev/libevdev.h>
 
@@ -139,6 +142,46 @@ open_path(const char *path)
 	return fd;
 }
 
+static int
+init_epollfd(struct touchpad *tp)
+{
+	int fd;
+	int timerfd;
+	struct epoll_event ev;
+
+	fd = epoll_create1(O_CLOEXEC);
+
+	if (fd < 0)
+		goto fail;
+
+	memset(&ev, 0, sizeof(ev));
+	ev.events = EPOLLIN,
+	ev.data.fd = libevdev_get_fd(tp->dev);
+	if (epoll_ctl(fd, EPOLL_CTL_ADD, ev.data.fd, &ev) < 0)
+		goto fail;
+
+	timerfd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC|TFD_NONBLOCK);
+	if (timerfd < -1)
+		goto fail;
+
+	memset(&ev, 0, sizeof(ev));
+	ev.events = EPOLLIN,
+	ev.data.fd = timerfd;
+	if (epoll_ctl(fd, EPOLL_CTL_ADD, timerfd, &ev) < 0)
+		goto fail;
+
+	tp->timerfd = timerfd;
+
+	return fd;
+fail:
+	close(fd);
+	close(timerfd);
+	tp->timerfd = -1;
+	tp->epollfd = -1;
+	return -errno;
+
+}
+
 int
 touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 {
@@ -155,9 +198,19 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 	if (rc < 0)
 		goto fail;
 
+	rc = libevdev_set_clock_id(tp->dev, CLOCK_MONOTONIC);
+	if (rc < 0)
+		goto fail;
+
 	ntouches = libevdev_get_num_slots(tp->dev);
 	if (ntouches <= 0) {
 		rc = -ECANCELED;
+		goto fail;
+	}
+
+	tp->epollfd = init_epollfd(tp);
+	if (tp->epollfd < 0) {
+		rc = tp->epollfd;
 		goto fail;
 	}
 
@@ -180,22 +233,34 @@ touchpad_free(struct touchpad *tp)
 		return;
 
 	libevdev_free(tp->dev);
+	close(tp->epollfd);
 	free(tp);
 }
 
 int
 touchpad_change_fd(struct touchpad *tp, int fd) {
 	int rc;
+	struct epoll_event ev;
+
+	epoll_ctl(tp->epollfd, EPOLL_CTL_DEL, libevdev_get_fd(tp->dev), NULL);
+
 	rc = libevdev_change_fd(tp->dev, fd);
 	if (rc == 0)
 		touchpad_reset(tp);
+
+	memset(&ev, 0, sizeof(ev));
+	ev.events = EPOLLIN;
+	ev.data.fd = fd;
+	if (epoll_ctl(tp->epollfd, EPOLL_CTL_ADD, fd, &ev) < 0)
+		return -errno;
+
 	return rc;
 }
 
 int
 touchpad_get_fd(struct touchpad *tp)
 {
-	return libevdev_get_fd(tp->dev);
+	return tp->epollfd;
 }
 
 int
@@ -270,6 +335,7 @@ touchpad_request_timer(struct touchpad *tp, void *userdata,
 		       unsigned int now, unsigned int delta)
 {
 	int t = now + delta;
+	struct itimerspec its;
 
 	if (delta == 0)
 		return 0;
@@ -279,7 +345,12 @@ touchpad_request_timer(struct touchpad *tp, void *userdata,
 	else
 		tp->next_timeout = t;
 
-	tp->interface->register_timer(tp, userdata, now, delta);
+	its.it_value.tv_sec = t/1000;
+	its.it_value.tv_nsec = (t % 1000) * 1000 * 1000;
+	its.it_interval.tv_sec = 0;
+	its.it_interval.tv_nsec = 0;
+
+	timerfd_settime(tp->timerfd, TFD_TIMER_ABSTIME, &its, NULL);
 	return 0;
 }
 
@@ -307,13 +378,40 @@ touchpad_handle_timeouts(struct touchpad *tp, void *userdata, unsigned int now)
 	return 0;
 }
 
+static void
+touchpad_drain_timer_events(struct touchpad *tp)
+{
+	uint64_t buf;
+	read(tp->timerfd, &buf, sizeof(buf));
+}
+
 int
 touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 {
 	int rc = 0;
 	enum libevdev_read_flag mode = LIBEVDEV_READ_FLAG_NORMAL;
+	struct epoll_event events[3];
+	struct timespec ts;
 
 	argcheck_ptr_not_null(tp->interface);
+
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	now = timespec_to_millis(&ts);
+
+	rc = epoll_wait(tp->epollfd, events, ARRAY_LENGTH(events), 0);
+	if (rc < 0)
+		return -errno;
+	else if (rc == 0)
+		return touchpad_handle_timeouts(tp, userdata, now);
+	else {
+		int i;
+		for (i = 0; i < rc; i++) {
+			if (events[i].data.fd == tp->timerfd) {
+				touchpad_drain_timer_events(tp);
+				break;
+			}
+		}
+	}
 
 	do {
 		struct input_event ev;

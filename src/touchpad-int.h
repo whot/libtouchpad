@@ -211,6 +211,8 @@ struct touchpad {
 
     enum event_types queued;
 
+    int timerfd;
+    int epollfd;
     unsigned int next_timeout;
 
     struct {

@@ -277,27 +277,6 @@ struct touchpad_interface {
 	 * previous position, i.e. 200 means the distance doubled.
 	 */
 	void (*pinch)(struct touchpad *tp, void *userdata, int scale);
-
-	/**
-	 * Called by libtouchpad to register a timer in ms millisecond from
-	 * now. The backend must call touchpad_handle_timer_expired()
-	 * after this period expires.
-	 *
-	 * The time used by libtouchpad is the time provided by the input
-	 * events on the device fd. By default, this is CLOCK_REALTIME, but
-	 * it may be set to CLOCK_MONOTONIC if the kernel supports the
-	 * EVIOCSCLOCK ioctl.
-	 *
-	 * @param tp The touchpad device
-	 * @param userdata Backend-specific data, see touchpad_handle_events()
-	 * @param now The current time in milliseconds.
-	 * @param ms The timer expiry time in milliseconds, relative to now.
-	 * If the timer expiry time is 0, the backend should unregister any
-	 * current timers.
-	 *
-	 * @return 0 on success or a negative errno on failure
-	 */
-	int (*register_timer)(struct touchpad *tp, void *userdata, unsigned int now, unsigned int ms);
 };
 
 /**
