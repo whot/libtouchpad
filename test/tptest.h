@@ -29,7 +29,10 @@
 #include <touchpad.h>
 
 enum tptest_device_type {
-	TOUCHPAD_SYNAPTICS_CLICKPAD,
+	TOUCHPAD_NO_DEVICE = 0,
+	TOUCHPAD_SYNAPTICS_CLICKPAD = 0x1,
+
+	TOUCHPAD_ALL_DEVICES = TOUCHPAD_SYNAPTICS_CLICKPAD,
 };
 
 enum tptest_event_type {
@@ -80,11 +83,14 @@ struct tptest_device {
 
 	int timerfd;
 	unsigned int latest_timer;
+
+	struct device *d;
 };
 
-void tptest_add(const char *suite, const char *name, void *func);
-int tptest_run(void);
+void tptest_add(const char *name, void *func, enum tptest_device_type devices);
+int tptest_run(int argc, char **argv);
 struct tptest_device * tptest_create_device(enum tptest_device_type which);
+struct tptest_device *tptest_current_device(void);
 void tptest_delete_device(struct tptest_device *d);
 int tptest_handle_events(struct tptest_device *d);
 
@@ -99,7 +105,6 @@ struct tptest_button_event *tptest_button_event(union tptest_event *e);
 struct tptest_motion_event *tptest_motion_event(union tptest_event *e);
 struct tptest_tap_event *tptest_tap_event(union tptest_event *e);
 struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e);
-
 void tptest_error(const char *msg, ...);
 #define argcheck_log(_file, _line, _func, msg, ...)  \
 	tptest_error("%s:%d %s(): " msg, _file, _line, _func, ## __VA_ARGS__)

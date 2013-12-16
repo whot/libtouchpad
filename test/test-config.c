@@ -33,20 +33,19 @@ START_TEST(config_get)
 {
 	int value;
 
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 
 	for (int i = TOUCHPAD_CONFIG_NONE + 1; i < TOUCHPAD_CONFIG_LAST; i++)
 		ck_assert_int_eq(touchpad_config_get(dev->touchpad,
 						     i, &value,
 						     TOUCHPAD_CONFIG_NONE), 0);
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(config_get_invalid)
 {
 	int value;
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 
 	tptest_allow_errors(true);
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
@@ -58,25 +57,23 @@ START_TEST(config_get_invalid)
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
 					     TOUCHPAD_CONFIG_NONE), 0);
 	tptest_allow_errors(false);
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(config_get_empty)
 {
 	int value = 10;
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad, TOUCHPAD_CONFIG_NONE, &value), 0);
 	ck_assert_int_eq(value, 10);
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(config_set_tap_enabled)
 {
 	enum touchpad_config_error error;
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	int value;
 	enum touchpad_config_parameter p = TOUCHPAD_CONFIG_TAP_ENABLE;
 
@@ -97,13 +94,12 @@ START_TEST(config_set_tap_enabled)
 	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_NO_ERROR);
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad, p, &value, TOUCHPAD_CONFIG_NONE), 0);
 	ck_assert_int_eq(value, 1);
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(config_buttons_get_defaults)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	int values[4];
 
 	ck_assert_int_eq(touchpad_config_get(dev->touchpad,
@@ -122,13 +118,12 @@ START_TEST(config_buttons_get_defaults)
 	ck_assert_int_le(values[3], 100);
 	ck_assert_int_le(values[0], values[1]);
 	ck_assert_int_le(values[2], values[3]);
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(config_buttons_set_invalid)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	enum touchpad_config_error error;
 
 	ck_assert_int_eq(touchpad_config_set(dev->touchpad, &error,
@@ -194,15 +189,12 @@ START_TEST(config_buttons_set_invalid)
 					     TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM, -1,
 					     TOUCHPAD_CONFIG_NONE), 4);
 	ck_assert_int_eq(error, TOUCHPAD_CONFIG_ERROR_VALUE_TOO_LOW);
-
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
 START_TEST(config_buttons_set_get)
 {
-	struct tptest_device *dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
+	struct tptest_device *dev = tptest_current_device();
 	enum touchpad_config_error error;
 	int values[4];
 
@@ -223,19 +215,17 @@ START_TEST(config_buttons_set_get)
 	ck_assert_int_eq(values[1], 70);
 	ck_assert_int_eq(values[2], 40);
 	ck_assert_int_eq(values[3], 90);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
-int main(void) {
-	tptest_add("config", "config_get", config_get);
-	tptest_add("config", "config_get", config_get_invalid);
-	tptest_add("config", "config_get", config_get_empty);
-	tptest_add("config", "config_set", config_set_tap_enabled);
+int main(int argc, char **argv) {
+	tptest_add("config_get", config_get, TOUCHPAD_ALL_DEVICES);
+	tptest_add("config_get", config_get_invalid, TOUCHPAD_ALL_DEVICES);
+	tptest_add("config_get", config_get_empty, TOUCHPAD_ALL_DEVICES);
+	tptest_add("config_set", config_set_tap_enabled, TOUCHPAD_ALL_DEVICES);
 
-	tptest_add("config", "config_buttons", config_buttons_get_defaults);
-	tptest_add("config", "config_buttons", config_buttons_set_invalid);
-	tptest_add("config", "config_buttons", config_buttons_set_get);
-	return tptest_run();
+	tptest_add("config_buttons", config_buttons_get_defaults, TOUCHPAD_ALL_DEVICES);
+	tptest_add("config_buttons", config_buttons_set_invalid, TOUCHPAD_ALL_DEVICES);
+	tptest_add("config_buttons", config_buttons_set_get, TOUCHPAD_ALL_DEVICES);
+	return tptest_run(argc, argv);
 }

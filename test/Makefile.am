@@ -5,7 +5,10 @@ TEST_LIBS = libtptest.la $(CHECK_LIBS) $(LIBEVDEV_LIBS) $(top_builddir)/src/libt
 noinst_LTLIBRARIES = libtptest.la
 libtptest_la_SOURCES = \
 	tptest.h \
-	tptest.c
+	tptest-int.h \
+	tptest.c \
+	tptest-synaptics.h \
+	tptest-synaptics.c
 
 noinst_PROGRAMS = test-tap test-config test-scroll test-device test-events test-buttons test-build-pedantic
 

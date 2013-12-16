@@ -25,12 +25,15 @@
 #endif
 
 #include "tptest.h"
+#include "tptest-int.h"
+#include "tptest-synaptics.h"
 #include "touchpad.h"
 #include "touchpad-config.h"
 #include "touchpad-util.h"
 #include <check.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <poll.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -51,6 +54,7 @@ struct test {
 	struct list_node node;
 	char *name;
 	TCase *tc;
+	enum tptest_device_type devices;
 };
 
 struct suite {
@@ -60,14 +64,59 @@ struct suite {
 	Suite *suite;
 };
 
+static struct tptest_device *current_device;
+
+struct tptest_device *tptest_current_device(void) {
+	return current_device;
+}
+
+void tptest_set_current_device(struct tptest_device *device) {
+	current_device = device;
+}
+
+static void generic_device_teardown(void)
+{
+	tptest_delete_device(current_device);
+	current_device = NULL;
+}
+
+struct device devices[] = {
+	{
+		.type = TOUCHPAD_SYNAPTICS_CLICKPAD,
+		.shortname = "synaptics",
+		.setup = tptest_synaptics_clickpad_setup,
+		.teardown = generic_device_teardown,
+		.create = tptest_create_synaptics_clickpad,
+		.touch_down = tptest_synaptics_clickpad_touch_down,
+		.move = tptest_synaptics_clickpad_move,
+	},
+	{ TOUCHPAD_NO_DEVICE, "no device", NULL, NULL },
+};
+
+
 static struct list_head all_tests = LIST_HEAD_INIT(all_tests);
 
+const struct device*
+lookup_device(enum tptest_device_type type)
+{
+	struct device *d = devices;
+	while (d->type != TOUCHPAD_NO_DEVICE) {
+		if (d->type == type)
+			return d;
+		d++;
+	}
+	return d;
+}
+
 static void
-tptest_add_tcase(struct suite *suite, const char *name, void *func)
+tptest_add_tcase_for_device(struct suite *suite, void *func, enum tptest_device_type device)
 {
 	struct test *t;
+	const struct device *dev = lookup_device(device);
+	const char *test_name = dev->shortname;
+
 	list_for_each(&suite->tests, t, node) {
-		if (strcmp(t->name, name) != 0)
+		if (strcmp(t->name, test_name) != 0)
 			continue;
 
 		tcase_add_test(t->tc, func);
@@ -75,31 +124,47 @@ tptest_add_tcase(struct suite *suite, const char *name, void *func)
 	}
 
 	t = zalloc(sizeof(*t));
-	t->name = strdup(name);
-	t->tc = tcase_create(name);
+	t->name = strdup(test_name);
+	t->tc = tcase_create(test_name);
 	list_add_tail(&suite->tests, &t->node);
+	if (device != TOUCHPAD_NO_DEVICE)
+		tcase_add_checked_fixture(t->tc, dev->setup, dev->teardown);
 	tcase_add_test(t->tc, func);
 	suite_add_tcase(suite->suite, t->tc);
 }
 
+static void
+tptest_add_tcase(struct suite *suite, void *func, enum tptest_device_type devices)
+{
+	if (devices != TOUCHPAD_NO_DEVICE) {
+		enum tptest_device_type mask = TOUCHPAD_SYNAPTICS_CLICKPAD;
+		while (mask <= devices) {
+			if (devices & mask)
+				tptest_add_tcase_for_device(suite, func, mask);
+			mask <<= 1;
+		}
+	} else
+		tptest_add_tcase_for_device(suite, func, TOUCHPAD_NO_DEVICE);
+}
+
 void
-tptest_add(const char *suite, const char *name, void *func)
+tptest_add(const char *name, void *func, enum tptest_device_type devices)
 {
 	struct suite *s;
 
 	list_for_each(&all_tests, s, node) {
-		if (strcmp(s->name, suite) == 0) {
-			tptest_add_tcase(s, name, func);
+		if (strcmp(s->name, name) == 0) {
+			tptest_add_tcase(s, func, devices);
 			return;
 		}
 	}
 
 	s = zalloc(sizeof(*s));
-	s->name = strdup(suite);
+	s->name = strdup(name);
 	s->suite = suite_create(s->name);
 	list_head_init(&s->tests);
 	list_add_tail(&all_tests, &s->node);
-	tptest_add_tcase(s, name, func);
+	tptest_add_tcase(s, func, devices);
 }
 
 int is_debugger_attached()
@@ -130,8 +195,27 @@ int is_debugger_attached()
 }
 
 
+static void
+tptest_list_tests(struct list_head *tests)
+{
+	struct suite *s;
+
+	list_for_each(tests, s, node) {
+		struct test *t;
+		printf("%s:\n", s->name);
+		list_for_each(&s->tests, t, node) {
+			printf("	%s\n", t->name);
+		}
+	}
+}
+
+static const struct option opts[] = {
+	{ "list", 0, 0, 'l' },
+	{ 0, 0, 0, 0}
+};
+
 int
-tptest_run(void) {
+tptest_run(int argc, char **argv) {
 	struct suite *s, *next;
 	int failed;
 	SRunner *sr = NULL;
@@ -147,6 +231,20 @@ tptest_run(void) {
 			sr = srunner_create(s->suite);
 		else
 			srunner_add_suite(sr, s->suite);
+	}
+
+	while(1) {
+		int c;
+		int option_index = 0;
+
+		c = getopt_long(argc, argv, "", opts, &option_index);
+		if (c == -1)
+			break;
+		switch(c) {
+			case 'l':
+				tptest_list_tests(&all_tests);
+				return 0;
+		}
 	}
 
 	srunner_run_all(sr, CK_NORMAL);
@@ -168,49 +266,6 @@ tptest_run(void) {
 	}
 
 	return failed;
-}
-
-static void
-test_commmon_create_synaptics_clickpad(struct tptest_device *d)
-{
-	struct libevdev *dev;
-	struct input_absinfo abs[] = {
-		{ ABS_X, 1472, 5472, 75 },
-		{ ABS_Y, 1408, 4448, 129 },
-		{ ABS_PRESSURE, 0, 255, 0 },
-		{ ABS_TOOL_WIDTH, 0, 15, 0 },
-		{ ABS_MT_SLOT, 0, 1, 0 },
-		{ ABS_MT_POSITION_X, 1472, 5472, 75 },
-		{ ABS_MT_POSITION_Y, 1408, 4448, 129 },
-		{ ABS_MT_TRACKING_ID, 0, 65535, 0 },
-		{ ABS_MT_PRESSURE, 0, 255, 0 }
-	};
-	struct input_absinfo *a;
-	int rc;
-
-	dev = libevdev_new();
-	ck_assert(dev != NULL);
-
-	libevdev_set_name(dev, "SynPS/2 Synaptics TouchPad");
-	libevdev_set_id_bustype(dev, 0x11);
-	libevdev_set_id_vendor(dev, 0x2);
-	libevdev_set_id_product(dev, 0x11);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT, NULL);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_TOOL_FINGER, NULL);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_TOOL_QUINTTAP, NULL);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_TOUCH, NULL);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_TOOL_DOUBLETAP, NULL);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_TOOL_TRIPLETAP, NULL);
-	libevdev_enable_event_code(dev, EV_KEY, BTN_TOOL_QUADTAP, NULL);
-
-	ARRAY_FOR_EACH(abs, a)
-		libevdev_enable_event_code(dev, EV_ABS, a->value, a);
-
-	rc = libevdev_uinput_create_from_device(dev,
-						LIBEVDEV_UINPUT_OPEN_MANAGED,
-						&d->uinput);
-	ck_assert_int_eq(rc, 0);
-	libevdev_free(dev);
 }
 
 static void
@@ -336,15 +391,23 @@ tptest_create_device(enum tptest_device_type which)
 	int fd;
 	int rc;
 	const char *path;
+	struct device *dev;
 
 	touchpad_set_error_log_func(error_log);
 
 	ck_assert(d != NULL);
 
-	switch(which) {
-		case TOUCHPAD_SYNAPTICS_CLICKPAD:
-			test_commmon_create_synaptics_clickpad(d);
+	dev = devices;
+	while (dev->type != TOUCHPAD_NO_DEVICE) {
+		if (dev->type == which) {
+			dev->create(d);
 			break;
+		}
+	}
+
+	if (dev->type == TOUCHPAD_NO_DEVICE) {
+		ck_abort_msg("Invalid device type %d\n", which);
+		return NULL;
 	}
 
 	path = libevdev_uinput_get_devnode(d->uinput);
@@ -364,6 +427,11 @@ tptest_create_device(enum tptest_device_type which)
 	d->timerfd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC|TFD_NONBLOCK);
 	ck_assert(d->timerfd > -1);
 
+	d->d = dev;
+	d->d->min[ABS_X] = libevdev_get_abs_minimum(d->evdev, ABS_X);
+	d->d->max[ABS_X] = libevdev_get_abs_maximum(d->evdev, ABS_X);
+	d->d->min[ABS_Y] = libevdev_get_abs_minimum(d->evdev, ABS_Y);
+	d->d->max[ABS_Y] = libevdev_get_abs_maximum(d->evdev, ABS_Y);
 	return d;
 }
 
@@ -419,21 +487,7 @@ tptest_event(struct tptest_device *d, unsigned int type, unsigned int code, int 
 void
 tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y)
 {
-	static int tracking_id;
-	struct input_event *ev;
-	struct input_event down[] = {
-		{ .type = EV_ABS, .code = ABS_X, .value = x  },
-		{ .type = EV_ABS, .code = ABS_Y, .value = y },
-		{ .type = EV_ABS, .code = ABS_PRESSURE, .value = 30  },
-		{ .type = EV_ABS, .code = ABS_MT_SLOT, .value = slot },
-		{ .type = EV_ABS, .code = ABS_MT_TRACKING_ID, .value = ++tracking_id },
-		{ .type = EV_ABS, .code = ABS_MT_POSITION_X, .value = x },
-		{ .type = EV_ABS, .code = ABS_MT_POSITION_Y, .value = y },
-		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
-	};
-
-	ARRAY_FOR_EACH(down, ev)
-		tptest_event(d, ev->type, ev->code, ev->value);
+	d->d->touch_down(d, slot, x, y);
 }
 
 void
@@ -453,20 +507,7 @@ tptest_touch_up(struct tptest_device *d, unsigned int slot)
 void
 tptest_touch_move(struct tptest_device *d, unsigned int slot, int x, int y)
 {
-	struct input_event *ev;
-	struct input_event move[] = {
-		{ .type = EV_ABS, .code = ABS_MT_SLOT, .value = slot },
-		{ .type = EV_ABS, .code = ABS_X, .value = x  },
-		{ .type = EV_ABS, .code = ABS_Y, .value = y },
-		{ .type = EV_ABS, .code = ABS_MT_POSITION_X, .value = x },
-		{ .type = EV_ABS, .code = ABS_MT_POSITION_Y, .value = y },
-		{ .type = EV_KEY, .code = BTN_TOOL_FINGER, .value = 1 },
-		{ .type = EV_KEY, .code = BTN_TOUCH, .value = 1 },
-		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
-	};
-
-	ARRAY_FOR_EACH(move, ev)
-		tptest_event(d, ev->type, ev->code, ev->value);
+	d->d->move(d, slot, x, y);
 }
 
 void
@@ -518,3 +559,13 @@ struct tptest_scroll_event *tptest_scroll_event(union tptest_event *e)
 	assert(e->type == EVTYPE_SCROLL);
 	return &e->scroll;
 }
+
+int tptest_scale(const struct tptest_device *d, unsigned int axis, int val)
+{
+	ck_assert_int_ge(val, 0);
+	ck_assert_int_le(val, 100);
+	ck_assert_int_le(axis, ABS_Y);
+
+	return (d->d->max[axis] - d->d->min[axis]) * val/100.0 + d->d->min[axis];
+}
+

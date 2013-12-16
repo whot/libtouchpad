@@ -24,51 +24,15 @@
 #include "config.h"
 #endif
 
-#include <check.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
+#ifndef TPTEST_SYNAPTICS_H
+#define TPTEST_SYNAPTICS_H
 
 #include "tptest.h"
-#include "touchpad-util.h"
-#include "touchpad-config.h"
+#include "tptest-int.h"
 
-START_TEST(device_open_invalid_device)
-{
-	int rc, fd;
-	struct touchpad *tp = NULL;
+void tptest_create_synaptics_clickpad(struct tptest_device *d);
+void tptest_synaptics_clickpad_setup(void);
+void tptest_synaptics_clickpad_touch_down(struct tptest_device *d, unsigned int slot, int x, int y);
+void tptest_synaptics_clickpad_move(struct tptest_device *d, unsigned int slot, int x, int y);
 
-	fd = open("/dev/input/event0", O_RDONLY);
-	ck_assert_int_ge(fd, 0);
-	rc = touchpad_new_from_fd(fd, &tp);
-	ck_assert(tp == NULL);
-	ck_assert_int_eq(rc, -ECANCELED);
-	close(fd);
-}
-END_TEST
-
-START_TEST(device_change_fd)
-{
-	struct tptest_device *dev = tptest_current_device();
-	int fd;
-
-	fd = touchpad_get_fd(dev->touchpad);
-	ck_assert_int_ge(fd, 0);
-
-	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, 0));
-	ck_assert_int_eq(0, touchpad_get_fd(dev->touchpad));
-
-	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, -1));
-	ck_assert_int_eq(-1, touchpad_get_fd(dev->touchpad));
-
-	ck_assert_int_eq(0, touchpad_change_fd(dev->touchpad, fd));
-	ck_assert_int_eq(fd, touchpad_get_fd(dev->touchpad));
-}
-END_TEST
-
-int main(int argc, char **argv) {
-	tptest_add("device_open", device_open_invalid_device, TOUCHPAD_NO_DEVICE);
-	tptest_add("device_change_fd", device_change_fd, TOUCHPAD_ALL_DEVICES);
-
-	return tptest_run(argc, argv);
-}
+#endif

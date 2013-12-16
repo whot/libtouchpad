@@ -35,8 +35,8 @@ START_TEST(tap_single_finger)
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 
 
@@ -57,8 +57,6 @@ START_TEST(tap_single_finger)
 
 	ck_assert(tap_down);
 	ck_assert(tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -68,9 +66,9 @@ START_TEST(tap_single_finger_move)
 	union tptest_event *e;
 	bool tap_down = false, tap_up = false;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -90,8 +88,6 @@ START_TEST(tap_single_finger_move)
 
 	ck_assert(!tap_down);
 	ck_assert(!tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -102,8 +98,8 @@ START_TEST(tap_single_finger_hold)
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 
 	while (tptest_handle_events(dev))
 		;
@@ -128,8 +124,6 @@ START_TEST(tap_single_finger_hold)
 
 	ck_assert(!tap_down);
 	ck_assert(!tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -139,10 +133,10 @@ START_TEST(tap_single_finger_doubletap)
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -162,8 +156,6 @@ START_TEST(tap_single_finger_doubletap)
 
 	ck_assert(tap_down == 2);
 	ck_assert(tap_up == 2);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -173,11 +165,11 @@ START_TEST(tap_single_finger_tap_move)
 	union tptest_event *e;
 	int tap_down = 0, tap_up = 0;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -197,8 +189,6 @@ START_TEST(tap_single_finger_tap_move)
 
 	ck_assert(tap_down == 1);
 	ck_assert(tap_up == 1);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -209,11 +199,11 @@ START_TEST(tap_single_finger_drag)
 	int tap_down = 0, tap_up = 0;
 	int finger_state = 0;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -238,8 +228,6 @@ START_TEST(tap_single_finger_drag)
 
 	ck_assert(tap_down == 1);
 	ck_assert(tap_up == 1);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -250,17 +238,17 @@ START_TEST(tap_single_finger_multi_drag)
 	int tap_down = 0, tap_up = 0;
 	int finger_state = 0;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 
 	while (tptest_handle_events(dev))
@@ -285,8 +273,6 @@ START_TEST(tap_single_finger_multi_drag)
 
 	ck_assert(tap_down == 1);
 	ck_assert(tap_up == 1);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -297,8 +283,8 @@ START_TEST(tap_single_finger_read_delay)
 	bool tap_down = false, tap_up = false;
 	int tap_timeout;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
 
 	while (!tptest_handle_events(dev))
 		;
@@ -331,8 +317,6 @@ START_TEST(tap_single_finger_read_delay)
 
 	ck_assert(tap_down);
 	ck_assert(tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -342,9 +326,9 @@ START_TEST(tap_double_finger)
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -365,8 +349,6 @@ START_TEST(tap_double_finger)
 
 	ck_assert(tap_down);
 	ck_assert(tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -376,9 +358,9 @@ START_TEST(tap_double_finger_invert_release)
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 	/* same as tap_double_finger but touchpoints released in different
 	   order */
 	tptest_touch_up(dev, 1);
@@ -401,8 +383,6 @@ START_TEST(tap_double_finger_invert_release)
 
 	ck_assert(tap_down);
 	ck_assert(tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -412,10 +392,10 @@ START_TEST(tap_double_finger_move)
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
-	tptest_touch_move_to(dev, 0, 3000, 3000, 4000, 3000, -1);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
+	tptest_touch_move_to(dev, 0, 30, 30, 40, 30, -1);
 	tptest_touch_up(dev, 0);
 	tptest_touch_up(dev, 1);
 
@@ -436,8 +416,6 @@ START_TEST(tap_double_finger_move)
 
 	ck_assert(!tap_down);
 	ck_assert(!tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -448,9 +426,9 @@ START_TEST(tap_double_finger_hold)
 	union tptest_event *e;
 	int tap_timeout;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 
 	while (tptest_handle_events(dev))
 		;
@@ -479,8 +457,6 @@ START_TEST(tap_double_finger_hold)
 
 	ck_assert(!tap_down);
 	ck_assert(!tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -490,12 +466,12 @@ START_TEST(tap_double_finger_move_tap)
 	bool tap_down = false, tap_up = false;
 	union tptest_event *e;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
-	tptest_touch_move_to(dev, 1, 4000, 4000, 4000, 3000, -1);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_move_to(dev, 1, 40, 40, 40, 30, -1);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
 
 	while (tptest_handle_events(dev))
@@ -519,8 +495,6 @@ START_TEST(tap_double_finger_move_tap)
 
 	ck_assert(tap_down);
 	ck_assert(tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
@@ -531,9 +505,9 @@ START_TEST(tap_double_finger_hold_tap)
 	union tptest_event *e;
 	int tap_timeout;
 
-	dev = tptest_create_device(TOUCHPAD_SYNAPTICS_CLICKPAD);
-	tptest_touch_down(dev, 0, 3000, 3000);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	dev = tptest_current_device();
+	tptest_touch_down(dev, 0, 30, 30);
+	tptest_touch_down(dev, 1, 40, 40);
 
 	while (tptest_handle_events(dev))
 		;
@@ -543,7 +517,7 @@ START_TEST(tap_double_finger_hold_tap)
 
 	usleep(tap_timeout * 2 * 1000);
 	tptest_touch_up(dev, 1);
-	tptest_touch_down(dev, 1, 4000, 4000);
+	tptest_touch_down(dev, 1, 40, 40);
 	tptest_touch_up(dev, 1);
 
 	while (tptest_handle_events(dev))
@@ -563,25 +537,23 @@ START_TEST(tap_double_finger_hold_tap)
 
 	ck_assert(tap_down);
 	ck_assert(tap_up);
-
-	tptest_delete_device(dev);
 }
 END_TEST
 
-int main(void) {
-	tptest_add("tap", "tap_single_finger", tap_single_finger);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_move);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_hold);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_doubletap);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_tap_move);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_drag);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_multi_drag);
-	tptest_add("tap", "tap_single_finger", tap_single_finger_read_delay);
-	tptest_add("tap", "tap_double_finger", tap_double_finger);
-	tptest_add("tap", "tap_double_finger", tap_double_finger_invert_release);
-	tptest_add("tap", "tap_double_finger", tap_double_finger_move);
-	tptest_add("tap", "tap_double_finger", tap_double_finger_hold);
-	tptest_add("tap", "tap_double_finger", tap_double_finger_hold_tap);
-	tptest_add("tap", "tap_double_finger", tap_double_finger_move_tap);
-	return tptest_run();
+int main(int argc, char **argv) {
+	tptest_add("tap_single_finger", tap_single_finger, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_move, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_hold, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_doubletap, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_tap_move, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_drag, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_multi_drag, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_single_finger", tap_single_finger_read_delay, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_invert_release, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_move, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_hold, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_hold_tap, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_move_tap, TOUCHPAD_ALL_DEVICES);
+	return tptest_run(argc, argv);
 }
