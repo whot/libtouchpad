@@ -338,11 +338,10 @@ void touchpad_set_interface(struct touchpad *tp, const struct touchpad_interface
  * Read and handle events from this device
  * @param tp A previously opened touchpad device
  * @param userdata The data to be supplied in the callback interface.
- * @param now The current time in milliseconds
  *
  * @return 0 on success or a negative errno on failure
  */
-int touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now);
+int touchpad_handle_events(struct touchpad *tp, void *userdata);
 
 /**
  * @ingroup api

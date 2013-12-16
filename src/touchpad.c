@@ -359,6 +359,12 @@ touchpad_handle_timeouts(struct touchpad *tp, void *userdata, unsigned int now)
 {
 	int timeout;
 	int next_timeout = INT_MAX;
+	struct timespec ts;
+
+	if (now == 0) {
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		now = timespec_to_millis(&ts);
+	}
 
 	if (tp->next_timeout == 0 || tp->next_timeout > now)
 		return 0;
@@ -386,23 +392,20 @@ touchpad_drain_timer_events(struct touchpad *tp)
 }
 
 int
-touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
+touchpad_handle_events(struct touchpad *tp, void *userdata)
 {
 	int rc = 0;
 	enum libevdev_read_flag mode = LIBEVDEV_READ_FLAG_NORMAL;
 	struct epoll_event events[3];
-	struct timespec ts;
 
 	argcheck_ptr_not_null(tp->interface);
 
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	now = timespec_to_millis(&ts);
 
 	rc = epoll_wait(tp->epollfd, events, ARRAY_LENGTH(events), 0);
 	if (rc < 0)
 		return -errno;
 	else if (rc == 0)
-		return touchpad_handle_timeouts(tp, userdata, now);
+		return touchpad_handle_timeouts(tp, userdata, 0);
 	else {
 		int i;
 		for (i = 0; i < rc; i++) {
@@ -425,7 +428,7 @@ touchpad_handle_events(struct touchpad *tp, void *userdata, unsigned int now)
 				touchpad_handle_timeouts(tp, userdata, timeval_to_millis(&ev.time));
 			touchpad_handle_event(tp, userdata, &ev);
 		} else if (rc == -EAGAIN)
-			touchpad_handle_timeouts(tp, userdata, now);
+			touchpad_handle_timeouts(tp, userdata, 0);
 
 	} while (rc == LIBEVDEV_READ_STATUS_SUCCESS);
 

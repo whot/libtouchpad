@@ -283,9 +283,8 @@ static void
 xf86touchpad_read_input(InputInfoPtr pInfo)
 {
 	struct touchpad *tp = xf86touchpad(pInfo);
-	unsigned int millis = GetTimeInMillis();
 
-	touchpad_handle_events(tp, pInfo, millis);
+	touchpad_handle_events(tp, pInfo);
 }
 
 static bool xf86touchpad_apply_config(InputInfoPtr pInfo,

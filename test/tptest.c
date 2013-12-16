@@ -411,7 +411,7 @@ tptest_create_device(enum tptest_device_type which)
 int
 tptest_handle_events(struct tptest_device *d)
 {
-	return touchpad_handle_events(d->touchpad, d, 0);
+	return touchpad_handle_events(d->touchpad, d);
 }
 
 void

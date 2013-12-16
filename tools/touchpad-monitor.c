@@ -86,11 +86,8 @@ int mainloop(struct touchpad *tp, struct tpdata *data) {
 	fds[0].fd = touchpad_get_fd(tp);
 	fds[0].events = POLLIN;
 
-	while (poll(fds, 1, -1)) {
-		unsigned int millis;
-
-		touchpad_handle_events(tp, data, millis);
-	}
+	while (poll(fds, 1, -1))
+		touchpad_handle_events(tp, data);
 
 	return 0;
 }
