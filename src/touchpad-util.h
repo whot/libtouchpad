@@ -76,5 +76,10 @@ timeval_to_millis(const struct timeval *tv)
 	return tv->tv_sec * 1000 + (tv->tv_usec / 1000);
 }
 
+static inline unsigned int
+timespec_to_millis(const struct timespec *ts)
+{
+	return ts->tv_sec * 1000 + (ts->tv_nsec / 1000000);
+}
 
 #endif
