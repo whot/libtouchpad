@@ -154,8 +154,8 @@ START_TEST(tap_single_finger_doubletap)
 		}
 	}
 
-	ck_assert(tap_down == 2);
-	ck_assert(tap_up == 2);
+	ck_assert_int_eq(tap_down, 2);
+	ck_assert_int_eq(tap_up, 2);
 }
 END_TEST
 
@@ -187,8 +187,8 @@ START_TEST(tap_single_finger_tap_move)
 		}
 	}
 
-	ck_assert(tap_down == 1);
-	ck_assert(tap_up == 1);
+	ck_assert_int_eq(tap_down, 1);
+	ck_assert_int_eq(tap_up, 1);
 }
 END_TEST
 
@@ -226,8 +226,8 @@ START_TEST(tap_single_finger_drag)
 			ck_assert_int_eq(finger_state, 1);
 	}
 
-	ck_assert(tap_down == 1);
-	ck_assert(tap_up == 1);
+	ck_assert_int_eq(tap_down, 1);
+	ck_assert_int_eq(tap_up, 1);
 }
 END_TEST
 
@@ -271,8 +271,8 @@ START_TEST(tap_single_finger_multi_drag)
 			ck_assert_int_eq(finger_state, 1);
 	}
 
-	ck_assert(tap_down == 1);
-	ck_assert(tap_up == 1);
+	ck_assert_int_eq(tap_down, 1);
+	ck_assert_int_eq(tap_up, 1);
 }
 END_TEST
 
