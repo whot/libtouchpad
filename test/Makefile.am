@@ -7,6 +7,8 @@ libtptest_la_SOURCES = \
 	tptest.h \
 	tptest-int.h \
 	tptest.c \
+	tptest-bcm5974.h \
+	tptest-bcm5974.c \
 	tptest-synaptics.h \
 	tptest-synaptics.c
 

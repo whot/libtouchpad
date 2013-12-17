@@ -27,6 +27,7 @@
 #include "tptest.h"
 #include "tptest-int.h"
 #include "tptest-synaptics.h"
+#include "tptest-bcm5974.h"
 #include "touchpad.h"
 #include "touchpad-config.h"
 #include "touchpad-util.h"
@@ -88,6 +89,15 @@ struct device devices[] = {
 		.create = tptest_create_synaptics_clickpad,
 		.touch_down = tptest_synaptics_clickpad_touch_down,
 		.move = tptest_synaptics_clickpad_move,
+	},
+	{
+		.type = TOUCHPAD_BCM5974,
+		.shortname = "bcm5974",
+		.setup = tptest_bcm5974_setup,
+		.teardown = generic_device_teardown,
+		.create = tptest_create_bcm5974,
+		.touch_down = tptest_bcm5974_touch_down,
+		.move = tptest_bcm5974_move,
 	},
 	{ TOUCHPAD_NO_DEVICE, "no device", NULL, NULL },
 };
