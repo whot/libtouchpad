@@ -125,6 +125,9 @@ touchpad_alloc(void)
 		tp->dev = libevdev_new();
 		tp->log.func = default_log_func;
 		tp->log.data = NULL;
+		tp->buttons.handle_state = touchpad_button_handle_state;
+		tp->buttons.handle_timeout = touchpad_button_handle_timeout;
+		tp->buttons.select_pointer_touch = touchpad_button_select_pointer_touch;
 		touchpad_config_set_static_defaults(tp);
 		touchpad_reset(tp);
 	}
@@ -224,6 +227,12 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 		tp->ntouches = max(3, tp->ntouches);
 	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_TOOL_DOUBLETAP))
 		tp->ntouches = max(2, tp->ntouches);
+
+	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_RIGHT)) {
+		tp->buttons.handle_state = touchpad_phys_button_handle_state;
+		tp->buttons.handle_timeout = touchpad_phys_button_handle_timeout;
+		tp->buttons.select_pointer_touch = touchpad_phys_button_select_pointer_touch;
+	}
 
 	touchpad_config_set_dynamic_defaults(tp);
 
@@ -377,7 +386,7 @@ touchpad_handle_timeouts(struct touchpad *tp, void *userdata, unsigned int now)
 	if (tp->next_timeout == 0 || tp->next_timeout > now)
 		return 0;
 
-	timeout = touchpad_button_handle_timeout(tp, now, userdata);
+	timeout = tp->buttons.handle_timeout(tp, now, userdata);
 	if (timeout)
 		next_timeout = timeout;
 

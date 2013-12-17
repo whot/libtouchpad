@@ -277,7 +277,7 @@ touchpad_select_pointer_touch(struct touchpad *tp)
 		return;
 
 	touchpad_for_each_touch(tp, t) {
-		if (touchpad_button_select_pointer_touch(tp, t)) {
+		if (tp->buttons.select_pointer_touch(tp, t)) {
 			t->pointer = true;
 			break;
 		}
@@ -343,7 +343,7 @@ touchpad_post_process_touches(struct touchpad *tp)
 static void
 touchpad_post_events(struct touchpad *tp, void *userdata)
 {
-	touchpad_button_handle_state(tp, userdata);
+	tp->buttons.handle_state(tp, userdata);
 	touchpad_tap_handle_state(tp, userdata);
 	if (touchpad_scroll_handle_state(tp, userdata) == 0) {
 		touchpad_post_motion_events(tp, userdata);

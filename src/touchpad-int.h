@@ -180,6 +180,14 @@ struct buttons {
 	uint32_t old_state;
 
 	unsigned int timeout;
+
+	/**
+	 * Process the current touchpad state, different for clickpads and
+	 * traditional touchpads.
+	 */
+	int (*handle_state)(struct touchpad *tp, void *userdata);
+	int (*handle_timeout)(struct touchpad *tp, unsigned int now, void *userdata);
+	bool (*select_pointer_touch)(struct touchpad *tp, struct touch *t);
 };
 
 enum event_types {
@@ -293,6 +301,9 @@ int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
 int touchpad_button_handle_state(struct touchpad *tp, void *userdata);
 bool touchpad_button_select_pointer_touch(struct touchpad *tp, struct touch *t);
 int touchpad_button_handle_timeout(struct touchpad *tp, unsigned int now, void *userdata);
+int touchpad_phys_button_handle_state(struct touchpad *tp, void *userdata);
+bool touchpad_phys_button_select_pointer_touch(struct touchpad *tp, struct touch *t);
+int touchpad_phys_button_handle_timeout(struct touchpad *tp, unsigned int now, void *userdata);
 int touchpad_request_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int delta);
 
 void touchpad_config_set_dynamic_defaults(struct touchpad *tp);

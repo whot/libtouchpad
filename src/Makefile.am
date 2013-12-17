@@ -6,6 +6,7 @@ libtouchpad_la_SOURCES = \
 	touchpad-config.h \
 	touchpad-config.c \
 	touchpad-button.c \
+	touchpad-phys-button.c \
 	touchpad-events.c \
 	touchpad-filter.c \
 	touchpad-tap.c \
