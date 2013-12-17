@@ -80,6 +80,9 @@ touchpad_update_abs_state(struct touchpad *tp,
 	int rc = 0;
 	struct touch *t = touchpad_current_touch(tp);
 
+	if (!t && ev->code != ABS_MT_SLOT)
+		return rc;
+
 	switch (ev->code) {
 		case ABS_MT_POSITION_X:
 			t->x = ev->value;
@@ -94,6 +97,8 @@ touchpad_update_abs_state(struct touchpad *tp,
 		case ABS_MT_SLOT:
 			tp->slot = ev->value;
 			t = touchpad_current_touch(tp);
+			if (!t)
+				return rc;
 			break;
 		case ABS_MT_TRACKING_ID:
 			if (ev->value == -1)

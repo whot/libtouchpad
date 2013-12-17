@@ -265,7 +265,7 @@ touchpad_pinned_touch(struct touchpad *tp)
 static inline struct touch*
 touchpad_current_touch(struct touchpad *tp)
 {
-	return (tp->slot != -1) ? touchpad_touch(tp, tp->slot) : NULL;
+	return (tp->slot != -1 && tp->slot < MAX_TOUCHPOINTS) ? touchpad_touch(tp, tp->slot) : NULL;
 }
 
 static inline struct touch*
