@@ -291,7 +291,6 @@ int touchpad_tap_handle_state(struct touchpad *tp, void *userdata);
 unsigned int touchpad_tap_handle_timeout(struct touchpad *tp, unsigned int ms, void *userdata);
 int touchpad_scroll_handle_state(struct touchpad *tp, void *userdata);
 int touchpad_button_handle_state(struct touchpad *tp, void *userdata);
-void touchpad_button_pre_process_touch(struct touchpad *tp, struct touch *t, void *userdata);
 bool touchpad_button_select_pointer_touch(struct touchpad *tp, struct touch *t);
 int touchpad_button_handle_timeout(struct touchpad *tp, unsigned int now, void *userdata);
 int touchpad_request_timer(struct touchpad *tp, void *userdata, unsigned int now, unsigned int delta);
