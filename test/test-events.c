@@ -72,10 +72,33 @@ START_TEST(events_touch_start_finish_same_event)
 }
 END_TEST
 
+START_TEST(events_exceed_max_touches)
+{
+	struct tptest_device *dev = tptest_current_device();
+	int i;
+
+
+	for (i = 0; i < libevdev_get_num_slots(dev->evdev); i++)
+		tptest_touch_down(dev, i, 10, 10);
+
+	tptest_handle_events(dev);
+
+	for (i = 0; i < libevdev_get_num_slots(dev->evdev); i++)
+		tptest_touch_move_to(dev, i, 10, 10, 90, 90, -1);
+
+	for (i = 0; i < libevdev_get_num_slots(dev->evdev); i++)
+		tptest_touch_up(dev, i);
+
+	tptest_handle_events(dev);
+}
+END_TEST
+
 int main(int argc, char **argv) {
 	tptest_add("events_invalid_touches", events_EV_SYN_only, TOUCHPAD_ALL_DEVICES);
 	tptest_add("events_invalid_touches", events_ABS_MT_TRACKING_ID_finishes, TOUCHPAD_ALL_DEVICES);
 	tptest_add("events_invalid_touches", events_touch_start_finish_same_event, TOUCHPAD_ALL_DEVICES);
+
+	tptest_add("events_max_touches", events_exceed_max_touches, TOUCHPAD_BCM5974);
 
 	return tptest_run(argc, argv);
 }
