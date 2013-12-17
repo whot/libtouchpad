@@ -31,6 +31,30 @@
 #include "touchpad-int.h"
 
 
+static void
+touchpad_begin_touch(struct touchpad *tp, struct touch *t, unsigned int tracking_id)
+{
+	t->state = TOUCH_BEGIN;
+	t->number = tracking_id;
+	tp->fingers_down++;
+	argcheck_int_ge(tp->fingers_down, 1);
+	t->dirty = true;
+	tp->queued |= EVENT_MOTION;
+}
+
+static void
+touchpad_end_touch(struct touchpad *tp, struct touch *t)
+{
+	if (t->state == TOUCH_NONE)
+		return;
+
+	t->state = TOUCH_END;
+	tp->fingers_down--;
+	argcheck_int_ge(tp->fingers_down, 0);
+	t->dirty = true;
+	tp->queued |= EVENT_MOTION;
+}
+
 static int
 touchpad_update_abs_state(struct touchpad *tp,
 			  const struct input_event *ev)
@@ -54,21 +78,10 @@ touchpad_update_abs_state(struct touchpad *tp,
 			t = touchpad_current_touch(tp);
 			break;
 		case ABS_MT_TRACKING_ID:
-			if (ev->value == -1) {
-				if (t->state == TOUCH_NONE)
-					return rc;
-
-				t->state = TOUCH_END;
-				tp->fingers_down--;
-				argcheck_int_ge(tp->fingers_down, 0);
-			} else {
-				t->state = TOUCH_BEGIN;
-				t->number = ev->value;
-				tp->fingers_down++;
-				argcheck_int_ge(tp->fingers_down, 1);
-			}
-			t->dirty = true;
-			tp->queued |= EVENT_MOTION;
+			if (ev->value == -1)
+				touchpad_end_touch(tp, t);
+			else
+				touchpad_begin_touch(tp, t, ev->value);
 			break;
 	}
 
