@@ -243,9 +243,12 @@ touchpad_tap_touch3_handle_event(struct touchpad *tp, enum tap_event event, void
 
 	switch (event) {
 		case TAP_EVENT_TOUCH:
+			tp->tap.state = TAP_STATE_DEAD;
+			touchpad_tap_clear_timer(tp, userdata);
+			break;
 		case TAP_EVENT_MOTION:
 		case TAP_EVENT_TIMEOUT:
-			tp->tap.state = TAP_STATE_IDLE;
+			tp->tap.state = TAP_STATE_TOUCH_3_HOLD;
 			touchpad_tap_clear_timer(tp, userdata);
 			break;
 		case TAP_EVENT_RELEASE:
