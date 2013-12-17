@@ -13,11 +13,13 @@ This driver provides:
 
 Features (current):
 * it builds
-
-Features (eventually):
 * tap-to-click
 * two-finger scrolling
 * software button emulation
+
+Features (eventually):
+* edge scrolling
+* clickfingers
 
 TODO
 ====
