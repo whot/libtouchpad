@@ -214,8 +214,16 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 		goto fail;
 	}
 
-	tp->ntouches = ntouches;
+	tp->maxtouches = ntouches;
 	tp->slot = libevdev_get_current_slot(tp->dev);
+
+	tp->ntouches = ntouches;
+	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_TOOL_QUADTAP))
+		tp->ntouches = max(4, tp->ntouches);
+	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_TOOL_TRIPLETAP))
+		tp->ntouches = max(3, tp->ntouches);
+	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_TOOL_DOUBLETAP))
+		tp->ntouches = max(2, tp->ntouches);
 
 	touchpad_config_set_dynamic_defaults(tp);
 

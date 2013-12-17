@@ -523,6 +523,8 @@ touchpad_button_handle_state(struct touchpad *tp, void *userdata)
 	touchpad_for_each_touch(tp, t) {
 		if (t->state == TOUCH_NONE)
 			continue;
+		if (t->fake)
+			continue;
 
 		if (t->state == TOUCH_END)
 				touchpad_button_handle_event(tp, t, BUTTON_EVENT_UP, userdata);

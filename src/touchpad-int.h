@@ -96,6 +96,7 @@ struct touch {
 	bool dirty;
 	bool pointer; /**< is this the pointer-moving touchpoint? */
 	bool pinned; /**< touch is pinned from phys. button press, movement is ignored */
+	bool fake; /**< touch is a fake touch from BTN_TOOL_*TAP */
 
 	enum touch_state state;
 	int millis;
@@ -198,7 +199,8 @@ struct touchpad {
     int fingers_down;		/* number of fingers down */
     int slot;			/* current slot */
 
-    int ntouches;		/* from ABS_MT_SLOT(max) */
+    int maxtouches;		/* from ABS_MT_SLOT(max) */
+    int ntouches;		/* maxtouches + triple/quad if applicable */
     struct touch touches[MAX_TOUCHPOINTS];
 
     struct touchpad_config config;
@@ -264,6 +266,14 @@ static inline struct touch*
 touchpad_current_touch(struct touchpad *tp)
 {
 	return (tp->slot != -1) ? touchpad_touch(tp, tp->slot) : NULL;
+}
+
+static inline struct touch*
+touchpad_fake_touch(struct touchpad *tp, int which)
+{
+	argcheck_int_range(which, BTN_TOOL_DOUBLETAP, BTN_TOOL_QUADTAP);
+
+	return touchpad_touch(tp, tp->maxtouches + which - BTN_TOOL_DOUBLETAP);
 }
 
 int touchpad_handle_event(struct touchpad *tp,

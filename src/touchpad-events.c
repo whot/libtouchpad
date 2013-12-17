@@ -31,13 +31,31 @@
 #include "touchpad-int.h"
 
 
+#define TOUCHPAD_FAKE_TRACKING_ID -1
+
 static void
-touchpad_begin_touch(struct touchpad *tp, struct touch *t, unsigned int tracking_id)
+touchpad_begin_touch(struct touchpad *tp, struct touch *t, int tracking_id)
 {
-	t->state = TOUCH_BEGIN;
+	static int fake_tracking_id = (1 << 16);
+
+	/* A touch may be active from a fake touch, just overwrite the
+	   values then. */
+	if (t->state == TOUCH_NONE || t->state == TOUCH_END) {
+		tp->fingers_down++;
+		argcheck_int_ge(tp->fingers_down, 1);
+	}
+
+
+	if (t->state != TOUCH_UPDATE)
+		t->state = TOUCH_BEGIN;
+
+	if (tracking_id == TOUCHPAD_FAKE_TRACKING_ID) {
+		tracking_id = fake_tracking_id++;
+		t->fake = true;
+	} else
+		t->fake = false;
+
 	t->number = tracking_id;
-	tp->fingers_down++;
-	argcheck_int_ge(tp->fingers_down, 1);
 	t->dirty = true;
 	tp->queued |= EVENT_MOTION;
 }
@@ -91,6 +109,55 @@ touchpad_update_abs_state(struct touchpad *tp,
 }
 
 static void
+touchpad_begin_fake_touches(struct touchpad *tp, unsigned int code)
+{
+	int i;
+	int tapcount = code - BTN_TOOL_DOUBLETAP + 2;
+	struct touch *t;
+
+	argcheck_int_range(code, BTN_TOOL_DOUBLETAP, BTN_TOOL_QUADTAP);
+
+	/* Don't need to fake touches for this device */
+	if (tp->maxtouches >= tapcount)
+		return;
+
+	for (i = 0; i < tapcount; i++) {
+		t = touchpad_touch(tp, i);
+		if (t->state == TOUCH_END) {
+			touchpad_begin_touch(tp, t, TOUCHPAD_FAKE_TRACKING_ID);
+			t->state = TOUCH_UPDATE;
+		}
+	}
+
+	touchpad_begin_touch(tp, t, TOUCHPAD_FAKE_TRACKING_ID);
+}
+
+static void
+touchpad_end_fake_touches(struct touchpad *tp, unsigned int code)
+{
+	int i;
+	int tapcount = code - BTN_TOOL_DOUBLETAP + 2;
+	struct touch *t;
+
+	/* Don't need to fake touches for this device */
+	if (tp->maxtouches >= tapcount)
+		return;
+
+	argcheck_int_range(code, BTN_TOOL_DOUBLETAP, BTN_TOOL_QUADTAP);
+
+	/* FIXME: we should set a timer for this because if there
+	   are still two fingers on the touchpad the touchpoints end in the
+	   switch from TRIPLETAP to DOUBLETAP and are re-created in the next
+	   event. A timer of even 2ms or so would help prevent this.
+	 */
+	for (i = 0; i < tapcount; i++) {
+		t = touchpad_touch(tp, i);
+		if (t->fake && (t->state == TOUCH_UPDATE || t->state == TOUCH_BEGIN))
+			touchpad_end_touch(tp, t);
+	}
+}
+
+static void
 touchpad_update_button_state(struct touchpad *tp,
 			     const struct input_event *ev)
 {
@@ -105,6 +172,13 @@ touchpad_update_button_state(struct touchpad *tp,
 			tp->buttons.state &= ~mask;
 			tp->queued |= EVENT_BUTTON_RELEASE;
 		}
+	}
+
+	if (ev->code >= BTN_TOOL_DOUBLETAP && ev->code <= BTN_TOOL_QUADTAP) {
+		if (ev->value)
+			touchpad_begin_fake_touches(tp, ev->code);
+		else
+			touchpad_end_fake_touches(tp, ev->code);
 	}
 }
 
@@ -229,6 +303,7 @@ touchpad_touch_reset(struct touchpad *tp, struct touch *t)
 	t->state = TOUCH_NONE;
 	t->pointer = false;
 	t->pinned = false;
+	t->fake = false;
 	t->button_state = BUTTON_STATE_NONE;
 	touchpad_history_reset(tp, t);
 }
