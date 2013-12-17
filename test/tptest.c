@@ -379,6 +379,7 @@ tptest_create_device(enum tptest_device_type which)
 			dev->create(d);
 			break;
 		}
+		dev++;
 	}
 
 	if (dev->type == TOUCHPAD_NO_DEVICE) {
