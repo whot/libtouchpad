@@ -29,3 +29,4 @@ TODO
 * optimise the loops through the touch points
 * we need to support more than one button set, the T440s use multiple button
   layouts
+* a device with hardware buttons should not use software buttons
