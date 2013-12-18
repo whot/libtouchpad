@@ -256,12 +256,12 @@ END_TEST
 
 int main(int argc, char **argv) {
 	tptest_add("buttons_left_click", left_click_generic, TOUCHPAD_ALL_DEVICES);
-	tptest_add("buttons_left_click", left_click_in_area, TOUCHPAD_ALL_DEVICES);
-	tptest_add("buttons_left_click", left_click_in_area_with_rbtn, TOUCHPAD_ALL_DEVICES);
+	tptest_add("buttons_left_click", left_click_in_area, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("buttons_left_click", left_click_in_area_with_rbtn, TOUCHPAD_ALL_MT_DEVICES);
 
-	tptest_add("buttons_right_click", right_click_in_area, TOUCHPAD_ALL_DEVICES);
-	tptest_add("buttons_right_click", right_click_in_area_with_lbtn, TOUCHPAD_ALL_DEVICES);
-	tptest_add("buttons_right_click", right_click_whole_touchpad, TOUCHPAD_ALL_DEVICES);
+	tptest_add("buttons_right_click", right_click_in_area, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("buttons_right_click", right_click_in_area_with_lbtn, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("buttons_right_click", right_click_whole_touchpad, TOUCHPAD_ALL_MT_DEVICES);
 
 	return tptest_run(argc, argv);
 }

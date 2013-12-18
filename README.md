@@ -27,6 +27,5 @@ TODO
 * make the test suite use different devices automatically
 ** requires all coords be given in percent of the touchpad
 * optimise the loops through the touch points
-* single-touch devices can map ABS_X to a single touchpoint and use this driver too
 * we need to support more than one button set, the T440s use multiple button
   layouts

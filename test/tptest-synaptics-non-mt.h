@@ -24,27 +24,15 @@
 #include "config.h"
 #endif
 
-#ifndef TPTEST_INT_H
-#define TPTEST_INT_H
+#ifndef TPTEST_SYNAPTICS_NON_MT_H
+#define TPTEST_SYNAPTICS_NON_MT_H
+
 #include "tptest.h"
+#include "tptest-int.h"
 
-struct device {
-	enum tptest_device_type type;
-	const char *shortname;
-	void (*setup)(void);
-	void (*teardown)(void);
-
-	void (*create)(struct tptest_device *d);
-	void (*touch_down)(struct tptest_device *d, unsigned int slot, int x, int y);
-	void (*move)(struct tptest_device *d, unsigned int slot, int x, int y);
-
-	int min[2];
-	int max[2];
-
-	int touches_down;
-};
-
-void tptest_set_current_device(struct tptest_device *device);
-int tptest_scale(const struct tptest_device *d, unsigned int axis, int val);
+void tptest_create_synaptics_non_mt(struct tptest_device *d);
+void tptest_synaptics_non_mt_setup(void);
+void tptest_synaptics_non_mt_touch_down(struct tptest_device *d, unsigned int slot, int x, int y);
+void tptest_synaptics_non_mt_move(struct tptest_device *d, unsigned int slot, int x, int y);
 
 #endif

@@ -549,11 +549,11 @@ int main(int argc, char **argv) {
 	tptest_add("tap_single_finger", tap_single_finger_drag, TOUCHPAD_ALL_DEVICES);
 	tptest_add("tap_single_finger", tap_single_finger_multi_drag, TOUCHPAD_ALL_DEVICES);
 	tptest_add("tap_single_finger", tap_single_finger_read_delay, TOUCHPAD_ALL_DEVICES);
-	tptest_add("tap_double_finger", tap_double_finger, TOUCHPAD_ALL_DEVICES);
-	tptest_add("tap_double_finger", tap_double_finger_invert_release, TOUCHPAD_ALL_DEVICES);
-	tptest_add("tap_double_finger", tap_double_finger_move, TOUCHPAD_ALL_DEVICES);
-	tptest_add("tap_double_finger", tap_double_finger_hold, TOUCHPAD_ALL_DEVICES);
-	tptest_add("tap_double_finger", tap_double_finger_hold_tap, TOUCHPAD_ALL_DEVICES);
-	tptest_add("tap_double_finger", tap_double_finger_move_tap, TOUCHPAD_ALL_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_invert_release, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_move, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_hold, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_hold_tap, TOUCHPAD_ALL_MT_DEVICES);
+	tptest_add("tap_double_finger", tap_double_finger_move_tap, TOUCHPAD_ALL_MT_DEVICES);
 	return tptest_run(argc, argv);
 }

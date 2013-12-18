@@ -10,7 +10,9 @@ libtptest_la_SOURCES = \
 	tptest-bcm5974.h \
 	tptest-bcm5974.c \
 	tptest-synaptics.h \
-	tptest-synaptics.c
+	tptest-synaptics.c \
+	tptest-synaptics-non-mt.h \
+	tptest-synaptics-non-mt.c
 
 noinst_PROGRAMS = test-tap test-config test-scroll test-device test-events test-buttons test-build-pedantic
 

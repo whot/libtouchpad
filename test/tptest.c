@@ -27,6 +27,7 @@
 #include "tptest.h"
 #include "tptest-int.h"
 #include "tptest-synaptics.h"
+#include "tptest-synaptics-non-mt.h"
 #include "tptest-bcm5974.h"
 #include "touchpad.h"
 #include "touchpad-config.h"
@@ -89,6 +90,15 @@ struct device devices[] = {
 		.create = tptest_create_synaptics_clickpad,
 		.touch_down = tptest_synaptics_clickpad_touch_down,
 		.move = tptest_synaptics_clickpad_move,
+	},
+	{
+		.type = TOUCHPAD_SYNAPTICS_NON_MT,
+		.shortname = "synaptics-non-mt",
+		.setup = tptest_synaptics_non_mt_setup,
+		.teardown = generic_device_teardown,
+		.create = tptest_create_synaptics_non_mt,
+		.touch_down = tptest_synaptics_non_mt_touch_down,
+		.move = tptest_synaptics_non_mt_move,
 	},
 	{
 		.type = TOUCHPAD_BCM5974,
@@ -447,6 +457,7 @@ tptest_event(struct tptest_device *d, unsigned int type, unsigned int code, int 
 void
 tptest_touch_down(struct tptest_device *d, unsigned int slot, int x, int y)
 {
+	d->d->touches_down |= slot;
 	d->d->touch_down(d, slot, x, y);
 }
 
@@ -459,6 +470,12 @@ tptest_touch_up(struct tptest_device *d, unsigned int slot)
 		{ .type = EV_ABS, .code = ABS_MT_TRACKING_ID, .value = -1 },
 		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
 	};
+
+	d->d->touches_down &= ~slot;
+	if (!d->d->touches_down) {
+		tptest_event(d, EV_KEY, BTN_TOUCH, 0);
+		tptest_event(d, EV_KEY, BTN_TOOL_FINGER, 0);
+	}
 
 	ARRAY_FOR_EACH(up, ev)
 		tptest_event(d, ev->type, ev->code, ev->value);
