@@ -229,6 +229,8 @@ struct touchpad {
 	    touchpad_log_func_t func;
 	    void *data;
     } log;
+
+    int (*update_abs_state)(struct touchpad *tp, const struct input_event *ev);
 };
 
 void
@@ -308,4 +310,8 @@ int touchpad_request_timer(struct touchpad *tp, void *userdata, unsigned int now
 
 void touchpad_config_set_dynamic_defaults(struct touchpad *tp);
 void touchpad_config_set_static_defaults(struct touchpad *tp);
+
+int touchpad_mt_update_abs_state(struct touchpad *tp, const struct input_event *ev);
+int touchpad_st_update_abs_state(struct touchpad *tp, const struct input_event *ev);
+
 #endif

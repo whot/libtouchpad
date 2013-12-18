@@ -95,22 +95,22 @@ config_set_softbutton(struct touchpad *tp,
 		case TOUCHPAD_CONFIG_SOFTBUTTON_TOP:
 			deflt = button_defaults_dynamic.top;
 			v = &tp->buttons.config.top;
-			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_Y, &min, &max, NULL);
 			break;
 		case TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM:
 			deflt = button_defaults_dynamic.bottom;
 			v = &tp->buttons.config.bottom;
-			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_Y, &min, &max, NULL);
 			break;
 		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT:
 			deflt = button_defaults_dynamic.right[0];
 			v = &tp->buttons.config.right[0];
-			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_X, &min, &max, NULL);
 			break;
 		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT:
 			deflt = button_defaults_dynamic.right[1];
 			v = &tp->buttons.config.right[1];
-			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_X, &min, &max, NULL);
 			break;
 		default:
 			log_bug(tp, button, "invalid config param for softbuttons\n");
@@ -145,19 +145,19 @@ config_get_softbutton(struct touchpad *tp,
 	switch (button) {
 		case TOUCHPAD_CONFIG_SOFTBUTTON_TOP:
 			v = tp->buttons.config.top;
-			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_Y, &min, &max, NULL);
 			break;
 		case TOUCHPAD_CONFIG_SOFTBUTTON_BOTTOM:
 			v = tp->buttons.config.bottom;
-			touchpad_get_min_max(tp, ABS_MT_POSITION_Y, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_Y, &min, &max, NULL);
 			break;
 		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_LEFT:
 			v = tp->buttons.config.right[0];
-			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_X, &min, &max, NULL);
 			break;
 		case TOUCHPAD_CONFIG_SOFTBUTTON_RBTN_RIGHT:
 			v = tp->buttons.config.right[1];
-			touchpad_get_min_max(tp, ABS_MT_POSITION_X, &min, &max, NULL);
+			touchpad_get_min_max(tp, ABS_X, &min, &max, NULL);
 			break;
 		default:
 			return 1;

@@ -73,8 +73,8 @@ touchpad_end_touch(struct touchpad *tp, struct touch *t)
 	tp->queued |= EVENT_MOTION;
 }
 
-static int
-touchpad_update_abs_state(struct touchpad *tp,
+int
+touchpad_mt_update_abs_state(struct touchpad *tp,
 			  const struct input_event *ev)
 {
 	int rc = 0;
@@ -112,6 +112,38 @@ touchpad_update_abs_state(struct touchpad *tp,
 
 	return rc;
 }
+
+int
+touchpad_st_update_abs_state(struct touchpad *tp,
+			     const struct input_event *ev)
+{
+	int rc = 0;
+	struct touch *t = touchpad_current_touch(tp);
+
+	switch (ev->code) {
+		case ABS_X:
+			t->x = ev->value;
+			t->dirty = true;
+			tp->queued |= EVENT_MOTION;
+			break;
+		case ABS_Y:
+			t->y = ev->value;
+			t->dirty = true;
+			tp->queued |= EVENT_MOTION;
+			break;
+		case ABS_MT_POSITION_X:
+		case ABS_MT_POSITION_Y:
+		case ABS_MT_SLOT:
+		case ABS_MT_TRACKING_ID:
+			argcheck_not_reached();
+			break;
+	}
+
+	t->millis = timeval_to_millis(&ev->time);
+
+	return rc;
+}
+
 
 static void
 touchpad_begin_fake_touches(struct touchpad *tp, unsigned int code)
@@ -177,6 +209,14 @@ touchpad_update_button_state(struct touchpad *tp,
 			tp->buttons.state &= ~mask;
 			tp->queued |= EVENT_BUTTON_RELEASE;
 		}
+	}
+
+	if (ev->code == BTN_TOUCH && tp->maxtouches == -1) {
+		struct touch *t = touchpad_current_touch(tp);
+		if (ev->value)
+			touchpad_begin_touch(tp, t, TOUCHPAD_FAKE_TRACKING_ID);
+		else
+			touchpad_end_touch(tp, t);
 	}
 
 	if (ev->code >= BTN_TOOL_DOUBLETAP && ev->code <= BTN_TOOL_QUADTAP) {
@@ -365,7 +405,7 @@ touchpad_handle_event(struct touchpad *tp,
 
 	switch(ev->type) {
 		case EV_ABS:
-			touchpad_update_abs_state(tp, ev);
+			tp->update_abs_state(tp, ev);
 			break;
 		case EV_KEY:
 			touchpad_update_button_state(tp, ev);

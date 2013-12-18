@@ -125,6 +125,7 @@ touchpad_alloc(void)
 		tp->dev = libevdev_new();
 		tp->log.func = default_log_func;
 		tp->log.data = NULL;
+		tp->update_abs_state = touchpad_mt_update_abs_state;
 		tp->buttons.handle_state = touchpad_button_handle_state;
 		tp->buttons.handle_timeout = touchpad_button_handle_timeout;
 		tp->buttons.select_pointer_touch = touchpad_button_select_pointer_touch;
@@ -205,8 +206,10 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 	if (rc < 0)
 		goto fail;
 
-	ntouches = libevdev_get_num_slots(tp->dev);
-	if (ntouches <= 0) {
+	if (!libevdev_has_event_code(tp->dev, EV_ABS, ABS_X) ||
+	    !libevdev_has_event_code(tp->dev, EV_ABS, ABS_Y) ||
+	    !libevdev_has_event_code(tp->dev, EV_KEY, BTN_LEFT) ||
+	    !libevdev_has_event_code(tp->dev, EV_KEY, BTN_TOOL_FINGER)) {
 		rc = -ECANCELED;
 		goto fail;
 	}
@@ -217,6 +220,7 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 		goto fail;
 	}
 
+	ntouches = libevdev_get_num_slots(tp->dev);
 	tp->maxtouches = min(ntouches, MAX_TOUCHPOINTS);
 	tp->slot = libevdev_get_current_slot(tp->dev);
 
@@ -227,6 +231,18 @@ touchpad_new_from_fd(int fd, struct touchpad **tp_out)
 		tp->ntouches = max(3, tp->ntouches);
 	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_TOOL_DOUBLETAP))
 		tp->ntouches = max(2, tp->ntouches);
+
+
+	/* non-MT touchpads are forced to at least one touch, with the
+	 * default slot always being set to 0.
+	 * If we have BTN_TOOL_*TAP on the device ntouches is already > 1
+	 * anyway
+	 */
+	if (tp->maxtouches == -1) {
+		tp->slot = 0;
+		tp->ntouches = max(tp->ntouches, 1);
+		tp->update_abs_state = touchpad_st_update_abs_state;
+	}
 
 	if (libevdev_has_event_code(tp->dev, EV_KEY, BTN_RIGHT)) {
 		tp->buttons.handle_state = touchpad_phys_button_handle_state;
